@@ -1,1 +1,6 @@
 planning/
+node_modules/
+client/*.js
+client/*.js.map
+client/*.min.js
+client/*.min.js.map

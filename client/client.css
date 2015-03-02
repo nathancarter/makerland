@@ -1,0 +1,24 @@
+
+body {
+    margin : 0;
+    padding : 0;
+}
+
+#leftpane {
+    width : auto;
+    height : 100%;
+    background : black;
+}
+
+#rightpane {
+    width : 350px;
+    height : 100%;
+    float : right;
+    background : gray;
+}
+
+#rightpaneexpander {
+    width : 30px;
+    height : 30px;
+    float : right;
+}
