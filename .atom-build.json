@@ -1,0 +1,5 @@
+{
+    "cmd": "cake",
+    "args": [ "all" ],
+    "sh": true
+}

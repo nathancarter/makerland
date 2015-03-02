@@ -1,0 +1,12 @@
+{
+    "name": "makerland",
+    "version": "0.0.0",
+    "description": "A browser-based tile-map game with lots of maker opportunities",
+    "author": "Nathan Carter <ncarter@bentley.edu> (http://web.bentley.edu/empl/c/ncarter)",
+    "license": "LGPLv3",
+    "dependencies": {
+        "coffee-script": "1.8.0",
+        "uglify-js" : "2.4.15",
+        "colors": "1.0.3"
+    }
+}
