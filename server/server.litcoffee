@@ -25,19 +25,9 @@ The entirety of the HTTP server is defined here.
 ## Web Sockets
 
 Now extend that server so that it also listens for web socket connections
-from the client side.  When a connection arrives, print it to the console.
+from the client side.  When a connection arrives, just create a Player
+object for that client to control; its constructor handles everything.
 
     io = require( 'socket.io' ).listen server
-    io.sockets.on 'connection', ( socket ) ->
-        console.log 'connected a client'
-
-Set up responses to two events.  First, if the client sends a command, for
-now just dump it to the console for testing.
-
-        socket.on 'command', ( command ) ->
-            console.log 'client sent this:', command
-
-Second, if the client disconnects, print that as well.
-
-        socket.on 'disconnect', ->
-            console.log 'disconnected a client'
+    Player = require( './player' ).Player
+    io.sockets.on 'connection', ( socket ) -> new Player socket
