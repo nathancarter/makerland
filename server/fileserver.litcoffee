@@ -14,6 +14,8 @@ the HTTP protocol.
     extension2mimetype =
         'png' : 'image/PNG'
         'html' : 'text/HTML'
+        'js' : 'application/javascript'
+        'css' : 'text/css'
 
 Export one function, `serveFile`, that takes two parameters.  The first is
 the name of the file requested, and the second is the response object to use

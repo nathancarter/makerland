@@ -21,3 +21,11 @@ icon to indicate its toggling nature.
     ( $ '#rightpaneexpander' ).click ->
         ( $ '#rightpane' ).toggle 200, ->
             showCommandExpander not expandee.is ':visible'
+
+# Web Socket Connection to Server
+
+Establish a web socket connection to the server for ongoing transfer of game
+data.
+
+    socket = io.connect document.URL, reconnect : false
+    socket.on 'disconnect', console.log
