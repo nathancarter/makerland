@@ -3,16 +3,35 @@
 
 Each instance represents a player in the game.
 
-    class Player
+    module.exports.Player = class Player
+
+The class maintains a list of all connected players, as a class variable.
+
+        allPlayers : [ ]
 
 The constructor accepts a socket object as parameter, the communication
 channel to the client page used by this player.
 
         constructor : ( socket ) ->
+
+Dump to the console a message about the connection, and add the player to
+the class variable `allPlayers`.
+
             console.log 'connected a player'
+            Player::allPlayers.push this
+            console.log "there are now #{Player::allPlayers.length}"
+
+Set up a handler for UI events from the client.
+
             socket.on 'ui event', ( event ) ->
                 console.log 'client ui event:', event
-            socket.on 'disconnect', ->
-                console.log 'disconnected a player'
 
-    module.exports.Player = Player
+When this player disconnects, tell the console, and remove the player from
+`allPlayers`.
+
+            socket.on 'disconnect', =>
+                console.log 'disconnected a player'
+                index = Player::allPlayers.indexOf this
+                Player::allPlayers = Player::allPlayers[...index].concat \
+                    Player::allPlayers[index+1..]
+                console.log "there are now #{Player::allPlayers.length}"
