@@ -8,5 +8,8 @@
         "coffee-script": "1.8.0",
         "uglify-js" : "2.4.15",
         "colors": "1.0.3"
+    },
+    "scripts" : {
+        "start" : "coffee server/server.litcoffee"
     }
 }

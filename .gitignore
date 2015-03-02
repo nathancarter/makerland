@@ -4,3 +4,4 @@ client/*.js
 client/*.js.map
 client/*.min.js
 client/*.min.js.map
+npm-debug.log
