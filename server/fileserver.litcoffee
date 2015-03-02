@@ -50,7 +50,7 @@ We got the file's content, so send it.
                 details = 'Cache-Control' : 'max-age=86400' # 1 day
                 extension = filename.split( '.' ).pop()
                 if extension2mimetype.hasOwnProperty extension
-                    details[extension] = extension2mimetype[extension]
+                    details['Content-Type'] = extension2mimetype[extension]
                 response.writeHead 200, details
                 response.write file, 'binary'
                 response.end()
