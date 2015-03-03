@@ -40,15 +40,16 @@ These constants define how the functions below perform.
 
 Concatenate all client-side `.litcoffee` source files into one.
 
+        fs.unlinkSync './client/all.litcoffee'
         all = ( fs.readFileSync name for name in \
             build.dir './client', /\.litcoffee$/ )
-        fs.writeFileSync './client/client.litcoffee', all.join( '\n\n' ),
+        fs.writeFileSync './client/all.litcoffee', all.join( '\n\n' ),
             'utf8'
 
 Run the compile process defined in the build utilities module.  This
 compiles, minifies, and generates source maps.
 
-        build.compile './client/client.litcoffee', -> done()
+        build.compile './client/all.litcoffee', -> done()
 
 ## The `submodules` build process
 

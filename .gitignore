@@ -5,3 +5,4 @@ client/*.js.map
 client/*.min.js
 client/*.min.js.map
 npm-debug.log
+client/all.litcoffee
