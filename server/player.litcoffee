@@ -21,6 +21,26 @@ the class variable `allPlayers`.
             Player::allPlayers.push this
             console.log "there are now #{Player::allPlayers.length}"
 
+Tell the client to show a login UI.
+
+            socket.emit 'show ui', [
+                type : 'text'
+                value : 'Please log in to MakerLand!'
+                align : 'center'
+            ,
+                type : 'string input'
+                name : 'username'
+            ,
+                type : 'password input'
+                name : 'password'
+            ,
+                type : 'action'
+                value : 'Log in'
+            ,
+                type : 'action'
+                value : 'New account'
+            ]
+
 Set up a handler for UI events from the client.
 
             socket.on 'ui event', ( event ) ->
