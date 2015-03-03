@@ -13,9 +13,9 @@ of the game view.
         while commandPane.firstChild
             commandPane.removeChild commandPane.firstChild
         commandPane.innerHTML = \
-            "<table border=0 cellpadding=2 cellspacing=6 width=100%>
+            "<div class='container' id='commandui'>
              #{( dataToRow element for element in data ).join '\n'}
-             </table>"
+             </div>"
 
 It uses the following function to create an array of cells forming an
 individual row in the table that populates that command pane.
@@ -41,7 +41,8 @@ individual row in the table that populates that command pane.
             ]
             when 'action' then [
                 "<input type='button' value='#{data.value}'
-                        style='width: 100%'#{attrs}>
+                        style='width: 100%'#{attrs}
+                        onclick='uiButtonClicked(this)'>
                  </input>"
             ]
             else [ "<p#{attrs}>#{JSON.stringify data}</p>" ]
@@ -50,5 +51,13 @@ And this function converts an array of cells into a table row.
 
     dataToRow = ( data ) ->
         cells = dataToCells data
-        td = "<td colspan=#{12/cells.length}>"
-        "<tr>#{td}#{cells.join '</td>'+td}</td></tr>"
+        div = "<div class='col-xs-#{12/cells.length}'>"
+        "<div class='row'>#{div}#{cells.join '</div>'+div}</div></div>"
+
+We also need an event handler for buttons added to the UI.  This is it.  It
+merely tells the server that the client clicked a button.
+
+    window.uiButtonClicked = ( button )->
+        socket.emit 'ui event',
+            type : 'action taken'
+            action : button.value

@@ -25,7 +25,7 @@ Tell the client to show a login UI.
 
             socket.emit 'show ui', [
                 type : 'text'
-                value : 'Please log in to MakerLand!'
+                value : '<h3>Please log in to MakerLand!</h3>'
                 align : 'center'
             ,
                 type : 'string input'
@@ -44,7 +44,20 @@ Tell the client to show a login UI.
 Set up a handler for UI events from the client.
 
             socket.on 'ui event', ( event ) ->
-                console.log 'client ui event:', event
+
+If the event is an "action taken" event, then we see if the player object
+has within it a handler installed for that event.
+
+                if event.type is 'action taken'
+                    if @handlers?[event.action]
+                        @handlers[event.action] event
+                    else
+                        console.log 'No action handler installed for', event
+
+Any other type we don't know how to handle, so we log it.
+
+                else
+                    console.log 'unknown ui event type:', event.type
 
 When this player disconnects, tell the console, and remove the player from
 `allPlayers`.
