@@ -22,7 +22,7 @@ individual row in the table that populates that command pane.
 
     dataToCells = ( data ) ->
         attrs = ''
-        for key, value of data
+        for own key, value of data
             if key isnt 'name' and key isnt 'value'
                 attrs += " #{key}='#{value}'"
         switch data.type

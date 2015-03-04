@@ -10,7 +10,7 @@ expandee is that pane which gets expanded/collapsed.
 The following two functions fill the button for expanding/collapsing the
 command pane with appropriate imagery.
 
-    showCommandExpander = ( show = yes )->
+    showCommandExpander = ( show = yes ) ->
         expander.get( 0 ).innerHTML = "<img
             src='#{if show then 'plus' else 'minus'}.png'>"
     showCommandExpander no
