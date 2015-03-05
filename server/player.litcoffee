@@ -87,6 +87,7 @@ an OK button, and calls the given callback when the user clicks OK.
             ,
                 type : 'action'
                 value : 'OK'
+                yes
                 action : callback
 
 This function tells the client to show a login UI.
@@ -105,11 +106,44 @@ This function tells the client to show a login UI.
             ,
                 type : 'action'
                 value : 'Log in'
-                action : =>
-                    @showOK 'Log in not yet implemented.', => @showLoginUI()
+                default : yes
+                action : ( event ) =>
+
+Handle clicks of the "log in" button by verifying that the player's login
+credentials are valid.
+
+                    accounts = ( require './database' ).accounts
+                    success = accounts.validLoginPair event.username,
+                        event.password
+                    if success
+                        @loggedIn event.username
+                    else
+                        @showOK 'Invalid username and/or password.',
+                            => @showLoginUI()
             ,
                 type : 'action'
                 value : 'New account'
-                action : =>
-                    @showOK 'New account not yet implemented.',
-                        => @showLoginUI()
+                cancel : yes
+                action : ( event ) =>
+
+Handle clicks of the "new account" button by attempting to make the account,
+but not overwriting any existing accounts.
+
+                    accounts = ( require './database' ).accounts
+                    if accounts.exists event.username
+                        return @showOK 'That username is already taken.',
+                            => @showLoginUI()
+                    try
+                        accounts.create event.username, event.password
+                        @loggedIn event.username
+                    catch e
+                        @showOK 'Error creating account: ' + e,
+                            => @showLoginUI()
+
+This method is called in the player when login succeeds.  It initializes the
+player object with its name and tells the player they've succeeded in
+logging in.
+
+        loggedIn : ( @name ) =>
+            @showUI type : 'text', value : 'Welcome to the game!'
+            console.log "player logged in as #{name}"

@@ -12,52 +12,97 @@ of the game view.
         commandPane = ( $ '#rightpane' ).get 0
         while commandPane.firstChild
             commandPane.removeChild commandPane.firstChild
-        commandPane.innerHTML = \
-            "<div class='container' id='commandui'>
-             #{( dataToRow element for element in data ).join '\n'}
-             </div>"
+        html = "<div class='container' id='commandui'><form>"
+        focus = null
+        cancel = null
+        for element in data
+            row = dataToRow element
+            focus or= row.focus
+            cancel or= row.cancel
+            html += row.code
+        html += "</form></div>"
+        commandPane.innerHTML = html
+        if focus then document.getElementById( focus ).focus()
+        ( $ commandPane.childNodes[0] ).submit ( e ) -> e.preventDefault()
+        ( $ commandPane ).keyup ( e ) ->
+            if e.keyCode is 27 then ( $ '#'+cancel ).click()
 
 It uses the following function to create an array of cells forming an
 individual row in the table that populates that command pane.
 
     dataToCells = ( data ) ->
+        cancel = data.cancel
+        delete data.cancel
         attrs = ''
         for own key, value of data
             if key isnt 'name' and key isnt 'value'
                 attrs += " #{key}='#{value}'"
-        switch data.type
+        focus = undefined
+        result = switch data.type
             when 'text' then [ "<p#{attrs}>#{data.value}</p>" ]
-            when 'string input' then [
-                data.name[0].toUpperCase() + data.name[1..] + ':'
-                "<input type='text' id='input_#{data.value}'
-                        style='width: 100%'#{attrs}>
-                 </input>"
-            ]
-            when 'password input' then [
-                data.name[0].toUpperCase() + data.name[1..] + ':'
-                "<input type='password' id='input_#{data.value}'
-                        style='width: 100%'#{attrs}>
-                 </input>"
-            ]
-            when 'action' then [
-                "<input type='button' value='#{data.value}'
-                        style='width: 100%'#{attrs}
-                        onclick='uiButtonClicked(this)'>
-                 </input>"
-            ]
+            when 'string input'
+                focus = "input_#{data.name}"
+                [
+                    data.name[0].toUpperCase() + data.name[1..] + ':'
+                    "<input type='text' id='input_#{data.name}'
+                            style='width: 100%'#{attrs}>
+                     </input>"
+                ]
+            when 'password input'
+                focus = "input_#{data.name}"
+                [
+                    data.name[0].toUpperCase() + data.name[1..] + ':'
+                    "<input type='password' id='input_#{data.name}'
+                            style='width: 100%'#{attrs}>
+                     </input>"
+                ]
+            when 'action'
+                type = if data.default then 'submit' else 'button'
+                name = data.value.replace /\s/g, '_'
+                cancel and= "button_#{name}"
+                focus = "button_#{name}"
+                [
+                    "<input type='#{type}' value='#{data.value}'
+                            style='width: 100%'#{attrs}
+                            id='button_#{name}'
+                            onclick='uiButtonClicked(this)'>
+                     </input>"
+                ]
             else [ "<p#{attrs}>#{JSON.stringify data}</p>" ]
+        result.focus = focus
+        result.cancel = cancel
+        result
 
 And this function converts an array of cells into a table row.
 
     dataToRow = ( data ) ->
         cells = dataToCells data
         div = "<div class='col-xs-#{12/cells.length}'>"
-        "<div class='row'>#{div}#{cells.join '</div>'+div}</div></div>"
+        code = "<div class='row'>
+            #{div}#{cells.join '</div>'+div}</div></div>"
+        code : code, focus : cells.focus, cancel : cells.cancel
+
+This function extracts from any input elements in the right pane their
+values, and stores them in a JSON object that can be sent to the server.
+
+    dataFromUI = ->
+        inputs = ( ( $ '#rightpane' ).get 0 ).getElementsByTagName 'input'
+        result = { }
+        for input in inputs
+            id = input.getAttribute 'id'
+            if id?[...6] is 'input_'
+                name = id[6..]
+                switch input.getAttribute 'type'
+                    when 'text', 'password' then value = input.value
+                    else value = undefined
+                result[name] = value
+        result
 
 We also need an event handler for buttons added to the UI.  This is it.  It
 merely tells the server that the client clicked a button.
 
     window.uiButtonClicked = ( button )->
-        socket.emit 'ui event',
-            type : 'action taken'
-            action : button.value
+        event = dataFromUI()
+        event.type = 'action taken'
+        event.action = button.value
+        socket.emit 'ui event', event
