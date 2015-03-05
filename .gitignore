@@ -7,3 +7,4 @@ client/*.min.js.map
 npm-debug.log
 client/all.litcoffee
 lessons/
+gamedb/

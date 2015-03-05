@@ -7,7 +7,10 @@ anyone who imports this module, directly as module properties.
 
     fs = require 'fs'
     path = require 'path'
-    settingsFile = path.join __dirname, '..', 'settings.json'
+    module.exports.gameRoot = path.join __dirname, '..'
+    settingsFile = path.join module.exports.gameRoot, 'settings.json'
+
+## Getting the raw data
 
 First, read the contents of the settings file.  Abort if we cannot do so.
 
@@ -28,3 +31,17 @@ Second, interpret it as JSON.  If that fails, ignore its content entirely.
 Finally, install all those key-value pairs into this module.
 
     module.exports[key] = value for own key, value of JSONdata
+
+## Convenience functions
+
+It's often easier to have a function that queries the database for us, and
+does some simple data cleaning or conversion for easier consumption by the
+client.
+
+For instance, if we're querying a path from the settings module, we'd like
+it to be an absolute path.  The following function turns relative paths in
+the settings file into absolute paths on the filesystem.
+
+    module.exports.getPath = ( key ) ->
+        throw 'No such setting key: ' + key if not module.exports[key]
+        path.resolve module.exports.gameRoot, module.exports[key]
