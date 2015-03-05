@@ -87,7 +87,6 @@ an OK button, and calls the given callback when the user clicks OK.
             ,
                 type : 'action'
                 value : 'OK'
-                yes
                 action : callback
 
 This function tells the client to show a login UI.
@@ -129,6 +128,9 @@ credentials are valid.
 Handle clicks of the "new account" button by attempting to make the account,
 but not overwriting any existing accounts.
 
+                    if not event.username or not event.password
+                        return @showOK 'You must supply both username and
+                            password.', => @showLoginUI()
                     accounts = ( require './database' ).accounts
                     if accounts.exists event.username
                         return @showOK 'That username is already taken.',
