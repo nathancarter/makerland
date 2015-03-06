@@ -254,8 +254,15 @@ access.
 
         showCommandUI : =>
             @showUI.apply this, ( for command in @commands()
+                iconPath = if commands[command].icon?
+                    path.join settings.clientPath( 'commandIconFolder' ),
+                        commands[command].icon
+                else
+                    undefined
                 type : 'command'
                 name : command[0].toUpperCase() + command[1..]
                 category : commands[command].category
                 shortInfo : commands[command].shortInfo
+                help : commands[command].help
+                icon : iconPath
             )

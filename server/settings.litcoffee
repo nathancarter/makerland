@@ -45,3 +45,15 @@ the settings file into absolute paths on the filesystem.
     module.exports.getPath = ( key ) ->
         throw 'No such setting key: ' + key if not module.exports[key]
         path.resolve module.exports.gameRoot, module.exports[key]
+
+The following function is the same, except it returns a path relative to the
+client subfolder of the repository, so the path is suitable to transmit to
+the client, for its use in forming URLs to request data from the server.
+
+    module.exports.clientPath = ( key ) ->
+        absolute = module.exports.getPath key
+        prefix = path.resolve module.exports.gameRoot, 'client'
+        if absolute[...prefix.length] is prefix
+            absolute[prefix.length..]
+        else
+            throw "Not a path in the client folder: #{absolute}"

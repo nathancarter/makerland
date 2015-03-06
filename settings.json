@@ -1,3 +1,4 @@
 {
-    "gameDatabaseRoot" : "./gamedb/"
+    "gameDatabaseRoot" : "./gamedb/",
+    "commandIconFolder" : "./client/icons/"
 }

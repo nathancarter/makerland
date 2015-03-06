@@ -113,12 +113,18 @@ individual row in the table that populates that command pane.
                 ]
             when 'command'
                 [
-                    "<input type='button' value='#{data.name}'
-                            style='width: 100%'#{attrs}
+                    "<button type='button' value='#{data.name}'#{attrs}
                             id='command_button_#{data.name}'
-                            class='btn btn-default'
+                            class='btn btn-default' style='width:100%'
+                            data-toggle='tooltip' data-placement='left'
+                            title='#{data.help.replace /'/g, '&apos;'}'
                             onclick='uiCommandClicked(this)'>
-                     </input>"
+                        <img src='#{data.icon}'
+                              onclick='uiCommandClicked(
+                                  document.getElementById(
+                                      \"command_button_#{data.name}\"))'/>
+                        #{data.name}
+                     </button>"
                     "<p#{attrs}>#{data.shortInfo}</p>"
                 ]
             else [ "<p#{attrs}>#{JSON.stringify data}</p>" ]
