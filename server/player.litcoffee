@@ -1,7 +1,11 @@
 
 # Player Class
 
-Each instance represents a player in the game.
+This module needs access to the accounts module.
+
+    accounts = ( require './database' ).accounts
+
+Each instance of the Player class represents a player in the game.
 
     module.exports.Player = class Player
 
@@ -47,12 +51,13 @@ When this player disconnects, tell the console, and remove the player from
 `allPlayers`.  Also, end the player's periodic status updates.
 
             socket.on 'disconnect', =>
-                console.log 'disconnected a player'
+                console.log "disconnected #{@name or 'a player'}"
                 index = Player::allPlayers.indexOf this
                 Player::allPlayers = Player::allPlayers[...index].concat \
                     Player::allPlayers[index+1..]
                 console.log "there are now #{Player::allPlayers.length}"
                 @stopStatusUpdates()
+                @save()
 
 Now that the player object is set up, show the player the login screen.
 
@@ -114,7 +119,6 @@ This function tells the client to show a login UI.
 Handle clicks of the "log in" button by verifying that the player's login
 credentials are valid.
 
-                    accounts = ( require './database' ).accounts
                     success = accounts.validLoginPair event.username,
                         event.password
                     if success
@@ -134,7 +138,6 @@ but not overwriting any existing accounts.
                     if not event.username or not event.password
                         return @showOK 'You must supply both username and
                             password.', => @showLoginUI()
-                    accounts = ( require './database' ).accounts
                     if accounts.exists event.username
                         return @showOK 'That username is already taken.',
                             => @showLoginUI()
@@ -150,6 +153,7 @@ player object with its name and tells the player they've succeeded in
 logging in.
 
         loggedIn : ( @name ) =>
+            @load()
             @showUI type : 'text', value : 'Welcome to the game!'
             console.log "player logged in as #{name}"
             @startStatusUpdates()
@@ -165,6 +169,15 @@ This function checks the status periodically to see if it has changed.  If
 so, it sends a status update message to the player.
 
         updateStatus : =>
+
+First, update player age.
+
+            @saveData or= { }
+            @saveData.age or= 0
+            @saveData.age += 2
+
+Now track player status.
+
             currentStatus = JSON.stringify @getStatus()
             if @lastStatus? and currentStatus is @lastStatus then return
             @lastStatus = currentStatus
@@ -178,3 +191,26 @@ the latter at disconnection.
             @statusUpdateInterval = setInterval ( => @updateStatus() ), 2000
         stopStatusUpdates : =>
             clearInterval @statusUpdateInterval if @statusUpdateInterval?
+
+## Loading and Saving Data
+
+The player object contains a `saveData` field that includes all the data (as
+key-value pairs) that get saved to disk as part of the player's permanent
+record.  Any data outside that field is considered temporary, and can be
+thrown away when the player logs out.
+
+This function loads the player data from disk, based on the player's name.
+We discard the password hash, so the player object doesn't carry that
+around.
+
+        load : =>
+            @saveData = accounts.get @name
+            delete @saveData.password
+
+This function saves the player data to disk, after first putting the
+password hash back in.
+
+        save : =>
+            toSave = JSON.parse JSON.stringify ( @saveData or { } )
+            toSave.password = accounts.get @name, 'password'
+            accounts.set @name, toSave

@@ -31,3 +31,12 @@ object for that client to control; its constructor handles everything.
     io = require( 'socket.io' ).listen server
     Player = require( './player' ).Player
     io.sockets.on 'connection', ( socket ) -> new Player socket
+
+## Ctrl-C Handler
+
+If the user who ran the game process presses Ctrl-C, we want to save all
+players before exiting the game.  This handler does so.
+
+    process.on 'SIGINT', ->
+        player.save() for player in Player::allPlayers
+        process.exit()
