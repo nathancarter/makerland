@@ -12,4 +12,4 @@ The quit command logs the player out of the game.
         quit :
             category : 'basic'
             shortInfo : 'Leave the game immediately'
-            run : ( player ) -> console.log "#{player.name} wants to quit."
+            run : ( player ) -> player.socket.disconnect()

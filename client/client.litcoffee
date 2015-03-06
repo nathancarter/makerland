@@ -28,7 +28,19 @@ Establish a web socket connection to the server for ongoing transfer of game
 data.
 
     socket = io.connect document.URL, reconnect : false
-    socket.on 'disconnect', console.log
+    socket.on 'disconnect', ( event ) ->
+        showStatus '{}'
+        expandee.get( 0 ).innerHTML = "
+            <div class='container' id='commandui'><form>
+            <div class='space-above-below col-xs-12'>
+            <p align='center'>Game closed.</p></div>
+            <div class='space-above-below col-xs-12'>
+            <input type='button' value='Reload Game' style='width: 100%'
+                   class='btn btn-success' onclick='location.reload()'>
+            </input></form></div>
+            "
+        expandee.show()
+        showCommandExpander no
 
 If the server sends us a "show ui" message, we pass it off to a function
 defined in a separate source file for handling such requests.
@@ -38,8 +50,9 @@ defined in a separate source file for handling such requests.
 If the server sends us a status update message, for now just dump it to the
 left pane.
 
-    socket.on 'status', ( data ) ->
+    showStatus = ( data ) ->
         output = ''
         for own key, value of JSON.parse data
             output += "<p><b>#{key}:</b> #{value}</p>"
         ( $ '#leftpane' ).get( 0 ).innerHTML = output
+    socket.on 'status', showStatus

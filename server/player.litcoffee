@@ -1,10 +1,12 @@
 
 # Player Class
 
-This module needs access to the accounts module.
+First, import required modules.
 
     accounts = ( require './database' ).accounts
     commands = require './commands'
+    settings = require './settings'
+    path = require 'path'
 
 Each instance of the Player class represents a player in the game.
 
@@ -47,6 +49,16 @@ Any other type we don't know how to handle, so we log it.
 
                 else
                     console.log 'unknown ui event type:', event.type
+
+If the event is a "command" event, then we see if the player has access to
+the command in question, and if so, run it.
+
+            socket.on 'command', ( event ) =>
+                if event.name in @commands()
+                    commands[event.name].run this
+                else
+                    console.log "Player #{@name} attempted to use the
+                        command #{event.name} without permission."
 
 When this player disconnects, tell the console, and remove the player from
 `allPlayers`.  Also, end the player's periodic status updates.

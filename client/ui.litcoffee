@@ -165,4 +165,4 @@ We also need an event handler for commands added to the UI, much like the
 one above.
 
     window.uiCommandClicked = ( button ) ->
-        console.log button
+        socket.emit 'command', name : button.value.toLowerCase()
