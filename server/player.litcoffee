@@ -97,16 +97,18 @@ Send the modified data on to the client.
             @socket.emit 'show ui', pieces
 
 The following function prompts the user with a section of text, followed by
-an OK button, and calls the given callback when the user clicks OK.
+an OK button, and calls the given callback when the user clicks OK.  The
+first parameter can be a string or an array of strings.
 
-        showOK : ( text, callback ) =>
-            @showUI
-                type : 'text'
-                value : text
-            ,
+        showOK : ( text, callback = @showCommandUI ) =>
+            if text not instanceof Array then text = [ text ]
+            args = ( { type : 'text', value : t } for t in text )
+            args.push {
                 type : 'action'
                 value : 'OK'
                 action : callback
+            }
+            @showUI.apply this, args
 
 ## The Login Process
 
@@ -246,7 +248,7 @@ populates it with the set of basic commands to which all players should have
 access.
 
             if not @saveData.commands?
-                @saveData.commands = [ 'quit' ]
+                @saveData.commands = [ 'players', 'settings', 'quit' ]
             @saveData.commands
 
 This command shows the player the UI for all commands to which they have
