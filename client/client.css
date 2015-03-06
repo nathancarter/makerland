@@ -18,11 +18,16 @@ body {
 }
 
 #commandui {
-    width: 350px;
+    width : 350px;
 }
 
 #rightpaneexpander {
     width : 30px;
     height : 30px;
     float : right;
+}
+
+.space-above-below {
+    margin-top : 8px;
+    margin-bottom : 8px;
 }

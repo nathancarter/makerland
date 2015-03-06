@@ -43,16 +43,16 @@ individual row in the table that populates that command pane.
             when 'string input'
                 focus = "input_#{data.name}"
                 [
-                    data.name[0].toUpperCase() + data.name[1..] + ':'
                     "<input type='text' id='input_#{data.name}'
+                            class='form-control' placeholder='#{data.name}'
                             style='width: 100%'#{attrs}>
                      </input>"
                 ]
             when 'password input'
                 focus = "input_#{data.name}"
                 [
-                    data.name[0].toUpperCase() + data.name[1..] + ':'
                     "<input type='password' id='input_#{data.name}'
+                            class='form-control' placeholder='#{data.name}'
                             style='width: 100%'#{attrs}>
                      </input>"
                 ]
@@ -64,7 +64,7 @@ individual row in the table that populates that command pane.
                 [
                     "<input type='#{type}' value='#{data.value}'
                             style='width: 100%'#{attrs}
-                            id='button_#{name}'
+                            id='button_#{name}' class='btn btn-default'
                             onclick='uiButtonClicked(this)'>
                      </input>"
                 ]
@@ -77,10 +77,10 @@ And this function converts an array of cells into a table row.
 
     dataToRow = ( data ) ->
         cells = dataToCells data
-        div = "<div class='col-xs-#{12/cells.length}'>"
-        code = "<div class='row'>
-            #{div}#{cells.join '</div>'+div}</div></div>"
-        code : code, focus : cells.focus, cancel : cells.cancel
+        code : "<div class='space-above-below'>
+            #{cells.join '</div><div class="space-above-below">'}</div>",
+        focus : cells.focus
+        cancel : cells.cancel
 
 This function extracts from any input elements in the right pane their
 values, and stores them in a JSON object that can be sent to the server.
