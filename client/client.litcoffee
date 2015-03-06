@@ -34,3 +34,12 @@ If the server sends us a "show ui" message, we pass it off to a function
 defined in a separate source file for handling such requests.
 
     socket.on 'show ui', ( data ) -> showUI data
+
+If the server sends us a status update message, for now just dump it to the
+left pane.
+
+    socket.on 'status', ( data ) ->
+        output = ''
+        for own key, value of JSON.parse data
+            output += "<p><b>#{key}:</b> #{value}</p>"
+        ( $ '#leftpane' ).get( 0 ).innerHTML = output

@@ -7,14 +7,14 @@ body {
 #leftpane {
     width : auto;
     height : 100%;
-    background : black;
+    background : #eee;
 }
 
 #rightpane {
     width : 350px;
     height : 100%;
     float : right;
-    background : #dcb;
+    background : white;
 }
 
 #commandui {

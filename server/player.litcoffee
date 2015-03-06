@@ -44,7 +44,7 @@ Any other type we don't know how to handle, so we log it.
                     console.log 'unknown ui event type:', event.type
 
 When this player disconnects, tell the console, and remove the player from
-`allPlayers`.
+`allPlayers`.  Also, end the player's periodic status updates.
 
             socket.on 'disconnect', =>
                 console.log 'disconnected a player'
@@ -52,6 +52,7 @@ When this player disconnects, tell the console, and remove the player from
                 Player::allPlayers = Player::allPlayers[...index].concat \
                     Player::allPlayers[index+1..]
                 console.log "there are now #{Player::allPlayers.length}"
+                @stopStatusUpdates()
 
 Now that the player object is set up, show the player the login screen.
 
@@ -88,6 +89,8 @@ an OK button, and calls the given callback when the user clicks OK.
                 type : 'action'
                 value : 'OK'
                 action : callback
+
+## The Login Process
 
 This function tells the client to show a login UI.
 
@@ -149,3 +152,29 @@ logging in.
         loggedIn : ( @name ) =>
             @showUI type : 'text', value : 'Welcome to the game!'
             console.log "player logged in as #{name}"
+            @startStatusUpdates()
+
+## Player Status
+
+This function creates a status object listing all data that the status
+display should show about the player.
+
+        getStatus : => name : @name
+
+This function checks the status periodically to see if it has changed.  If
+so, it sends a status update message to the player.
+
+        updateStatus : =>
+            currentStatus = JSON.stringify @getStatus()
+            if @lastStatus? and currentStatus is @lastStatus then return
+            @lastStatus = currentStatus
+            @socket.emit 'status', currentStatus
+
+We now provide two functions, one for beginning a periodic status update
+query, and one for stopping that query.  The former is called at login, and
+the latter at disconnection.
+
+        startStatusUpdates : =>
+            @statusUpdateInterval = setInterval ( => @updateStatus() ), 2000
+        stopStatusUpdates : =>
+            clearInterval @statusUpdateInterval if @statusUpdateInterval?
