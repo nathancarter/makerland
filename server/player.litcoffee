@@ -4,6 +4,7 @@
 This module needs access to the accounts module.
 
     accounts = ( require './database' ).accounts
+    commands = require './commands'
 
 Each instance of the Player class represents a player in the game.
 
@@ -129,7 +130,6 @@ credentials are valid.
             ,
                 type : 'action'
                 value : 'New account'
-                cancel : yes
                 action : ( event ) =>
 
 Handle clicks of the "new account" button by attempting to make the account,
@@ -154,9 +154,9 @@ logging in.
 
         loggedIn : ( @name ) =>
             @load()
-            @showUI type : 'text', value : 'Welcome to the game!'
             console.log "player logged in as #{name}"
             @startStatusUpdates()
+            @showCommandUI()
 
 ## Player Status
 
@@ -188,6 +188,7 @@ query, and one for stopping that query.  The former is called at login, and
 the latter at disconnection.
 
         startStatusUpdates : =>
+            @updateStatus()
             @statusUpdateInterval = setInterval ( => @updateStatus() ), 2000
         stopStatusUpdates : =>
             clearInterval @statusUpdateInterval if @statusUpdateInterval?
@@ -214,3 +215,35 @@ password hash back in.
             toSave = JSON.parse JSON.stringify ( @saveData or { } )
             toSave.password = accounts.get @name, 'password'
             accounts.set @name, toSave
+
+## Command Access
+
+To what commands does the player have access?  This routine fetches that
+information from the player's `saveData`.
+
+        commands : =>
+
+We treat the admin character special, always granting them access to all
+commands at all times, even ones just added moments ago.
+
+            if @name is 'admin'
+                @saveData.commands = ( key for own key of commands )
+
+If the data is empty (because the player object was just created) this
+populates it with the set of basic commands to which all players should have
+access.
+
+            if not @saveData.commands?
+                @saveData.commands = [ 'quit' ]
+            @saveData.commands
+
+This command shows the player the UI for all commands to which they have
+access.
+
+        showCommandUI : =>
+            @showUI.apply this, ( for command in @commands()
+                type : 'command'
+                name : command[0].toUpperCase() + command[1..]
+                category : commands[command].category
+                shortInfo : commands[command].shortInfo
+            )

@@ -19,6 +19,7 @@ body {
 
 #commandui {
     width : 350px;
+    margin-top: 10px;
 }
 
 #rightpaneexpander {
@@ -28,6 +29,6 @@ body {
 }
 
 .space-above-below {
-    margin-top : 8px;
-    margin-bottom : 8px;
+    margin-top : 4px;
+    margin-bottom : 4px;
 }
