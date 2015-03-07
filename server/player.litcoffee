@@ -72,8 +72,12 @@ When this player disconnects, tell the console, and remove the player from
                 @stopStatusUpdates()
                 @save()
 
-Now that the player object is set up, show the player the login screen.
+Now that the player object is set up, tell the client all the main game
+settings and show the login screen.
 
+            subset = { }
+            subset[key] = settings[key] for key in settings.clientSettings
+            socket.emit 'settings', subset
             @showLoginUI()
 
 ## User interface functions

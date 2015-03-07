@@ -65,3 +65,9 @@ used in drawing the game view.
     currentStatus = { }
     clearStatus = -> currentStatus = { }
     socket.on 'status', ( data ) -> currentStatus = JSON.parse data
+
+If the server sends us a game settings message, we save that in a global
+variable.
+
+    window.gameSettings = { }
+    socket.on 'settings', ( data ) -> window.gameSettings = data

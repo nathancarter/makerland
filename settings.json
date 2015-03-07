@@ -1,4 +1,7 @@
 {
     "gameDatabaseRoot" : "./gamedb/",
-    "commandIconFolder" : "./client/icons/"
+    "commandIconFolder" : "./client/icons/",
+    "cellSizeInPixels" : 80,
+    "mapBlockSizeInCells" : 8,
+    "clientSettings" : [ "cellSizeInPixels", "mapBlockSizeInCells" ]
 }

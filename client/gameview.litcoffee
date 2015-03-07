@@ -37,6 +37,8 @@ Last, draw the player's status as a HUD.
 The following function draws the game map.  For now, this just makes a grid.
 
     drawGameMap = ( context ) ->
+        cellSize = window.gameSettings.cellSizeInPixels
+        if not cellSize then return
         context.strokeStyle = '#000000'
         x = gameview.width/2
         while x <= gameview.width
@@ -46,7 +48,7 @@ The following function draws the game map.  For now, this just makes a grid.
             context.moveTo gameview.width-x, 0
             context.lineTo gameview.width-x, gameview.height
             context.stroke()
-            x += 100
+            x += cellSize
         y = gameview.height/2
         while y <= gameview.height
             context.beginPath()
@@ -55,7 +57,7 @@ The following function draws the game map.  For now, this just makes a grid.
             context.moveTo 0, gameview.height-y
             context.lineTo gameview.width, gameview.height-y
             context.stroke()
-            y += 100
+            y += cellSize
 
 THe following function draws the player's avatar.  For now, this is just a
 rectangle.
