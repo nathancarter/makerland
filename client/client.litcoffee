@@ -2,25 +2,38 @@
 # Expand/Collapse Command Pane
 
 The expander is the button used to expand/collapse the command pane.  The
-expandee is that pane which gets expanded/collapsed.
+right pane is that pane which gets expanded/collapsed.
 
     expander = $ '#rightpaneexpander'
-    expandee = $ '#rightpane'
+    leftpane = $ '#leftpane'
+    rightpane = $ '#rightpane'
+    gameview = ( $ '#gameview' ).get 0
 
-The following two functions fill the button for expanding/collapsing the
-command pane with appropriate imagery.
+The following functions define how to expand and collapse the command pane,
+and how to update the button for doing so to reflect its next action.
 
-    showCommandExpander = ( show = yes ) ->
+    commandPaneExpanded = -> rightpane.width() > 0
+    updateExpander = ->
+        expanded = commandPaneExpanded()
         expander.get( 0 ).innerHTML = "<img
-            src='#{if show then 'plus' else 'minus'}.png'>"
-    showCommandExpander no
+            src='#{if expanded then 'minus' else 'plus'}.png'>"
+    expandCommandPane = ->
+        rightpane.animate { width : '350px' }, 200, -> updateExpander()
+        leftpane.animate { right : '350px' }, 200
+        expander.animate { right : '350px' }, 200
+    collapseCommandPane = ->
+        rightpane.animate { width : '0px' }, 200, -> updateExpander()
+        leftpane.animate { right : '0px' }, 200
+        expander.animate { right : '0px' }, 200
+    toggleCommandPane = ->
+        if commandPaneExpanded() then collapseCommandPane() \
+        else expandCommandPane()
+    expandCommandPane()
 
-When the expander is clicked, toggle the expandee and change the expander's
-icon to indicate its toggling nature.
+When the expander is clicked, toggle the right pane and change the
+expander's icon to indicate its toggling nature.
 
-    ( $ '#rightpaneexpander' ).click ->
-        expandee.toggle 200, ->
-            showCommandExpander not expandee.is ':visible'
+    expander.click toggleCommandPane
 
 # Web Socket Connection to Server
 
@@ -29,8 +42,8 @@ data.
 
     socket = io.connect document.URL, reconnect : false
     socket.on 'disconnect', ( event ) ->
-        showStatus '{}'
-        expandee.get( 0 ).innerHTML = "
+        clearStatus()
+        rightpane.get( 0 ).innerHTML = "
             <div class='container' id='commandui'><form>
             <div class='space-above-below col-xs-12'>
             <p align='center'>Game closed.</p></div>
@@ -39,20 +52,16 @@ data.
                    class='btn btn-success' onclick='location.reload()'>
             </input></form></div>
             "
-        expandee.show()
-        showCommandExpander no
+        expandCommandPane()
 
 If the server sends us a "show ui" message, we pass it off to a function
 defined in a separate source file for handling such requests.
 
     socket.on 'show ui', ( data ) -> showUI data
 
-If the server sends us a status update message, for now just dump it to the
-left pane.
+If the server sends us a status update message, save it so that it can be
+used in drawing the game view.
 
-    showStatus = ( data ) ->
-        output = ''
-        for own key, value of JSON.parse data
-            output += "<p><b>#{key}:</b> #{value}</p>"
-        ( $ '#leftpane' ).get( 0 ).innerHTML = output
-    socket.on 'status', showStatus
+    currentStatus = { }
+    clearStatus = -> currentStatus = { }
+    socket.on 'status', ( data ) -> currentStatus = JSON.parse data
