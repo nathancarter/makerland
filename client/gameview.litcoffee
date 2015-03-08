@@ -36,9 +36,11 @@ Next, draw the game map.
 
         drawGameMap context
 
-Next, draw the player's avatar.
+Next, draw the player's avatar, together with the avatars of anything moving
+nearby.
 
         drawPlayer context
+        drawOtherPlayers context
 
 Last, draw the player's status as a HUD.
 
@@ -75,7 +77,7 @@ that moves as the player walks.  Later, it will have an actual map in it.
 The following function draws the player's avatar.  For now, this is just a
 rectangle.
 
-    drawAvatar = ( context, position ) ->
+    drawAvatar = ( context, name, position ) ->
         cellSize = window.gameSettings.cellSizeInPixels
         if not cellSize then return
         myPosition = getPlayerPosition()
@@ -84,9 +86,18 @@ rectangle.
         y = gameview.height/2 + ( position[2] - myPosition[2] ) * cellSize
         context.fillStyle = '#ff0000'
         context.fillRect x-10, y-10, 20, 20
+        context.font = '16px serif'
+        context.fillStyle = '#ff0000'
+        size = context.measureText name
+        context.fillText name, x-size.width/2, y-20
     drawPlayer = ( context ) ->
         name = currentStatus.name[0].toUpperCase() + currentStatus.name[1..]
-        drawAvatar context, getPlayerPosition()
+        drawAvatar context, name, getPlayerPosition()
+    drawOtherPlayers = ( context ) ->
+        for own key, value of getNearbyObjects()
+            if value.type is 'player'
+                key = key[0].toUpperCase() + key[1..]
+                drawAvatar context, key, value.position
 
 The following function draws the player's status as a HUD.  For now, this is
 just the player's name (after login only).

@@ -18,6 +18,13 @@ The class maintains a list of all connected players, as a class variable.
 
         allPlayers : [ ]
 
+You can look up a player by name with the following class method.
+
+        @nameToPlayer : ( name ) ->
+            for player in Player::allPlayers
+                if player.name is name then return player
+            null
+
 ## Constructor
 
 The constructor accepts a socket object as parameter, the communication
@@ -60,6 +67,12 @@ the command in question, and if so, run it.
                     console.log "Player #{@name} attempted to use the
                         command #{event.name} without permission."
 
+If the event tells us where the player has moved, then notify the handler
+for position changes.
+
+            socket.on 'player position', ( data ) =>
+                @positionChanged data.position, data.visionDistance
+
 When this player disconnects, tell the console, and remove the player from
 `allPlayers`.  Also, end the player's periodic status updates.
 
@@ -71,6 +84,7 @@ When this player disconnects, tell the console, and remove the player from
                 console.log "there are now #{Player::allPlayers.length}"
                 @stopStatusUpdates()
                 @save()
+                @positionChanged null, null
 
 Now that the player object is set up, tell the client all the main game
 settings and show the login screen.
@@ -272,3 +286,14 @@ access.
                 help : commands[command].help
                 icon : iconPath
             )
+
+## Tracking Player Location
+
+The following function updates player position data and asks the blocks
+module to recompute visibility based on the given maximum vision distance.
+
+        positionChanged : ( newPosition, visionDistance ) =>
+            oldPosition = @position
+            @position = newPosition
+            require( './blocks' ).updateVisibility this, visionDistance,
+                oldPosition
