@@ -40,7 +40,7 @@ expander's icon to indicate its toggling nature.
 Establish a web socket connection to the server for ongoing transfer of game
 data.
 
-    socket = io.connect document.URL, reconnect : false
+    socket = io.connect document.URL, reconnection : false
     socket.on 'disconnect', ( event ) ->
         clearStatus()
         rightpane.get( 0 ).innerHTML = "
