@@ -45,6 +45,22 @@ This function checks whether an entry exists in the table.
             catch e
                 no
 
+This function lists all entries in the table by name.  Its default
+implementation just finds all filenames in the table's folder that have the
+JSON format.  Subclasses may override with more specific implementations,
+of course.
+
+        entries : =>
+            ( f[...-5] for f in \
+                fs.readdirSync path.resolve dbroot, @tableName \
+                when f[-5..] is '.json' )
+
+This function determines how an entry in the database will be displayed in
+HTML format.  The default is just the entry's name, but subclasses can make
+this more specific to be more user-friendly.
+
+        show : ( entry ) -> "<p>#{entry}</p>"
+
 Set the default value for a given key.  This will prevail for all entries
 that do not have that key.
 

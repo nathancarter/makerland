@@ -4,7 +4,7 @@
 This module collects together in one place all database tables in the game.
 Thus clients can just import this module and get all the rest for free.
 
-    tables = [
+    module.exports.tables = tables = [
         'accounts'
     ]
 

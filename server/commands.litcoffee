@@ -7,6 +7,8 @@ command's properties (description, help, code to run it, etc.).
 
     module.exports =
 
+## Basic Commands
+
 The quit command logs the player out of the game.
 
         quit :
@@ -171,3 +173,35 @@ The settings command allows players to edit their personal settings.
                         type : 'action'
                         value : 'Done'
                         action : -> player.showCommandUI()
+
+## Maker Commands
+
+        database :
+            category : 'maker'
+            icon : 'database.png'
+            shortInfo : 'Browse the game assets database'
+            help : 'This command shows all tables in the database, and lets
+                you click on any one to see its entries.  Some tables permit
+                adding, removing, and editing the entries as well.'
+            run : ( player ) ->
+                database = require './database'
+                do browse = ->
+                    buttons = for table in database.tables
+                        type : 'action'
+                        value : table
+                        action : ->
+                            name = table[0].toUpperCase() + table[1..]
+                            table = database[table]
+                            contents = ( table.show entry \
+                                for entry in table.entries() )
+                            contents.unshift "<h3>#{name} table:</h3>"
+                            player.showOK contents, browse
+                    buttons.unshift
+                        type : 'text'
+                        value : '<h3>Tables in Database:</h3>
+                            <p>(Click one to view its contents.)</p>'
+                    buttons.push
+                        type : 'action'
+                        value : 'Done'
+                        action : -> player.showCommandUI()
+                    player.showUI buttons

@@ -110,6 +110,12 @@ requesting that it show the UI defined by that structure.
 
         showUI : ( pieces... ) =>
 
+If the function was called on a single array, rather than passed many
+parameters, flatten it out.
+
+            if pieces.length is 1 and pieces[0] instanceof Array
+                pieces = pieces[0]
+
 Clear out any action handlers installed before, then move any handlers in
 the given data into this player.
 
@@ -137,7 +143,7 @@ first parameter can be a string or an array of strings.
                 value : 'OK'
                 action : callback
             }
-            @showUI.apply this, args
+            @showUI args
 
 ## The Login Process
 
@@ -291,7 +297,7 @@ This command shows the player the UI for all commands to which they have
 access.
 
         showCommandUI : =>
-            @showUI.apply this, ( for command in @commands()
+            @showUI ( for command in @commands()
                 iconPath = if commands[command].icon?
                     path.join settings.clientPath( 'commandIconFolder' ),
                         commands[command].icon
