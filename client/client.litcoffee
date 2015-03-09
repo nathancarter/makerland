@@ -60,14 +60,14 @@ defined in a separate source file for handling such requests.
     socket.on 'show ui', ( data ) -> showUI data
 
 If the server sends us a status update message, save it so that it can be
-used in drawing the game view.  Also, we use `movePlayer` to notify a
-newly-logged-in player of their location and vision distance.
+used in drawing the game view.  Also, we notify a newly-logged-in player of
+their location and vision distance.
 
     currentStatus = { }
     clearStatus = -> currentStatus = { }
     socket.on 'status', ( data ) ->
         currentStatus = JSON.parse data
-        movePlayer 0, 0
+        sendPositionToServer()
 
 If the server sends us a game settings message, we save that in a global
 variable.

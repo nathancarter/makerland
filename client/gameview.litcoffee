@@ -61,43 +61,32 @@ that moves as the player walks.  Later, it will have an actual map in it.
         ycells = Math.ceil gameview.height/cellSize
         context.strokeStyle = '#000000'
         position = getPlayerPosition()
-        xp = 1 - ( position[1] - Math.floor position[1] )
-        yp = 1 - ( position[2] - Math.floor position[2] )
-        xcenter = gameview.width/2 + cellSize*xp
-        ycenter = gameview.height/2 + cellSize*yp
-        x = xcenter - cellSize*xcells/2
+        xp = position[1] - Math.floor position[1]
+        yp = position[2] - Math.floor position[2]
+        xcenter = gameview.width/2 - cellSize*xp
+        ycenter = gameview.height/2 - cellSize*yp
+        x = xcenter - cellSize*Math.ceil xcells/2
         while x <= gameview.width
             line x, 0, x, gameview.height
             x += cellSize
-        y = ycenter - cellSize*ycells/2
+        y = ycenter - cellSize*Math.ceil ycells/2
         while y <= gameview.height
             line 0, y, gameview.width, y
             y += cellSize
 
-The following function draws the player's avatar.  For now, this is just a
-rectangle.
+The following function draws the player's avatar by calling a routine
+defined in a separate file.
 
-    drawAvatar = ( context, name, position ) ->
-        cellSize = window.gameSettings.cellSizeInPixels
-        if not cellSize then return
-        myPosition = getPlayerPosition()
-        if myPosition[0] isnt position[0] then return
-        x = gameview.width/2 + ( position[1] - myPosition[1] ) * cellSize
-        y = gameview.height/2 + ( position[2] - myPosition[2] ) * cellSize
-        context.fillStyle = '#ff0000'
-        context.fillRect x-10, y-10, 20, 20
-        context.font = '16px serif'
-        context.fillStyle = '#ff0000'
-        size = context.measureText name
-        context.fillText name, x-size.width/2, y-20
     drawPlayer = ( context ) ->
         name = currentStatus.name[0].toUpperCase() + currentStatus.name[1..]
-        drawAvatar context, name, getPlayerPosition()
+        drawAvatar context, name, getPlayerPosition(),
+            getPlayerMotionDirection(), currentStatus.appearance
     drawOtherPlayers = ( context ) ->
         for own key, value of getNearbyObjects()
             if value.type is 'player'
                 key = key[0].toUpperCase() + key[1..]
-                drawAvatar context, key, value.position
+                drawAvatar context, key, value.position,
+                    value.motionDirection, value.appearance
 
 The following function draws the player's status as a HUD.  For now, this is
 just the player's name (after login only).
@@ -149,4 +138,4 @@ sync.  Feel free to make computations herein depend on `frameRate`.
         if keysDown[keyCodes.right] then dx += speed
         if keysDown[keyCodes.up] then dy -= speed
         if keysDown[keyCodes.down] then dy += speed
-        if dx isnt 0 or dy isnt 0 then movePlayer dx, dy
+        movePlayer dx, dy

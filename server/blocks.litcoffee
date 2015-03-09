@@ -32,10 +32,11 @@ that moves.  We use it to update the above two mappings, so that this module
 can send information to clients about what's moving on their screen.  But
 first we need the function we'll use to send the notification to clients.
 
-    notifyAboutMovement = ( notifyThisPlayer, aboutThisName, position ) ->
+    notifyAboutMovement = ( notifyThisPlayer, aboutThisPlayer, position ) ->
         notifyThisPlayer?.socket.emit 'movement nearby',
             type : 'player'
-            name : aboutThisName
+            name : aboutThisPlayer.name
+            appearance : aboutThisPlayer.saveData?.avatar
             position : position
 
 Now that we have that function, here's the bigger function that uses it.
@@ -82,7 +83,7 @@ the locations of anyone in that block, since they can now see it.
                     otherPlayer = Player.nameToPlayer otherPlayer
                     theirBlock = "#{blockName otherPlayer.position}"
                     if theirBlock is block
-                        notifyAboutMovement player, otherPlayer.name,
+                        notifyAboutMovement player, otherPlayer,
                             otherPlayer.position
                 playersWhoCanSeeBlock[block].push player.name
 
@@ -103,5 +104,4 @@ that the player moved.
             canStillSee = name in maybeMore
             if name isnt player.name
                 notifyAboutMovement Player.nameToPlayer( name ),
-                    player.name,
-                    if canStillSee then player.position else null
+                    player, if canStillSee then player.position else null

@@ -19,6 +19,7 @@ Clear out the contents of the command pane.
 Build the HTML code for all the UI described in `data`.  But for command
 objects, save them to be processed separately.
 
+        setWatchingChanges no
         html = ''
         focus = null
         cancel = null
@@ -47,10 +48,12 @@ data.
                 comhtml += dataToRow( command ).code
         html = comhtml + html
 
-Fill the command pane with the HTML for the entire UI.
+Fill the command pane with the HTML for the entire UI.  Then install the
+change handler on all newly-created controls.
 
         commandPane.innerHTML = "<div class='container'
             id='commandui'><form>#{html}</form></div>"
+        ( $ '#rightpane input, select' ).change window.uiElementChanged
 
 If we found a UI element that should have focus, give it focus; if there is
 an element that should be the default button or the cancel button, set up
@@ -90,6 +93,19 @@ individual row in the table that populates that command pane.
                             style='width: 100%'#{attrs}>
                      </input>"
                 ]
+            when 'choice'
+                name = data.name[0].toUpperCase() + data.name[1..]
+                focus = "input_#{data.name}"
+                [
+                    "<label for='input_#{data.name}'>#{name}:</label>
+                    <select class='form-control' id='input_#{data.name}'>
+                    #{for own key, value of data.choices
+                        selected = if value is data.selected \
+                            then 'selected' else ''
+                        "<option value='#{value}' #{selected}
+                         >#{key}</option>"}
+                    </select>"
+                ]
             when 'action'
                 type = if data.default then 'submit' else 'button'
                 name = data.value.replace /\s/g, '_'
@@ -127,6 +143,9 @@ individual row in the table that populates that command pane.
                      </button>"
                     "<p#{attrs}>#{data.shortInfo}</p>"
                 ]
+            when 'watcher'
+                setWatchingChanges yes
+                [ ]
             else [ "<p#{attrs}>#{JSON.stringify data}</p>" ]
         result.focus = focus
         result.cancel = cancel
@@ -136,6 +155,7 @@ And this function converts an array of cells into a table row.
 
     dataToRow = ( data ) ->
         cells = dataToCells data
+        if cells.length is 0 then return code : ''
         divclass = "space-above-below col-xs-#{12/cells.length}"
         code : "<div class='#{divclass}'>
             #{cells.join "</div><div class='#{divclass}'>"}</div>",
@@ -146,15 +166,16 @@ This function extracts from any input elements in the right pane their
 values, and stores them in a JSON object that can be sent to the server.
 
     dataFromUI = ->
-        inputs = ( ( $ '#rightpane' ).get 0 ).getElementsByTagName 'input'
         result = { }
-        for input in inputs
+        for input in ( $ '#rightpane input, #rightpane select' ).get()
             id = input.getAttribute 'id'
             if id?[...6] is 'input_'
                 name = id[6..]
-                switch input.getAttribute 'type'
-                    when 'text', 'password' then value = input.value
-                    else value = undefined
+                value = undefined
+                if input.getAttribute( 'type' ) in [ 'text', 'password' ]
+                    value = input.value
+                if input.tagName is 'SELECT'
+                    value = input.options[input.selectedIndex].value
                 result[name] = value
         result
 
@@ -172,3 +193,14 @@ one above.
 
     window.uiCommandClicked = ( button ) ->
         socket.emit 'command', name : button.value.toLowerCase()
+
+We also need a handler for any change in any UI element, because sometimes
+the server wants to be notified about that.
+
+    watchingChanges = no
+    setWatchingChanges = ( flag ) -> watchingChanges = flag
+    window.uiElementChanged = ( event ) ->
+        if not watchingChanges then return
+        event = dataFromUI()
+        event.type = 'contents changed'
+        socket.emit 'ui event', event

@@ -52,6 +52,15 @@ has within it a handler installed for that event.
                     else
                         console.log 'No action handler installed for', event
 
+If the event handler is a "contents changed" event, then we see if the
+player object has within it a handler installed for watching changes.
+
+                else if event.type is 'contents changed'
+                    if @handlers?.__watcher
+                        @handlers.__watcher event
+                    else
+                        console.log 'No handler installed to watch changes.'
+
 Any other type we don't know how to handle, so we log it.
 
                 else
@@ -109,6 +118,8 @@ the given data into this player.
                 if piece.type is 'action'
                     @handlers[piece.value] = piece.action
                     delete piece.action
+                if piece.type is 'watcher'
+                    @handlers.__watcher = piece.action
 
 Send the modified data on to the client.
 
@@ -195,7 +206,9 @@ logging in.
 This function creates a status object listing all data that the status
 display should show about the player.
 
-        getStatus : => name : @name
+        getStatus : =>
+            name : @name
+            appearance : @saveData.avatar
 
 This function checks the status periodically to see if it has changed.  If
 so, it sends a status update message to the player.
@@ -261,12 +274,17 @@ commands at all times, even ones just added moments ago.
             if @name is 'admin'
                 @saveData.commands = ( key for own key of commands )
 
-If the data is empty (because the player object was just created) this
-populates it with the set of basic commands to which all players should have
+The player may be new, and thus not have any commands; in that case we
+populate the list of commands with all the basic commands.  We actually do
+this for all players, so that in case anyone loses access to a basic
+command, or a new basic command is invented, players will automatically have
 access.
 
-            if not @saveData.commands?
-                @saveData.commands = [ 'players', 'settings', 'quit' ]
+            @saveData.commands ?= [ ]
+            for own key of commands
+                if commands[key].category is 'basic'
+                    if key not in @saveData.commands
+                        @saveData.commands.push key
             @saveData.commands
 
 This command shows the player the UI for all commands to which they have

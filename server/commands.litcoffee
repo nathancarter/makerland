@@ -87,5 +87,87 @@ The settings command allows players to edit their personal settings.
                                 action : -> settings
                     ,
                         type : 'action'
+                        value : 'Change appearance'
+                        action : ->
+                            colors =
+                                black  : '#000000'
+                                tan    : '#7E715D'
+                                dusty  : '#574C3C'
+                                orange : '#943E0F'
+                                brown  : '#5F472F'
+                                gray   : '#626262'
+                                honey  : '#99761B'
+                                gold   : '#C9BC0F'
+                                algae  : '#769028'
+                                grass  : '#397628'
+                                trees  : '#246024'
+                                sky    : '#28726E'
+                            player.showUI
+                                type : 'text'
+                                value : '<h4>Changing appearance</h4>'
+                            ,
+                                type : 'choice'
+                                name : 'head color'
+                                choices : colors
+                                selected : player.saveData.avatar.headColor
+                            ,
+                                type : 'choice'
+                                name : 'body color'
+                                choices : colors
+                                selected : player.saveData.avatar.bodyColor
+                            ,
+                                type : 'choice'
+                                name : 'arm color'
+                                choices : colors
+                                selected : player.saveData.avatar.armColor
+                            ,
+                                type : 'choice'
+                                name : 'leg color'
+                                choices : colors
+                                selected : player.saveData.avatar.legColor
+                            ,
+                                type : 'choice'
+                                name : 'thickness'
+                                choices :
+                                    thin : 1
+                                    normal : 2
+                                    thick : 3
+                                selected : player.saveData.avatar.thickness
+                            ,
+                                type : 'choice'
+                                name : 'height'
+                                choices :
+                                    'very short' : 0.5
+                                    short : 0.8
+                                    normal : 1
+                                    tall : 1.2
+                                selected : player.saveData.avatar.height
+                            ,
+                                type : 'choice'
+                                name : 'head size'
+                                choices :
+                                    small : 0.07
+                                    medium : 0.1
+                                    large : 0.13
+                                selected : player.saveData.avatar.headSize
+                            ,
+                                type : 'action'
+                                value : 'Done'
+                                action : settings
+                            ,
+                                type : 'watcher'
+                                action : ( event ) ->
+                                    player.saveData.avatar =
+                                        headColor : event['head color']
+                                        bodyColor : event['body color']
+                                        armColor : event['arm color']
+                                        legColor : event['leg color']
+                                        thickness : parseInt event.thickness
+                                        height : parseFloat event.height
+                                        headSize : parseFloat \
+                                            event['head size']
+                                    player.updateStatus()
+                    ,
+                        type : 'action'
                         value : 'Done'
                         action : -> player.showCommandUI()
