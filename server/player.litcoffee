@@ -263,6 +263,7 @@ This function saves the player data to disk, after first putting the
 password hash back in.
 
         save : =>
+            if not @name then return
             toSave = JSON.parse JSON.stringify ( @saveData or { } )
             toSave.password = accounts.get @name, 'password'
             accounts.set @name, toSave
