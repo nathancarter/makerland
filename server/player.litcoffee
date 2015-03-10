@@ -47,8 +47,8 @@ If the event is an "action taken" event, then we see if the player object
 has within it a handler installed for that event.
 
                 if event.type is 'action taken'
-                    if @handlers?[event.action]
-                        @handlers[event.action] event
+                    if @handlers?[event.id]
+                        @handlers[event.id] event
                     else
                         console.log 'No action handler installed for', event
 
@@ -120,12 +120,20 @@ Clear out any action handlers installed before, then move any handlers in
 the given data into this player.
 
             @handlers = { }
-            for piece in pieces
+            count = 0
+            installHandlers = ( piece ) =>
                 if piece.type is 'action'
-                    @handlers[piece.value] = piece.action
+                    piece.id = count
+                    @handlers[count] = piece.action
                     delete piece.action
+                    count++
                 if piece.type is 'watcher'
                     @handlers.__watcher = piece.action
+            for piece in pieces
+                if piece instanceof Array
+                    installHandlers entry for entry in piece
+                else
+                    installHandlers piece
 
 Send the modified data on to the client.
 

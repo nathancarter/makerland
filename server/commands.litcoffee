@@ -50,12 +50,14 @@ The settings command allows players to edit their personal settings.
                         newp = event['new password']
                         newp2 = event['new password again']
                         if newp isnt newp2
-                            player.showOK 'New passwords did not match.',
-                                settings
-                            return
+                            return player.showOK 'New passwords did not
+                                match.', settings
                         if not accounts.validLoginPair player.name, oldp
-                            player.showOK 'Incorrect password.', settings
-                            return
+                            return player.showOK 'Incorrect password.',
+                                settings
+                        if not accounts.validPassword newp
+                            return player.showOK 'Invalid password. ' \
+                                + accounts.passwordRules
                         accounts.set player.name, 'password', newp
                         player.showOK 'Password changed!'
                     player.showUI
@@ -185,17 +187,53 @@ The settings command allows players to edit their personal settings.
                 adding, removing, and editing the entries as well.'
             run : ( player ) ->
                 database = require './database'
-                do browse = ->
-                    buttons = for table in database.tables
-                        type : 'action'
-                        value : table
-                        action : ->
-                            name = table[0].toUpperCase() + table[1..]
-                            table = database[table]
-                            contents = ( table.show entry \
-                                for entry in table.entries() )
-                            contents.unshift "<h3>#{name} table:</h3>"
-                            player.showOK contents, browse
+                do browseDB = ->
+                    buttons = for name in database.tables
+                        do ( name ) ->
+                            table = database[name]
+                            name = name[0].toUpperCase() + name[1..]
+                            type : 'action'
+                            value : name
+                            action : browseTable = ->
+                                contents = [
+                                    type : 'text'
+                                    value : "<h3>#{name} table:</h3>"
+                                ]
+                                hasEdit = 'edit' of table
+                                hasRemove = 'remove' of table
+                                for entry in table.entries()
+                                    do ( entry ) ->
+                                        contents.push
+                                            type : 'text'
+                                            value : table.show entry
+                                        entryActions = [ ]
+                                        if hasEdit and table.canEdit \
+                                                player, entry
+                                            entryActions.push
+                                                type : 'action'
+                                                value : 'edit'
+                                                action : -> table.edit \
+                                                    player, entry, \
+                                                    browseTable
+                                        if hasRemove and table.canRemove \
+                                                player, entry
+                                            entryActions.push
+                                                type : 'action'
+                                                value : 'remove'
+                                                action : -> table.remove \
+                                                    player, entry, \
+                                                    browseTable
+                                        if entryActions.length
+                                            entryActions.unshift
+                                                type : 'text'
+                                                value : ''
+                                            contents.push \
+                                                entryActions.slice()
+                                contents.push
+                                    type : 'action'
+                                    value : 'Done'
+                                    action : browseDB
+                                player.showUI contents
                     buttons.unshift
                         type : 'text'
                         value : '<h3>Tables in Database:</h3>

@@ -23,6 +23,8 @@ can descend from this class.
 
     module.exports.Table = class Table
 
+### Constructor
+
         constructor : ( @tableName ) ->
             module.exports[tableName] = this
             try
@@ -30,6 +32,8 @@ can descend from this class.
             catch e
                 throw e if e.code isnt 'EEXIST'
             @defaults = { }
+
+### Entries as Files
 
 The `filename` function maps names of entries in the table to full paths in
 the filesystem in which the entry should be stored.
@@ -55,11 +59,7 @@ of course.
                 fs.readdirSync path.resolve dbroot, @tableName \
                 when f[-5..] is '.json' )
 
-This function determines how an entry in the database will be displayed in
-HTML format.  The default is just the entry's name, but subclasses can make
-this more specific to be more user-friendly.
-
-        show : ( entry ) -> "<p>#{entry}</p>"
+### Reading and Writing
 
 Set the default value for a given key.  This will prevail for all entries
 that do not have that key.
@@ -86,3 +86,20 @@ the `set(entryName,A,B)` form is used.
                 current[A] = B
                 A = current
             fs.writeFileSync ( @filename entryName ), JSON.stringify A
+
+### Maker Browsing and Editing
+
+This function determines how an entry in the database will be displayed in
+HTML format.  The default is just the entry's name, but subclasses can make
+this more specific to be more user-friendly.
+
+        show : ( entry ) -> "<p>#{entry}</p>"
+
+These functions determine whether a maker can edit or remove a given entry
+from the table, or add new entries.  The defaults return false, but
+subclasses can override one or more to implement their specific permission
+scheme.
+
+        canEdit : ( player, entry ) -> no
+        canRemove : ( player, entry ) -> no
+        canAdd : ( player ) -> no

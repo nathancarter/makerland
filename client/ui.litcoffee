@@ -68,11 +68,19 @@ It uses the following function to create an array of cells forming an
 individual row in the table that populates that command pane.
 
     dataToCells = ( data ) ->
+        if data instanceof Array
+            result = [ ]
+            for datum in data
+                cells = dataToCells datum
+                result = result.concat cells
+                result.cancel = cells.cancel
+                result.focus = cells.focus
+            return result
         cancel = data.cancel
         delete data.cancel
         attrs = ''
         for own key, value of data
-            if key isnt 'name' and key isnt 'value'
+            if key isnt 'name' and key isnt 'value' and key isnt 'id'
                 attrs += " #{key}='#{value}'"
         focus = undefined
         result = switch data.type
@@ -116,7 +124,7 @@ individual row in the table that populates that command pane.
                 [
                     "<input type='#{type}' value='#{data.value}'
                             style='width: 100%'#{attrs}
-                            id='button_#{name}' class='btn #{buttonType}'
+                            id='button_#{data.id}' class='btn #{buttonType}'
                             onclick='uiButtonClicked(this)'>
                      </input>"
                 ]
@@ -185,7 +193,7 @@ merely tells the server that the client clicked a button.
     window.uiButtonClicked = ( button ) ->
         event = dataFromUI()
         event.type = 'action taken'
-        event.action = button.value
+        event.id = button.getAttribute( 'id' )[7..]
         socket.emit 'ui event', event
 
 We also need an event handler for commands added to the UI, much like the
