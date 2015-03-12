@@ -59,7 +59,7 @@ If we found a UI element that should have focus, give it focus; if there is
 an element that should be the default button or the cancel button, set up
 handlers for those as well.
 
-        if focus then document.getElementById( focus ).focus()
+        if focus then document.getElementById( focus )?.focus()
         ( $ commandPane.childNodes[0] ).submit ( e ) -> e.preventDefault()
         ( $ commandPane ).keyup ( e ) ->
             if e.keyCode is 27 then ( $ '#'+cancel ).click()
@@ -165,8 +165,8 @@ And this function converts an array of cells into a table row.
         cells = dataToCells data
         if cells.length is 0 then return code : ''
         divclass = "space-above-below col-xs-#{12/cells.length}"
-        code : "<div class='#{divclass}'>
-            #{cells.join "</div><div class='#{divclass}'>"}</div>",
+        code : "<div class='row'><div class='#{divclass}'>
+            #{cells.join "</div><div class='#{divclass}'>"}</div></div>",
         focus : cells.focus
         cancel : cells.cancel
 
