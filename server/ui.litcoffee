@@ -33,7 +33,8 @@ with the Cancel button, then the `cancel` callback is called, passing no
 parameters.  Both callbacks default to showing the main command UI.
 
     module.exports.editListUI =
-    ( player, list, title, check = -> yes, save = -> player.showCommandUI(),
+    ( player, list, title, check = ( -> yes ),
+      save = ( -> player.showCommandUI() ),
       cancel = -> player.showCommandUI() ) ->
         again = -> module.exports.editListUI player, list, title, check,
             save, cancel
@@ -56,19 +57,17 @@ parameters.  Both callbacks default to showing the main command UI.
                 ]
         controls.push [
             type : 'string input'
-            value : 'new entry'
+            name : 'new entry'
         ,
             type : 'action'
             value : 'Add'
             action : ( event ) ->
-                okay = check event['new entry']
-                if check isnt yes
-                    return player.showOK "The entry
-                        \"#{event['new entry']}\" is not valid for this
-                        list. #{if typeof check is 'string' then check}",
-                        again
-                list.push event['new entry']
-                again()
+                if check event['new entry']
+                    list.push event['new entry']
+                    return again()
+                player.showOK "The entry \"#{event['new entry']}\" is not
+                    valid for this list.
+                    #{if typeof okay is 'string' then okay}", again
         ]
         controls.push
             type : 'action'
@@ -80,3 +79,55 @@ parameters.  Both callbacks default to showing the main command UI.
             cancel : yes
             action : -> cancel()
         player.showUI controls
+
+## Editing a list of authors
+
+A common use-case for editing a list of strings is editing the list of
+authors for a database table entry.  We provide that common functionality
+here as a convenience function.
+
+The `check` function just verifies that an author exists as a player in the
+game.  The caller must provide the player object, the table object, the
+entry name, and the callback function to use for returning to the containing
+UI.
+
+    module.exports.editAuthorsList = ( player, table, entry, callback ) ->
+        check = ( newAuthor ) ->
+            newAuthor = newAuthor.toLowerCase()
+            if not require( './database' ).accounts.exists newAuthor
+                "The name \"#{newAuthor}\" does not belong to any
+                player in the game."
+            else
+                yes
+        save = ( newAuthorsList ) ->
+            table.setAuthors entry, newAuthorsList
+            callback()
+        module.exports.editListUI player, table.getAuthors( entry ),
+            "Editing authors for cell type #{entry}", check, save, callback
+
+## "Are you sure?" prompt
+
+It is very common to want to prompt a user, before a serious action is
+taken, to see if they really want to do it.  The following function makes it
+easy for clients to do so.
+
+Provide the player object, text describing the action, and callbacks to run
+in the two possible cases (doing the action or cancelling it).  The text
+parameter will be used as shown in the code immediately below.
+
+    module.exports.areYouSure = ( player, actionText, action, cancel ) ->
+        if not /[.?!]$/.test actionText then actionText += '.'
+        player.showUI
+            type : 'text'
+            value : "<h3>Are you sure?</h3>
+                <p>You are about to #{actionText}
+                Are you sure you want to proceed?</p>"
+        ,
+            type : 'action'
+            value : 'Cancel'
+            cancel : yes
+            action : cancel
+        ,
+            type : 'action'
+            value : 'Yes, proceed'
+            action : action
