@@ -158,7 +158,7 @@ first parameter can be a string or an array of strings.
 This function tells the client to show a login UI.
 
         showLoginUI : =>
-            @showUI
+            controls = [
                 type : 'text'
                 value : '<h3>Please log in to MakerLand!</h3>'
                 align : 'center'
@@ -184,26 +184,29 @@ credentials are valid.
                     else
                         @showOK 'Invalid username and/or password.',
                             => @showLoginUI()
-            ,
-                type : 'action'
-                value : 'New account'
-                action : ( event ) =>
+            ]
+            if not settings.privateGame
+                controls.push
+                    type : 'action'
+                    value : 'New account'
+                    action : ( event ) =>
 
 Handle clicks of the "new account" button by attempting to make the account,
 but not overwriting any existing accounts.
 
-                    if not event.username or not event.password
-                        return @showOK 'You must supply both username and
-                            password.', => @showLoginUI()
-                    if accounts.exists event.username
-                        return @showOK 'That username is already taken.',
-                            => @showLoginUI()
-                    try
-                        accounts.create event.username, event.password
-                        @loggedIn event.username
-                    catch e
-                        @showOK 'Error creating account: ' + e,
-                            => @showLoginUI()
+                        if not event.username or not event.password
+                            return @showOK 'You must supply both username
+                                and password.', => @showLoginUI()
+                        if accounts.exists event.username
+                            return @showOK 'That username is already
+                                taken.', => @showLoginUI()
+                        try
+                            accounts.create event.username, event.password
+                            @loggedIn event.username
+                        catch e
+                            @showOK 'Error creating account: ' + e,
+                                => @showLoginUI()
+            @showUI controls
 
 This method is called in the player when login succeeds.  It initializes the
 player object with its name and tells the player they've succeeded in
