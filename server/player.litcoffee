@@ -123,6 +123,11 @@ the given data into this player.
             count = 0
             installHandlers = ( piece ) =>
                 if piece.type is 'action'
+                    if not piece.action instanceof Function
+                        console.log "Error: Cannot install handler for
+                            action #{piece.value} because its action is not
+                            a function."
+                        return
                     piece.id = count
                     @handlers[count] = piece.action
                     delete piece.action
