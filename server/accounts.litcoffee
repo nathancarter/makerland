@@ -1,5 +1,5 @@
 
-## Player Accounts Table
+# Player Accounts Table
 
 This module implements a game database table for storing player accounts.
 
@@ -175,32 +175,15 @@ for doing so looks like the following.
             if Player.nameToPlayer entry
                 return player.showOK 'You cannot remove that player because
                     they are currently logged into the game.', callback
-            player.showUI
-                type : 'text'
-                value : "<h3>About to remove player!</h3>
-                    <p>Are you SURE you want to remove \"#{entry}\"?
-                    This action cannot be undone!</p>"
-            ,
-                type : 'action'
-                value : 'Cancel'
-                cancel : yes
-                action : callback
-            ,
-                type : 'action'
-                value : 'Yes, remove forever'
-                action : =>
-                    if Player.nameToPlayer entry
-                        return player.showOK 'You cannot remove that player
-                            because they are currently logged into the
-                            game.', callback
-                    fs = require 'fs'
-                    try
-                        fs.unlinkSync @filename entry
-                        player.showOK "Success.  Player #{entry} permanently
-                            removed.", callback
-                    catch e
-                        player.showOK "Error.  Remove unsuccessful: #{e}",
-                            callback
+            action = =>
+                if Player.nameToPlayer entry
+                    return player.showOK 'You cannot remove that player
+                        because they are currently logged into the game.',
+                        callback
+                player.showOK @tryToRemove( entry ), callback
+            require( './ui' ).areYouSure player,
+                "remove the player account \"#{entry}\" <i>permanently</i>.
+                 This action <i>cannot</i> be undone!", action, callback
 
 Only the admin can add new player entries to the table.  The UI for doing so
 looks like the following.

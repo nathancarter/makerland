@@ -117,3 +117,14 @@ permissions.
             authors instanceof Array and player.name in authors
         canRemove : ( player, entry ) -> no
         canAdd : ( player ) -> no
+
+The following convenience function can be called by implementations of the
+`remove` method in subclasses.  It attempts to remove the entry as a file on
+the filesystem, and returns a string describing success or failure.
+
+        tryToRemove : ( entry ) =>
+            try
+                fs.unlinkSync @filename entry
+                "Success.  Entry #{entry} removed."
+            catch e
+                "Error.  Could not remove entry #{entry}.  #{e}"
