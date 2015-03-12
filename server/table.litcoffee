@@ -87,6 +87,15 @@ the `set(entryName,A,B)` form is used.
                 A = current
             fs.writeFileSync ( @filename entryName ), JSON.stringify A
 
+The following are just convenience functions that use a field with the
+special name "__authors" (unlikely to collide with any actual database
+field name).  The authors list stored in these fields is used to determine
+read and write permissions for tables that choose to use it.
+
+        setAuthors : ( entryName, authorsList ) =>
+            @set entryName, '__authors', authorsList
+        getAuthors : ( entryName ) => @get entryName, '__authors'
+
 ### Maker Browsing and Editing
 
 This function determines how an entry in the database will be displayed in
@@ -96,10 +105,15 @@ this more specific to be more user-friendly.
         show : ( entry ) -> "<p>#{entry}</p>"
 
 These functions determine whether a maker can edit or remove a given entry
-from the table, or add new entries.  The defaults return false, but
-subclasses can override one or more to implement their specific permission
-scheme.
+from the table, or add new entries.  The defaults check to see if the
+player's name is on the authors list for an entry, but subclasses can
+override one or more to implement their specific permission scheme.  Note
+that if the table does not use authors lists for entries, then these
+defaults are simply the same as saying no to every request for edit/remove
+permissions.
 
-        canEdit : ( player, entry ) -> no
+        canEdit : ( player, entry ) ->
+            authors = @getAuthors entry
+            authors instanceof Array and player.name in authors
         canRemove : ( player, entry ) -> no
         canAdd : ( player ) -> no

@@ -202,6 +202,25 @@ for doing so looks like the following.
                         player.showOK "Error.  Remove unsuccessful: #{e}",
                             callback
 
+Only the admin can add new player entries to the table.  The UI for doing so
+looks like the following.
+
+        canAdd : ( player ) => player.name is 'admin'
+        add : ( player, callback = -> player.showCommandUI() ) =>
+            randomchar = ->
+                'abcdefghijklmnopqrstuvwxyz'[(Math.random()*26)|0]
+            newname = 'newplayer'
+            while @exists newname
+                newname += randomchar()
+            password = ''
+            while password.length < 10
+                password += randomchar()
+            @create newname, password
+            player.showOK "A new account was created with the name
+                <b>#{newname}</b>.  Its password is initially random.
+                Feel free to edit the account and change both the name
+                and the password.", callback
+
 ## Exporting
 
 The module then exports a single instance of the `AccountsTable` class.

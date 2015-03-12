@@ -229,6 +229,12 @@ The settings command allows players to edit their personal settings.
                                                 value : ''
                                             contents.push \
                                                 entryActions.slice()
+                                if 'add' of table and table.canAdd player
+                                    contents.push
+                                        type : 'action'
+                                        value : 'Add entry'
+                                        action : ->
+                                            table.add player, browseTable
                                 contents.push
                                     type : 'action'
                                     value : 'Done'
