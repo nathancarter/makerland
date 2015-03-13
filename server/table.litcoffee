@@ -128,6 +128,20 @@ not exist.
                 else
                     throw e
 
+And since we can get and set file values on entries, it's good to also be
+able to get a list of such entries, and to remove one.
+
+        removeFile : ( entryName, key ) =>
+            key = key.replace( /_/g, '_und_' ).replace /\./g, '_dot_'
+            try fs.unlinkSync @filename( entryName ).replace /json$/, key
+        allFileKeys : ( entryName ) =>
+            encodedKeys = ( f[entryName.length+1..] for f in \
+                fs.readdirSync path.resolve dbroot, @tableName \
+                when f[..entryName.length] is "#{entryName}." and \
+                     /^[^.]+$/.test f[entryName.length+1..] )
+            for key in encodedKeys
+                key.replace( /_dot_/g, '.' ).replace( /_und_/g, '_' )
+
 ### Maker Browsing and Editing
 
 This function determines how an entry in the database will be displayed in
@@ -150,6 +164,12 @@ permissions.
         canRemove : ( player, entry ) -> no
         canAdd : ( player ) -> no
 
+Subclasses that implement an `add` method should have it take two
+parameters; the first is the player object doing the add and the second is
+the UI callback function for when the add is done.  (The `add` routine may
+need to ask the player some questions.)  It should call that callback with
+the new entry's name as parameter.
+
 The following convenience function can be called by implementations of the
 `remove` method in subclasses.  It attempts to remove the entry as a file on
 the filesystem, and returns a string describing success or failure.
@@ -160,3 +180,20 @@ the filesystem, and returns a string describing success or failure.
                 "Success.  Entry #{entry} removed."
             catch e
                 "Error.  Could not remove entry #{entry}.  #{e}"
+
+The following convenience function attempts to duplicate an entry in the
+database.  If `canAdd` fails for the given player, it does nothing.
+Otherwise, it calls `add()` to create a new entry, then moves over all
+key-value pairs (except the authors list) from the old entry to the new.
+(The authors list will be set by the call to `add`.)  File-type values are
+also duplicated.
+
+        duplicate : ( player, entry, uiCallback ) =>
+            if not @canAdd player then return uiCallback()
+            @add player, ( newentry ) =>
+                for own key, value of @get entry
+                    if key isnt '__authors'
+                        @set newentry, key, value
+                for key in @allFileKeys entry
+                    @setFile newentry, key, @getFile entry, key
+                uiCallback()

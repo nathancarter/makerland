@@ -202,7 +202,7 @@ looks like the following.
             player.showOK "A new account was created with the name
                 <b>#{newname}</b>.  Its password is initially random.
                 Feel free to edit the account and change both the name
-                and the password.", callback
+                and the password.", -> callback newname
 
 ## Exporting
 

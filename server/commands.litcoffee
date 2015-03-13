@@ -201,6 +201,7 @@ The settings command allows players to edit their personal settings.
                                 ]
                                 hasEdit = 'edit' of table
                                 hasRemove = 'remove' of table
+                                hasDuplicate = table.duplicate
                                 for entry in table.entries()
                                     do ( entry ) ->
                                         contents.push
@@ -223,6 +224,15 @@ The settings command allows players to edit their personal settings.
                                                 action : -> table.remove \
                                                     player, entry, \
                                                     browseTable
+                                        if hasDuplicate and table.canAdd \
+                                                player
+                                            entryActions.push
+                                                type : 'action'
+                                                value : 'copy'
+                                                action : ->
+                                                    table.duplicate \
+                                                        player, entry,
+                                                        browseTable
                                         if entryActions.length
                                             entryActions.unshift
                                                 type : 'text'

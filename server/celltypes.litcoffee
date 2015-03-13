@@ -44,7 +44,8 @@ the following.
             @setAuthors "#{i}", [ player.name ]
             player.showOK "The new cell type was created with index #{i}.
                 You have been set as its only author.
-                Feel free to edit it to suit your needs.", callback
+                Feel free to edit it to suit your needs.",
+                -> callback "#{i}"
 
 Who can edit individual entries in the cell types table is determined by the
 authors list, which is the default implementation of `canEdit` in the
