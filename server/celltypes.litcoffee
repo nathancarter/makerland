@@ -21,7 +21,13 @@ Just give the table its name.
 
 ## Maker Database Browsing
 
-        show : ( entry ) -> "<p>#{entry}. #{@get( entry ).name}</p>"
+        smallIcon : ( entry ) =>
+            db = require './database'
+            "<img width=100
+                  src='#{db.createDatabaseURL @tableName, entry, 'icon'}'
+                  onerror='this.style.display=\"none\"'/>"
+        show : ( entry ) =>
+            "<p>#{entry}. #{@smallIcon entry} #{@get( entry ).name}</p>"
 
 ## Maker Permissions
 
@@ -100,6 +106,20 @@ The UI for editing a cell type looks like the following.
                     value : 'Change'
                     action : => require( './ui' ).editAuthorsList player,
                         this, entry, again
+                ]
+            ,
+                [
+                    type : 'text'
+                    value : 'Icon:'
+                ,
+                    type : 'text'
+                    value : @smallIcon entry
+                ,
+                    type : 'action'
+                    value : 'Change'
+                    action : =>
+                        player.getFileUpload "#{data.name} icon", again,
+                            ( contents ) => @setFile entry, 'icon', contents
                 ]
             ,
                 type : 'action'

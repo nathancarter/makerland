@@ -96,6 +96,38 @@ read and write permissions for tables that choose to use it.
             @set entryName, '__authors', authorsList
         getAuthors : ( entryName ) => @get entryName, '__authors'
 
+For large values it doesn't make sense to store them in a JSON file with
+other, smaller data, because it will make getting small data from the
+database inefficient if a giant file must be read each time.  Thus we
+provide the following two routines that read and write keys with large
+values, by using files that sit in the filesystem next to the entry's JSON
+file.
+
+When setting a key-value pair in a certain entry, we must encode the key so
+that it (a) has no dots in it (and thus serves as a single file extension)
+and (b) is not equal to `json`, so that the file does not collide with the
+entry's `.json` file.
+
+        setFile : ( entryName, key, value ) =>
+            key = key.replace( /_/g, '_und_' ).replace /\./g, '_dot_'
+            filename = @filename( entryName ).replace /json$/, key
+            fs.writeFileSync filename, value
+
+When getting a key-value pair for a certain entry, we use the same scheme
+for encoding keys used in `@setFile`.  We return undefined if the file does
+not exist.
+
+        getFile : ( entryName, key ) =>
+            key = key.replace( /_/g, '_und_' ).replace /\./g, '_dot_'
+            filename = @filename( entryName ).replace /json$/, key
+            try
+                fs.readFileSync filename
+            catch e
+                if e.code is 'ENOENT'
+                    undefined
+                else
+                    throw e
+
 ### Maker Browsing and Editing
 
 This function determines how an entry in the database will be displayed in
