@@ -207,6 +207,7 @@ The settings command allows players to edit their personal settings.
                                         contents.push
                                             type : 'text'
                                             value : table.show entry
+                                            class : 'line-above'
                                         entryActions = [ ]
                                         if hasEdit and table.canEdit \
                                                 player, entry
@@ -234,17 +235,23 @@ The settings command allows players to edit their personal settings.
                                                         player, entry,
                                                         browseTable
                                         if entryActions.length
-                                            entryActions.unshift
-                                                type : 'text'
-                                                value : ''
+                                            if entryActions.length < 3
+                                                entryActions.unshift
+                                                    type : 'text'
+                                                    value : ''
                                             contents.push \
                                                 entryActions.slice()
+                                contents.push
+                                    type : 'text'
+                                    value : ''
+                                    class : 'line-above'
                                 if 'add' of table and table.canAdd player
                                     contents.push
                                         type : 'action'
                                         value : 'Add entry'
                                         action : ->
                                             table.add player, browseTable
+                                    line = undefined
                                 contents.push
                                     type : 'action'
                                     value : 'Done'

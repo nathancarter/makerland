@@ -93,11 +93,15 @@ individual row in the table that populates that command pane.
         delete data.splash
         attrs = ''
         for own key, value of data
-            if key isnt 'name' and key isnt 'value' and key isnt 'id'
+            if key not in [ 'name', 'value', 'id', 'class' ]
                 attrs += " #{key}='#{value}'"
         focus = undefined
         result = switch data.type
-            when 'text' then [ "<p#{attrs}>#{data.value}</p>" ]
+            when 'text'
+                [
+                    "<p class='#{data.class or ""}'
+                        #{attrs}>#{data.value}</p>"
+                ]
             when 'string input'
                 focus = "input_#{data.name}"
                 [

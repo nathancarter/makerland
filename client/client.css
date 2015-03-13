@@ -48,13 +48,17 @@ body {
 }
 
 /*
- * This style is used by some entries in the command pane, to get a little
- * more space above and below them.
+ * These styles are used by some entries in the command pane.
  */
 
 .space-above-below {
     margin-top : 4px;
     margin-bottom : 4px;
+}
+
+.line-above {
+    margin-top : 4px;
+    border-top : 1px solid #ccc;
 }
 
 /*
