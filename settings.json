@@ -1,6 +1,7 @@
 {
     "gameDatabaseRoot" : "./gamedb/",
     "commandIconFolder" : "./client/icons/",
+    "fileUploadFolder" : "./client/uploads/",
     "cellSizeInPixels" : 80,
     "mapBlockSizeInCells" : 8,
     "clientSettings" : [ "cellSizeInPixels", "mapBlockSizeInCells" ],

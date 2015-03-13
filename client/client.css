@@ -1,4 +1,9 @@
 
+/*
+ * All the styles in this top section are for the main game view,
+ * with its two panes.
+ */
+
 body {
     margin : 0;
     padding : 0;
@@ -42,7 +47,43 @@ body {
     background : white;
 }
 
+/*
+ * This style is used by some entries in the command pane, to get a little
+ * more space above and below them.
+ */
+
 .space-above-below {
     margin-top : 4px;
     margin-bottom : 4px;
+}
+
+/*
+ * These styles were taken from the following URL, to help style file-type
+ * inputs in HTML forms according to the Bootstrap look-and-feel.
+ * http://www.abeautifulsite.net/whipping-file-inputs-into-shape-with-bootstrap-3/
+ */
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    background: red;
+    cursor: inherit;
+    display: block;
+}
+
+input[readonly] {
+    background-color: white !important;
+    cursor: text !important;
 }

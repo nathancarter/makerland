@@ -51,8 +51,11 @@ data.
 Fill the command pane with the HTML for the entire UI.  Then install the
 change handler on all newly-created controls.
 
-        commandPane.innerHTML = "<div class='container'
-            id='commandui'><form>#{html}</form></div>"
+        commandPane.innerHTML =
+            "<div class='container' id='commandui'>
+             <form action='/upload/#{currentStatus?.name}'
+                   method='post' id='commandPaneForm'
+                   enctype='multipart/form-data'>#{html}</form></div>"
         ( $ '#rightpane input, select' ).change window.uiElementChanged
 
 If we found a UI element that should have focus, give it focus; if there is
@@ -151,6 +154,28 @@ individual row in the table that populates that command pane.
                      </button>"
                     "<p#{attrs}>#{data.shortInfo}</p>"
                 ]
+            when 'upload file'
+                [
+                    "<div class='input-group'>
+                        <span class='input-group-btn'>
+                            <span class='btn btn-default btn-file'>
+                                Browse&hellip;
+                                <input type='file' name='upload-file'>
+                            </span>
+                        </span>
+                        <input type='text' class='form-control' readonly>
+                    </div>"
+                 ]
+            when 'upload button'
+                data.value ?= 'Start upload'
+                [
+                    "<input type='submit' value='#{data.value}'
+                            style='width: 100%'#{attrs}
+                            id='button_#{data.id}' class='btn btn-default'
+                            onclick='$(\"#commandPaneForm\").ajaxSubmit();
+                                     uiButtonClicked(this);'>
+                     </input>"
+                ]
             when 'watcher'
                 setWatchingChanges yes
                 [ ]
@@ -212,3 +237,11 @@ the server wants to be notified about that.
         event = dataFromUI()
         event.type = 'contents changed'
         socket.emit 'ui event', event
+
+The following function supports the Bootstrap-styled file input by making it
+so that whenever the selected file changes, the readonly input next to the
+button is updated with the filename.
+
+    ( $ document ).delegate '.btn-file :file', 'change', ->
+        ( $ this ).parents( '.input-group' ).find( ':text' ).val \
+            ( $ this ).val().replace /.*(\/|\\)/, ''

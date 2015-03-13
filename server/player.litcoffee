@@ -119,10 +119,13 @@ parameters, flatten it out.
 Clear out any action handlers installed before, then move any handlers in
 the given data into this player.
 
-            @handlers = { }
+            @handlers = if @handlers?.__uploaded
+                __uploaded : @handlers.__uploaded
+            else
+                { }
             count = 0
             installHandlers = ( piece ) =>
-                if piece.type is 'action'
+                if piece.type is 'action' or piece.type is 'upload button'
                     if not piece.action instanceof Function
                         console.log "Error: Cannot install handler for
                             action #{piece.value} because its action is not
@@ -134,6 +137,8 @@ the given data into this player.
                     count++
                 if piece.type is 'watcher'
                     @handlers.__watcher = piece.action
+                if piece.type is 'upload file'
+                    @handlers.__uploaded = piece.action
             for piece in pieces
                 if piece instanceof Array
                     installHandlers entry for entry in piece
@@ -157,6 +162,31 @@ first parameter can be a string or an array of strings.
                 action : callback
             }
             @showUI args
+
+The following function presents a file upload UI, returning control to the
+callback when completed.  Provide a title string for the UI page, plus a
+callback to be called when the user either cancels the upload UI or finishes
+an upload and then clicks OK on the next screen (which just says the file
+upload has been started).  The final parameter is the handler for when the
+upload completes, and should do something with the file.  (It will receive
+the file's contents as a parameter; the file will have been removed from
+disk, and should be re-saved elsewhere if needed.)
+
+        getFileUpload : ( title, uiCallback = @showCommandUI, handler ) =>
+            @showUI
+                type : 'text'
+                value : "<h3>Upload File: #{title}</h3>"
+            ,
+                type : 'upload file'
+                action : handler
+            ,
+                type : 'upload button'
+                action : => @showOK 'Upload started.', uiCallback
+            ,
+                type : 'action'
+                value : 'Cancel'
+                cancel : yes
+                action : uiCallback
 
 ## The Login Process
 
