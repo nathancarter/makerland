@@ -18,8 +18,10 @@ This function declares how to draw the game view on the canvas.
 First, clear the canvas.
 
         jqgameview = $ gameview
-        gameview.width = jqgameview.width()
-        gameview.height = jqgameview.height()
+        if gameview.width isnt jqgameview.width()
+            gameview.width = jqgameview.width()
+        if gameview.height isnt jqgameview.height()
+            gameview.height = jqgameview.height()
         context = gameview.getContext '2d'
 
 If we're supposed to be showing a splash screen, just do that.  Otherwise,
