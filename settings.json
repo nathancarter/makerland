@@ -5,5 +5,7 @@
     "cellSizeInPixels" : 80,
     "mapBlockSizeInCells" : 8,
     "clientSettings" : [ "cellSizeInPixels", "mapBlockSizeInCells" ],
-    "privateGame" : false
+    "privateGame" : false,
+    "gameTitle" : "<h3>Log in or sign up</h3>",
+    "gameTitleImage" : "makerlandlogo.png"
 }

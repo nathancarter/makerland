@@ -195,8 +195,9 @@ This function tells the client to show a login UI.
         showLoginUI : =>
             controls = [
                 type : 'text'
-                value : '<h3>Please log in to MakerLand!</h3>'
                 align : 'center'
+                value : settings.gameTitle
+                splash : settings.gameTitleImage
             ,
                 type : 'string input'
                 name : 'username'

@@ -23,6 +23,7 @@ objects, save them to be processed separately.
         html = ''
         focus = null
         cancel = null
+        splash = null
         commands = categories : [ ]
         for element in data
             if element.type is 'command'
@@ -34,6 +35,7 @@ objects, save them to be processed separately.
             row = dataToRow element
             focus or= row.focus
             cancel or= row.cancel
+            splash or= row.splash
             html += row.code
 
 Now build a command UI from the categorized commands we lifted out of the
@@ -67,6 +69,11 @@ handlers for those as well.
         ( $ commandPane ).keyup ( e ) ->
             if e.keyCode is 27 then ( $ '#'+cancel ).click()
 
+If one of the UI messages contained a splash screen, then mark that in our
+status object so that the game view draws it.
+
+        if splash then currentStatus = splash : splash
+
 It uses the following function to create an array of cells forming an
 individual row in the table that populates that command pane.
 
@@ -78,9 +85,12 @@ individual row in the table that populates that command pane.
                 result = result.concat cells
                 result.cancel = cells.cancel
                 result.focus = cells.focus
+                result.splash = cells.splash
             return result
         cancel = data.cancel
         delete data.cancel
+        splash = data.splash
+        delete data.splash
         attrs = ''
         for own key, value of data
             if key isnt 'name' and key isnt 'value' and key isnt 'id'
@@ -182,6 +192,7 @@ individual row in the table that populates that command pane.
             else [ "<p#{attrs}>#{JSON.stringify data}</p>" ]
         result.focus = focus
         result.cancel = cancel
+        result.splash = splash
         result
 
 And this function converts an array of cells into a table row.
@@ -194,6 +205,7 @@ And this function converts an array of cells into a table row.
             #{cells.join "</div><div class='#{divclass}'>"}</div></div>",
         focus : cells.focus
         cancel : cells.cancel
+        splash : cells.splash
 
 This function extracts from any input elements in the right pane their
 values, and stores them in a JSON object that can be sent to the server.

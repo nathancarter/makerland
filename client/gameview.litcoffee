@@ -21,6 +21,13 @@ First, clear the canvas.
         gameview.width = jqgameview.width()
         gameview.height = jqgameview.height()
         context = gameview.getContext '2d'
+
+If we're supposed to be showing a splash screen, just do that.  Otherwise,
+clear the game view for other drawing.
+
+        if currentStatus.splash
+            drawSplashScreen currentStatus.splash
+            return
         context.fillStyle = '#dddddd'
         context.fillRect 0, 0, gameview.width, gameview.height
 
@@ -139,3 +146,18 @@ sync.  Feel free to make computations herein depend on `frameRate`.
         if keysDown[keyCodes.up] then dy -= speed
         if keysDown[keyCodes.down] then dy += speed
         movePlayer dx, dy
+
+## Splash Screen
+
+At login time, the game shows a title screen called a "splash screen."  The
+following function supports doing so.
+
+    drawSplashScreen = ( imageURL ) ->
+        image = new Image;
+        image.onload = ->
+            jqgameview = $ gameview
+            gameview.width = jqgameview.width()
+            gameview.height = jqgameview.height()
+            context = gameview.getContext '2d'
+            context.drawImage image, 0, 0, gameview.width, gameview.height
+        image.src = imageURL
