@@ -69,6 +69,7 @@ that moves as the player walks.  Later, it will have an actual map in it.
         xcells = Math.ceil gameview.width/cellSize
         ycells = Math.ceil gameview.height/cellSize
         context.strokeStyle = '#000000'
+        context.lineWidth = 1
         position = getPlayerPosition()
         xp = position[1] - Math.floor position[1]
         yp = position[2] - Math.floor position[2]
