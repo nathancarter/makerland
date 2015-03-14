@@ -183,11 +183,10 @@ At login time, the game shows a title screen called a "splash screen."  The
 following function supports doing so.
 
     drawSplashScreen = ( imageURL ) ->
-        image = new Image;
-        image.onload = ->
-            jqgameview = $ gameview
-            gameview.width = jqgameview.width()
-            gameview.height = jqgameview.height()
+        if not currentStatus.splashImage?
+            currentStatus.splashImage = new Image
+            currentStatus.splashImage.src = imageURL
+        if currentStatus.splashImage.complete
             context = gameview.getContext '2d'
-            context.drawImage image, 0, 0, gameview.width, gameview.height
-        image.src = imageURL
+            context.drawImage currentStatus.splashImage, 0, 0,
+                gameview.width, gameview.height
