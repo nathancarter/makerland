@@ -119,8 +119,18 @@ The UI for editing a cell type looks like the following.
                     type : 'action'
                     value : 'Change'
                     action : =>
-                        player.getFileUpload "#{data.name} icon", again,
-                            ( contents ) => @setFile entry, 'icon', contents
+                        N = require( './settings' ).cellSizeInPixels
+                        player.getFileUpload "#{data.name} icon",
+                            "Files larger than #{N}x#{N} will take up
+                            unnecessary space on the game server, and will
+                            potentially flicker as you walk over them.
+                            Before uploading an icon, consider resizing it
+                            on your computer to be #{N}x#{N}.",
+                            again, ( contents ) =>
+                                @setFile entry, 'icon', contents
+                                { Player } = require './player'
+                                for p in Player::allPlayers
+                                    p.socket.emit 'icon changed', entry
                 ]
             ,
                 type : 'action'

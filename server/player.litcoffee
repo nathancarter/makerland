@@ -164,18 +164,21 @@ first parameter can be a string or an array of strings.
             @showUI args
 
 The following function presents a file upload UI, returning control to the
-callback when completed.  Provide a title string for the UI page, plus a
-callback to be called when the user either cancels the upload UI or finishes
-an upload and then clicks OK on the next screen (which just says the file
-upload has been started).  The final parameter is the handler for when the
-upload completes, and should do something with the file.  (It will receive
-the file's contents as a parameter; the file will have been removed from
-disk, and should be re-saved elsewhere if needed.)
+callback when completed.  Provide a title string for the UI page, any other
+instructions as a subtitle string, plus a callback to be called when the
+user either cancels the upload UI or finishes an upload and then clicks OK
+on the next screen (which just says the file upload has been started).  The
+final parameter is the handler for when the upload completes, and should do
+something with the file.  (It will receive the file's contents as a
+parameter; the file will have been removed from disk, and should be re-saved
+elsewhere if needed.)
 
-        getFileUpload : ( title, uiCallback = @showCommandUI, handler ) =>
+        getFileUpload : ( title, subtitle = '',
+        uiCallback = @showCommandUI, handler ) =>
+            if subtitle isnt '' then subtitle = "<p>#{subtitle}</p>"
             @showUI
                 type : 'text'
-                value : "<h3>Upload File: #{title}</h3>"
+                value : "<h3>Upload File: #{title}</h3>#{subtitle}"
             ,
                 type : 'upload file'
                 action : handler

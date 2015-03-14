@@ -55,6 +55,19 @@ Last, draw the player's status as a HUD.
 
         drawPlayerStatus context
 
+In order to draw the cells in the game map, we need to cache their icons.
+This datum and routine do so.
+
+    gameMapCache = { }
+    getCellTypeIcon = ( index ) ->
+        if not gameMapCache.hasOwnProperty index
+            gameMapCache[index] = new Image
+            gameMapCache[index].src =
+                "db/celltypes/#{index}/icon?#{encodeURIComponent new Date}"
+        gameMapCache[index]
+    socket.on 'icon changed', ( data ) ->
+        delete gameMapCache[parseInt data]
+
 The following function draws the game map.  For now, this just makes a grid
 that moves as the player walks.  Later, it will have an actual map in it.
 
@@ -68,21 +81,35 @@ that moves as the player walks.  Later, it will have an actual map in it.
             context.stroke()
         xcells = Math.ceil gameview.width/cellSize
         ycells = Math.ceil gameview.height/cellSize
-        context.strokeStyle = '#000000'
+        context.strokeStyle = context.fillStyle = '#000000'
         context.lineWidth = 1
+        blockSize = window.gameSettings.mapBlockSizeInCells
+        for own name, array of window.visibleBlocksCache
+            [ plane, x, y ] = ( parseInt i for i in name.split ',' )
+            for i in [0...blockSize]
+                for j in [0...blockSize]
+                    screen = mapCoordsToScreenCoords x+i, y+j
+                    drawn = no
+                    if array[i][j] > -1
+                        image = getCellTypeIcon array[i][j]
+                        if image.complete
+                            try
+                                context.drawImage image, screen.x, screen.y,
+                                    cellSize, cellSize
+                                drawn = yes
+                    if not drawn
+                        line screen.x, screen.y, screen.x, screen.y+cellSize
+                        line screen.x, screen.y, screen.x+cellSize, screen.y
+    mapCoordsToScreenCoords = ( x, y ) ->
+        cellSize = window.gameSettings.cellSizeInPixels
         position = getPlayerPosition()
-        xp = position[1] - Math.floor position[1]
-        yp = position[2] - Math.floor position[2]
-        xcenter = gameview.width/2 - cellSize*xp
-        ycenter = gameview.height/2 - cellSize*yp
-        x = xcenter - cellSize*Math.ceil xcells/2
-        while x <= gameview.width
-            line x, 0, x, gameview.height
-            x += cellSize
-        y = ycenter - cellSize*Math.ceil ycells/2
-        while y <= gameview.height
-            line 0, y, gameview.width, y
-            y += cellSize
+        x : gameview.width*0.5 + ( x - position[1] ) * cellSize
+        y : gameview.height*0.5 + ( y - position[2] ) * cellSize
+    screenCoordsToMapCoords = ( x, y ) ->
+        cellSize = window.gameSettings.cellSizeInPixels
+        position = getPlayerPosition()
+        x : position[1] + ( x - gameview.width*0.5 ) / cellSize
+        y : position[2] + ( y - gameview.height*0.5 ) / cellSize
 
 The following function draws the player's avatar by calling a routine
 defined in a separate file.

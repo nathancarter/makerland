@@ -29,4 +29,4 @@ the given path is not a database URL.
 We also provide the inverse function.
 
     module.exports.createDatabaseURL = ( table, entry, key ) ->
-        "/db/#{table}/#{entry}/#{key}"
+        "/db/#{table}/#{entry}/#{key}?#{encodeURIComponent new Date}"
