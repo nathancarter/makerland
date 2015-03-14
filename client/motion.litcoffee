@@ -80,3 +80,11 @@ communication.
             ), 100
         else
             delete nearbyObjects[key]
+
+## For Tracking Visible Map Blocks
+
+When the set of blocks I can see changes, the game notifies me with a socket
+message of the following form.
+
+    socket.on 'visible blocks', ( data ) ->
+        console.log 'visible blocks', JSON.stringify data

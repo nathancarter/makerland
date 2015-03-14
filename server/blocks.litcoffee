@@ -147,8 +147,10 @@ copy of its old value for use below.
 Next, for any block that was recently visible but became invisible, remove
 the player from its entry in `playersWhoCanSeeBlock`.
 
+        blockSetChanged = no
         for block in formerlyVisibleBlocks
             if block not in visibleBlocks
+                blockSetChanged = yes
                 if array = playersWhoCanSeeBlock[block]
                     i = array.indexOf player.name
                     if i > -1 then array.splice i, 1
@@ -159,6 +161,7 @@ the locations of anyone in that block, since they can now see it.
 
         for block in visibleBlocks
             if block not in formerlyVisibleBlocks
+                blockSetChanged = yes
                 playersWhoCanSeeBlock[block] ?= [ ]
                 for otherPlayer in playersWhoCanSeeBlock[block]
                     otherPlayer = Player.nameToPlayer otherPlayer
@@ -186,3 +189,17 @@ that the player moved.
             if name isnt player.name
                 notifyAboutMovement Player.nameToPlayer( name ),
                     player, if canStillSee then player.position else null
+
+Also, any players whose set of visible blocks changed, notify those players
+about their new set of visible blocks.
+
+        if blockSetChanged then notifyAboutVisibility player, visibleBlocks
+
+The following function notifies players about their set of visible blocks.
+
+    notifyAboutVisibility = ( notifyThisPlayer, blockSet ) ->
+        data = { }
+        for block in blockSet
+            [ plane, x, y ] = ( parseInt i for i in block.split ',' )
+            data[block] = module.exports.getCells plane, x, y
+        notifyThisPlayer?.socket.emit 'visible blocks', data
