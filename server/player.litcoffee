@@ -246,9 +246,14 @@ but not overwriting any existing accounts.
 
 This method is called in the player when login succeeds.  It initializes the
 player object with its name and tells the player they've succeeded in
-logging in.
+logging in.  Note the first two lines, which check to see if the player is
+already logged in elsewhere in the game, and if so, disconnects that other
+client before allowing this one to take over.
 
-        loggedIn : ( @name ) =>
+        loggedIn : ( name ) =>
+            if otherCopy = Player.nameToPlayer name
+                otherCopy.socket.disconnect()
+            @name = name
             @load()
             console.log "player logged in as #{name}"
             @startStatusUpdates()
