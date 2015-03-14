@@ -255,6 +255,7 @@ The settings command allows players to edit their personal settings.
                                 contents.push
                                     type : 'action'
                                     value : 'Done'
+                                    cancel : yes
                                     action : browseDB
                                 player.showUI contents
                     buttons.unshift
@@ -264,5 +265,6 @@ The settings command allows players to edit their personal settings.
                     buttons.push
                         type : 'action'
                         value : 'Done'
+                        cancel : yes
                         action : -> player.showCommandUI()
                     player.showUI buttons

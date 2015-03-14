@@ -157,10 +157,10 @@ or a button.
 Otherwise, it should record key down and up events so that we can handle
 them periodically.
 
-    document.body.onkeydown = ( event ) ->
+    ( $ document.body ).on 'keydown', ( event ) ->
         if shouldIgnoreKeyboardEvent() then return
         keysDown[event.keyCode] = yes
-    document.body.onkeyup = ( event ) ->
+    ( $ document.body ).on 'keyup', ( event ) ->
         if shouldIgnoreKeyboardEvent() then return
         delete keysDown[event.keyCode]
 
