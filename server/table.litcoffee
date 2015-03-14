@@ -138,7 +138,8 @@ able to get a list of such entries, and to remove one.
             encodedKeys = ( f[entryName.length+1..] for f in \
                 fs.readdirSync path.resolve dbroot, @tableName \
                 when f[..entryName.length] is "#{entryName}." and \
-                     /^[^.]+$/.test f[entryName.length+1..] )
+                     /^[^.]+$/.test( f[entryName.length+1..] ) and \
+                     f[entryName.length+1..] isnt 'json' )
             for key in encodedKeys
                 key.replace( /_dot_/g, '.' ).replace( /_und_/g, '_' )
 
@@ -176,6 +177,11 @@ the filesystem, and returns a string describing success or failure.
 
         tryToRemove : ( entry ) =>
             try
+                for key in @allFileKeys entry
+                    key = key.replace( /_/g, '_und_' ) \
+                             .replace( /\./g, '_dot_' )
+                    filename = @filename( entry ).replace /json$/, key
+                    fs.unlinkSync filename
                 fs.unlinkSync @filename entry
                 "Success.  Entry #{entry} removed."
             catch e
