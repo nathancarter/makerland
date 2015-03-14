@@ -208,4 +208,4 @@ looks like the following.
 
 The module then exports a single instance of the `AccountsTable` class.
 
-    module.exports = new AccountsTable()
+    module.exports = new AccountsTable

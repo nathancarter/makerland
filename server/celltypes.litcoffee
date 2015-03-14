@@ -140,4 +140,4 @@ A maker can remove a cell type if and only if that maker can edit it.
 
 The module then exports a single instance of the `CellTypesTable` class.
 
-    module.exports = new CellTypesTable()
+    module.exports = new CellTypesTable
