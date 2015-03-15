@@ -21,6 +21,8 @@ Just give the table its name.
 
 ## Maker Database Browsing
 
+Implement custom show method.
+
         smallIcon : ( entry ) =>
             db = require './database'
             "<img width=100
@@ -28,6 +30,10 @@ Just give the table its name.
                   onerror='this.style.display=\"none\"'/>"
         show : ( entry ) =>
             "<p>#{entry}. #{@smallIcon entry} #{@get( entry ).name}</p>"
+
+Ensure entries are returned sorted in numerical order.
+
+        entries : => super().sort ( a, b ) -> parseInt( a ) - parseInt( b )
 
 ## Maker Permissions
 
