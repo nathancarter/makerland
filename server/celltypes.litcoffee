@@ -135,6 +135,7 @@ The UI for editing a cell type looks like the following.
             ,
                 type : 'action'
                 value : 'Done'
+                cancel : yes
                 action : callback
 
 A maker can remove a cell type if and only if that maker can edit it.

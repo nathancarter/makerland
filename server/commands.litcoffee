@@ -293,7 +293,7 @@ the mouse on the map itself.
                     chooser( pick )
                 ,
                     type : 'action'
-                    value : 'Get started using it'
+                    value : 'Place individual cells'
                     default : yes
                     action : ( data ) =>
                         choice = data['cell type']
@@ -307,6 +307,73 @@ the mouse on the map itself.
                         player.mapClickMode "Click any cell on the map to
                             change it to be \"#{celltypename}.\"",
                             changeMapCell, pick
+                ,
+                    type : 'action'
+                    value : 'Fill rectangles of cells'
+                    action : ( data ) =>
+                        choice = data['cell type']
+                        if not table.exists choice
+                            return player.showOK 'You must choose a valid
+                                cell type first.', pick
+                        celltypename = table.get choice, 'name'
+                        firstCorner = ->
+                            player.mapClickMode "Click the first corner of
+                                the area to fill with \"#{celltypename}.\"",
+                                secondCorner, pick, 'nw-resize'
+                        secondCorner = ( x, y ) ->
+                            player.mapClickMode "Click the second corner of
+                                the area to fill with \"#{celltypename}.\"",
+                                fillRectangle( x, y ), pick, 'se-resize'
+                        fillRectangle = ( x1, y1 ) ->
+                            ( x2, y2 ) ->
+                                bt = require './blocks'
+                                plane = player.position[0]
+                                if x1 > x2 then [ x1, x2 ] = [ x2, x1 ]
+                                if y1 > y2 then [ y1, y2 ] = [ y2, y1 ]
+                                x1 = ( Math.floor x1 ) | 0
+                                x2 = ( Math.floor x2 ) | 0
+                                y1 = ( Math.floor y1 ) | 0
+                                y2 = ( Math.floor y2 ) | 0
+                                for i in [x1..x2]
+                                    for j in [y1..y2]
+                                        bt.setCell plane, i, j, choice
+                                firstCorner()
+                        firstCorner()
+                ,
+                    type : 'action'
+                    value : 'Rectangular border of cells'
+                    action : ( data ) =>
+                        choice = data['cell type']
+                        if not table.exists choice
+                            return player.showOK 'You must choose a valid
+                                cell type first.', pick
+                        celltypename = table.get choice, 'name'
+                        firstCorner = ->
+                            player.mapClickMode "Click the first corner of
+                                the area to fill with \"#{celltypename}.\"",
+                                secondCorner, pick, 'nw-resize'
+                        secondCorner = ( x, y ) ->
+                            player.mapClickMode "Click the second corner of
+                                the area to fill with \"#{celltypename}.\"",
+                                drawRectangle( x, y ), pick, 'se-resize'
+                        drawRectangle = ( x1, y1 ) ->
+                            ( x2, y2 ) ->
+                                bt = require './blocks'
+                                plane = player.position[0]
+                                if x1 > x2 then [ x1, x2 ] = [ x2, x1 ]
+                                if y1 > y2 then [ y1, y2 ] = [ y2, y1 ]
+                                x1 = ( Math.floor x1 ) | 0
+                                x2 = ( Math.floor x2 ) | 0
+                                y1 = ( Math.floor y1 ) | 0
+                                y2 = ( Math.floor y2 ) | 0
+                                for i in [x1..x2]
+                                    bt.setCell plane, i, y1, choice
+                                    bt.setCell plane, i, y2, choice
+                                for i in [y1..y2]
+                                    bt.setCell plane, x1, i, choice
+                                    bt.setCell plane, x2, i, choice
+                                firstCorner()
+                        firstCorner()
                 ,
                     type : 'action'
                     value : 'Done'

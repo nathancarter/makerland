@@ -159,6 +159,7 @@ first parameter can be a string or an array of strings.
             args.push {
                 type : 'action'
                 value : 'OK'
+                cancel : yes
                 action : callback
             }
             @showUI args
@@ -195,7 +196,9 @@ The following function tells the player that he/she can click anywhere on
 the map to accomplish a specific action.  This routine calls the given click
 callback whenever the player does so, with map coordinates (in game world
 coordinates, not screen coordinates) each time the player clicks.  The mode
-ends when the player chooses the Done button (or hits Esc).
+ends when the player chooses the Done button (or hits Esc).  The CSS cursor
+style given as the fourth parameter applies over the game view during this
+mode.
 
 The `instructions` parameter is the text to be shown on the screen.  It will
 have above it a heading that says "Click the map" and a button below it that
@@ -211,13 +214,14 @@ y.  These will not usually be integers, since players can click strictly
 inside map cells, not just on their corners.
 
         mapClickMode : ( instructions, clickHandler,
-        uiCallback = @showCommandUI ) =>
+        uiCallback = @showCommandUI, cursor = 'crosshair' ) =>
             @showUI
                 type : 'text'
                 value : '<h3>Click the map</h3>'
             ,
                 type : 'map click'
                 value : instructions
+                cursor : cursor
                 action : ( data ) ->
                     clickHandler data.location.x, data.location.y
             ,

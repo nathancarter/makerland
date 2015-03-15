@@ -164,6 +164,7 @@ doing so looks like the following.
             ,
                 type : 'action'
                 value : 'Done'
+                cancel : yes
                 action : callback
 
 Only the admin can remove individual player entries from the table.  The UI

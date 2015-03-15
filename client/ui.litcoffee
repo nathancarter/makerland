@@ -199,7 +199,8 @@ individual row in the table that populates that command pane.
                 setWatchingChanges yes
                 [ ]
             when 'map click'
-                ( $ '#gameview' ).get( 0 ).style.cursor = 'crosshair'
+                ( $ '#gameview' ).get( 0 ).style.cursor =
+                    data.cursor or 'crosshair'
                 [
                     "<p#{attrs} class='map-click' id='click_#{data.id}'
                      >#{data.value}</p>"
