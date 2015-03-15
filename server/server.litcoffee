@@ -20,7 +20,10 @@ The entirety of the HTTP server is defined here.
         if uri is '/'
             uri = 'client.html'
         if uri[...8] is '/upload/'
-            handleUpload uri[8..], request, response
+            try
+                return handleUpload uri[8..], request, response
+            catch e
+                console.log 'Error uploading file', uri, 'Message:', e
         fileserver.serveFile uri, response
     .listen 9999
 
@@ -42,29 +45,23 @@ doesn't, create it.  If you can't, abort with an error.
             process.exit 1
 
 Next, use busboy for multipart upload handling.  Any request to `/upload/X`
-gets processed this way.
+gets processed this way.  We keep a list of all data chunks sent, then use
+`Buffer` to concat them all into one buffer at the end, which we send to the
+client's chosen handler for all this.
 
     handleUpload = ( name, request, response ) ->
         busboy = require 'busboy'
         bb = new busboy { headers : request.headers }
-        destination = require( './settings' ).getPath 'fileUploadFolder'
-        fn = require( 'path' ).join destination, name
-        try
-            if fs.lstatSync( fn ).isFile()
-                console.log 'Player tried two uploads at once:', fn
-                return
-        catch e
-            if e.code isnt 'ENOENT'
-                console.log 'Error getting information about file:', fn
+        buffers = [ ]
         bb.on 'file', ( fieldname, file, others... ) ->
-            file.pipe fs.createWriteStream fn
+            file.on 'data', ( data ) -> buffers.push data
         bb.on 'finish', ->
             handler = Player.nameToPlayer( name )?.handlers?.__uploaded
             if handler instanceof Function
-                contents = fs.readFileSync fn
-            fs.unlinkSync fn
-            if handler instanceof Function
-                handler contents
+                buffer = Buffer.concat buffers
+                handler buffer
+            response.writeHead 200, Connection : 'close'
+            response.end()
         request.pipe bb
 
 ## Web Sockets
