@@ -73,16 +73,16 @@ functions.
             block = @getCells plane, x, y
             if not block then return null
             N = settings.mapBlockSizeInCells
-            x = ( x - ( N * Math.floor x/N ) ) | 0
-            y = ( y - ( N * Math.floor y/N ) ) | 0
-            block[x][y]
+            dx = ( x - ( N * Math.floor x/N ) ) | 0
+            dy = ( y - ( N * Math.floor y/N ) ) | 0
+            block[dx][dy]
         setCell : ( plane, x, y, i ) =>
             block = @getCells plane, x, y
             if not block then return null
             N = settings.mapBlockSizeInCells
-            x = ( x - ( N * Math.floor x/N ) ) | 0
-            y = ( y - ( N * Math.floor y/N ) ) | 0
-            block[x][y] = i
+            dx = ( x - ( N * Math.floor x/N ) ) | 0
+            dy = ( y - ( N * Math.floor y/N ) ) | 0
+            block[dx][dy] = parseInt i
             @setCells plane, x, y, block
 
 Export a singleton of the class as the module.
