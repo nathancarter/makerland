@@ -61,6 +61,14 @@ body {
     border-top : 1px solid #ccc;
 }
 
+.category {
+    margin-top : 10px;
+    margin-bottom : 4px;
+    font-weight : bold;
+    text-align : center;
+    font-size : larger;
+}
+
 /*
  * These styles were taken from the following URL, to help style file-type
  * inputs in HTML forms according to the Bootstrap look-and-feel.

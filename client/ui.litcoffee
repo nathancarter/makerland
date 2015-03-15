@@ -154,9 +154,8 @@ individual row in the table that populates that command pane.
             when 'category'
                 name = data.name[0].toUpperCase() + data.name[1..]
                 [
-                    "<div class='panel panel-default'>
-                        <div class='panel-body'>#{name} Commands
-                    </div></div>"
+                    "<div class='panel panel-default category'
+                     ><div class='panel-body'>#{name} Commands</div></div>"
                 ]
             when 'command'
                 [
