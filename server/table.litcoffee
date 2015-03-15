@@ -203,3 +203,63 @@ also duplicated.
                 for key in @allFileKeys entry
                     @setFile newentry, key, @getFile entry, key
                 uiCallback()
+
+The following function creates a single UI item that shows a particular
+entry from a given database table, and allows you to click "Change" to
+select a different one.  If you click "Change" it presents an entire other
+UI pane, lets you choose the new entry, then returns to the UI given as the
+`uiCallback` parameter.  The appearance of the entry is as the `show()`
+function from its table gives, plus a hidden input field that maps the
+given name for this UI element to the name of the selected table entry.
+
+Example JavaScript usage:
+```js
+// you must declare it up here so that it's one instance across all calls
+// of the showMyUI() function below
+uiItem = myTable.entryChooser( playerObject, 'put key name here',
+    'optional initial entry name here' );
+// then name the function for showing the UI, so that you can pass it as a
+// UI callback when needed
+function showMyUI () {
+    player.showUI( [
+        // some UI elements here...
+        uiItem( showMyUI ), // this provides the callback when done
+        // more UI elements here...
+    ] );
+}
+// now show the UI
+showMyUI();
+```
+
+And now the actual implementation.
+
+        entryChooser : ( player, keyname, initialChoice ) =>
+            choice = initialChoice
+            ( uiCallback ) => [
+                type : 'text'
+                value : "<p>#{keyname}:</p>
+                         <input type='hidden' id='input_#{keyname}'
+                                value='#{choice}'/>"
+            ,
+                type : 'text'
+                value : if @exists choice then @show choice else '[none]'
+            ,
+                type : 'action'
+                value : 'Change'
+                action : =>
+                    controls = for entry in @entries()
+                        do ( entry ) => [
+                            type : 'text'
+                            value : @show entry
+                        ,
+                            type : 'action'
+                            value : 'Choose'
+                            action : => choice = entry ; uiCallback()
+                        ]
+                    controls.push
+                        type : 'action'
+                        value : 'Cancel'
+                        cancel : yes
+                        action : uiCallback
+                    player.showUI controls
+            ]

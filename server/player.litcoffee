@@ -43,10 +43,10 @@ Set up a handler for UI events from the client.
 
             socket.on 'ui event', ( event ) =>
 
-If the event is an "action taken" event, then we see if the player object
-has within it a handler installed for that event.
+If the event is an "action taken" event or a "map click" event, then we see
+if the player object has within it a handler installed for that event.
 
-                if event.type is 'action taken'
+                if event.type in [ 'action taken', 'map click' ]
                     if @handlers?[event.id]
                         @handlers[event.id] event
                     else
@@ -125,7 +125,7 @@ the given data into this player.
                 { }
             count = 0
             installHandlers = ( piece ) =>
-                if piece.type is 'action' or piece.type is 'upload button'
+                if piece.type in [ 'action', 'upload button', 'map click' ]
                     if not piece.action instanceof Function
                         console.log "Error: Cannot install handler for
                             action #{piece.value} because its action is not
@@ -188,6 +188,41 @@ elsewhere if needed.)
             ,
                 type : 'action'
                 value : 'Cancel'
+                cancel : yes
+                action : uiCallback
+
+The following function tells the player that he/she can click anywhere on
+the map to accomplish a specific action.  This routine calls the given click
+callback whenever the player does so, with map coordinates (in game world
+coordinates, not screen coordinates) each time the player clicks.  The mode
+ends when the player chooses the Done button (or hits Esc).
+
+The `instructions` parameter is the text to be shown on the screen.  It will
+have above it a heading that says "Click the map" and a button below it that
+says "Exit," but that's all.  Thus the instructions should say what will
+happen when the player clicks.  The click handler does not need to display
+another UI to the player; it can leave this UI visible, so that the player
+can click repeatedly.  Or it can display another UI if that's preferred.
+The instructions should give the player the correct expectation of this
+behavior.
+
+The click handler will receive the map coordinates as two parameters, x and
+y.  These will not usually be integers, since players can click strictly
+inside map cells, not just on their corners.
+
+        mapClickMode : ( instructions, clickHandler,
+        uiCallback = @showCommandUI ) =>
+            @showUI
+                type : 'text'
+                value : '<h3>Click the map</h3>'
+            ,
+                type : 'map click'
+                value : instructions
+                action : ( data ) ->
+                    clickHandler data.location.x, data.location.y
+            ,
+                type : 'action'
+                value : 'Done'
                 cancel : yes
                 action : uiCallback
 

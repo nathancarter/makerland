@@ -65,6 +65,7 @@ integers.
             key = "#{plane},#{x},#{y}"
             if not @exists key then @set key, { }
             @set key, 'cells', array
+            notifyAboutBlockUpdate key
 
 You can also get or set just one cell at a time, with the following
 functions.
@@ -198,8 +199,19 @@ about their new set of visible blocks.
 The following function notifies players about their set of visible blocks.
 
     notifyAboutVisibility = ( notifyThisPlayer, blockSet ) ->
+        if not notifyThisPlayer then return
         data = { }
         for block in blockSet
             [ plane, x, y ] = ( parseInt i for i in block.split ',' )
             data[block] = module.exports.getCells plane, x, y
-        notifyThisPlayer?.socket.emit 'visible blocks', data
+        notifyThisPlayer.socket.emit 'visible blocks', data
+
+And when a block is edited by a maker, we want to call the above function on
+every player who can see the block.
+
+    notifyAboutBlockUpdate = ( blockName ) ->
+        for playerName in playersWhoCanSeeBlock[blockName]
+            player = Player.nameToPlayer playerName
+            if player
+                notifyAboutVisibility player,
+                    blocksVisibleToPlayer[playerName]

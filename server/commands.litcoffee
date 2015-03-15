@@ -178,6 +178,10 @@ The settings command allows players to edit their personal settings.
 
 ## Maker Commands
 
+The database command allows makers to browse the list of database tables,
+browse each table, and edit those tables which are editable, including
+adding, removing, and changing entries.
+
         database :
             category : 'maker'
             icon : 'database.png'
@@ -268,3 +272,43 @@ The settings command allows players to edit their personal settings.
                         cancel : yes
                         action : -> player.showCommandUI()
                     player.showUI buttons
+
+The world command allows the maker to edit the game world by clicking with
+the mouse on the map itself.
+
+        world :
+            category : 'maker'
+            icon : 'world.png'
+            shortInfo : 'Edit the game world'
+            help : 'This command allows the maker to edit the game map by
+                choosing cell types, then clicking the map to fill the map
+                with that type of cell.'
+            run : ( player ) ->
+                table = require( './database' ).celltypes
+                chooser = table.entryChooser player, 'cell type', 1
+                do pick = => player.showUI
+                    type : 'text'
+                    value : '<h3>Editing Game Map</h3>'
+                ,
+                    chooser( pick )
+                ,
+                    type : 'action'
+                    value : 'Get started using it'
+                    default : yes
+                    action : ( data ) =>
+                        choice = data['cell type']
+                        if not table.exists choice
+                            return player.showOK 'You must choose a valid
+                                cell type first.', pick
+                        celltypename = table.get choice, 'name'
+                        changeMapCell = ( x, y ) ->
+                            require( './blocks' ).setCell \
+                                player.position[0], x, y, choice
+                        player.mapClickMode "Click any cell on the map to
+                            change it to be \"#{celltypename}.\"",
+                            changeMapCell, pick
+                ,
+                    type : 'action'
+                    value : 'Done'
+                    cancel : yes
+                    action : -> player.showCommandUI()

@@ -190,3 +190,19 @@ following function supports doing so.
             context = gameview.getContext '2d'
             context.drawImage currentStatus.splashImage, 0, 0,
                 gameview.width, gameview.height
+
+## Handling Map Clicks
+
+When the player clicks on the map, we must check to see if the server wants
+to know about that.  If it does, then we must send a message, after having
+converted the coordinates from screen to world.
+
+    ( $ '#gameview' ).on 'click', ( event ) ->
+        listeners = $ '.map-click'
+        if listeners.length
+            mapcoords = screenCoordsToMapCoords \
+                event.pageX - this.offsetLeft, event.pageY - this.offsetTop
+            socket.emit 'ui event',
+                type : 'map click'
+                location : mapcoords
+                id : listeners.get( 0 ).getAttribute( 'id' )[6..]

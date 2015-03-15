@@ -26,6 +26,7 @@ objects, save them to be processed separately.
         cancelControl = null
         splash = null
         commands = categories : [ ]
+        ( $ '#gameview' ).get( 0 ).style.cursor = 'default'
         for element in data
             if element.type is 'command'
                 commands[element.category] ?= [ ]
@@ -198,7 +199,14 @@ individual row in the table that populates that command pane.
             when 'watcher'
                 setWatchingChanges yes
                 [ ]
-            else [ "<p#{attrs}>#{JSON.stringify data}</p>" ]
+            when 'map click'
+                ( $ '#gameview' ).get( 0 ).style.cursor = 'crosshair'
+                [
+                    "<p#{attrs} class='map-click' id='click_#{data.id}'
+                     >#{data.value}</p>"
+                ]
+            else
+                [ "<p#{attrs}>#{JSON.stringify data}</p>" ]
         result.focus = focus
         result.cancel = cancel
         result.splash = splash
@@ -226,7 +234,8 @@ values, and stores them in a JSON object that can be sent to the server.
             if id?[...6] is 'input_'
                 name = id[6..]
                 value = undefined
-                if input.getAttribute( 'type' ) in [ 'text', 'password' ]
+                if input.getAttribute( 'type' ) in \
+                        [ 'text', 'password', 'hidden' ]
                     value = input.value
                 if input.tagName is 'SELECT'
                     value = input.options[input.selectedIndex].value
