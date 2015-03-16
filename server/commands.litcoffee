@@ -379,3 +379,80 @@ the mouse on the map itself.
                     value : 'Done'
                     cancel : yes
                     action : -> player.showCommandUI()
+
+The teleport command allows the maker to mark locations in the world to
+remember, then jump back to those locations later.
+
+        teleport :
+            category : 'maker'
+            icon : 'teleport.png'
+            shortInfo : 'Teleport (or edit your teleport list)'
+            help : 'This command keeps track of all the places in the game
+                world you\'ve memorized as teleportation destinations.  It
+                lets you jump to one, add one, or remove one.'
+            run : ( player ) ->
+                showList = -> module.exports.teleport.run player
+                tp = player.saveData.teleport ?= { }
+                controls = [
+                    type : 'text'
+                    value : '<h3>Teleportation Destinations</h3>'
+                ]
+                if Object.keys( tp ).length > 0
+                    for own key, value of tp
+                        do ( key, value ) ->
+                            controls.push [
+                                type : 'text'
+                                value : key
+                            ,
+                                type : 'action'
+                                value : 'Go here'
+                                action : ->
+                                    player.teleport value
+                                    showList()
+                            ,
+                                type : 'action'
+                                value : 'Delete'
+                                action : ->
+                                    ui = require './ui'
+                                    ui.areYouSure player, "delete forever
+                                        your memorized destination called
+                                        \"#{key}\"",
+                                        ( ->
+                                            delete tp[key]
+                                            player.showOK 'Deleted!',
+                                                showList
+                                        ), showList
+                            ]
+                else
+                    controls.push
+                        type : 'text'
+                        value : 'You have not yet memorized any
+                            teleportation destinations.'
+                controls = controls.concat [
+                    type : 'text'
+                    value : 'To memorize your current location, type a name
+                        for it in the box below, then click Add.'
+                ,
+                    [
+                        type : 'string input'
+                        name : 'type name here'
+                    ,
+                        type : 'action'
+                        value : 'Add'
+                        action : ( data ) ->
+                            name = data['type name here']
+                            if tp.hasOwnProperty name
+                                player.showOK 'You are already using that
+                                    destination name.  Try another.',
+                                    showList
+                            tp[name] = player.position.slice()
+                            player.showOK "You have memorized your current
+                                location as \"#{name}.\"", showList
+                    ]
+                ,
+                    type : 'action'
+                    value : 'Done'
+                    cancel : yes
+                    action : => player.showCommandUI()
+                ]
+                player.showUI controls

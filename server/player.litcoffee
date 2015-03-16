@@ -406,7 +406,7 @@ access.
                 icon : iconPath
             )
 
-## Tracking Player Location
+## Player Location
 
 The following function updates player position data and asks the blocks
 module to recompute visibility based on the given maximum vision distance.
@@ -416,3 +416,11 @@ module to recompute visibility based on the given maximum vision distance.
             @position = newPosition
             require( './blocks' ).updateVisibility this, visionDistance,
                 oldPosition
+
+The following command teleports a player from one location in the game to
+another.  It does so by telling the client about the new position, and the
+client, in turn, tells the server not only the new position, but also the
+vision distance, which results in a call to `positionChanged`.
+
+        teleport : ( destination ) =>
+            @socket.emit 'player position', destination

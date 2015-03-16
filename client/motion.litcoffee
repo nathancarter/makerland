@@ -37,6 +37,16 @@ caching blocks in advance).
                 -1
         if dx or dy then sendPositionToServer()
 
+The server can also tell us the player position, and we must always trust
+that, not our own records, because the server is the authoritative record of
+the entire game.  (We wouldn't want to show the player an untrue
+representation of the game world, or it could be dangerous for his/her
+character.)
+
+    socket.on 'player position', ( data ) ->
+        setPlayerPosition data
+        sendPositionToServer()
+
 The vision distance is computed in both the x and y directions, and the
 maximum of the two is reported.  We divide by the cell size to convert from
 screen units (pixels) to game map units (cells).
