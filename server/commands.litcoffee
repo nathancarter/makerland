@@ -173,6 +173,81 @@ The settings command allows players to edit their personal settings.
                                     player.updateStatus()
                     ,
                         type : 'action'
+                        value : 'Edit shortcuts'
+                        action : ->
+                            controls = [
+                                type : 'text'
+                                value : '<h3>Shortcuts</h3>
+                                    <p>Use the tools below to edit your
+                                    keyboard shortcuts for the game\'s
+                                    commands, as well as shortcuts that sit
+                                    as icons on top of the game map.</p>
+                                    <p>Due to differences in browsers and
+                                    keyboards, ordinary letters work best;
+                                    punctuation and other symbols do not
+                                    always work.</p>'
+                            ]
+                            shortcuts = player.saveData.shortcuts ?= { }
+                            hudshorts = player.saveData.hudshorts ?= [ ]
+                            commands = player.commands().concat [
+                                'hide/show command panel'
+                            ]
+                            for command in commands
+                                controls = controls.concat [
+                                    type : 'category'
+                                    name : command
+                                ,
+                                    [
+                                        type : 'text'
+                                        value : 'Keyboard shortcut:'
+                                    ,
+                                        type : 'string input'
+                                        name : "shortcut for #{command}"
+                                        value : shortcuts[command] or ''
+                                    ]
+                                ,
+                                    type : 'checkbox'
+                                    checked : command in hudshorts
+                                    name : "Show #{command} over map"
+                                ]
+                            controls = controls.concat [
+                                type : 'action'
+                                value : 'Save'
+                                default : yes
+                                action : ( data ) ->
+                                    invalids = [ ]
+                                    hudshorts = { }
+                                    for command in commands
+                                        sh = data["shortcut for #{command}"]
+                                        ch = data[ \
+                                            "Show #{command} over map"]
+                                        if sh.length > 1
+                                            invalids.push sh
+                                        else if sh.length is 1
+                                            shortcuts[command] = sh
+                                        if ch
+                                            hudshorts[command] =
+                                                module.exports[command].icon
+                                    player.saveData.hudshorts = hudshorts
+                                    if invalids.length > 0
+                                        player.showOK "One or more of your
+                                            keyboard shortcuts was too long.
+                                            The following keyboard shortcuts
+                                            were not saved: #{invalids}",
+                                            -> module.exports.settings.run \
+                                                player
+                                    else
+                                        module.exports.settings.run player
+                            ,
+                                type : 'action'
+                                value : 'Cancel'
+                                cancel : yes
+                                action : ->
+                                    module.exports.settings.run player
+                            ]
+                            player.showUI controls
+                    ,
+                        type : 'action'
                         value : 'Done'
                         action : -> player.showCommandUI()
 

@@ -53,7 +53,9 @@ data.
         html = comhtml + html
 
 Fill the command pane with the HTML for the entire UI.  Then install the
-change handler on all newly-created controls.
+change handler on all newly-created controls.  Then ensure that the pane
+is shown, because otherwise the user may not be able to use a command they
+just invoked, e.g., via a shortcut key.
 
         commandPane.innerHTML =
             "<div class='container' id='commandui'>
@@ -61,6 +63,7 @@ change handler on all newly-created controls.
                    method='post' id='commandPaneForm'
                    enctype='multipart/form-data'>#{html}</form></div>"
         ( $ '#rightpane input, select' ).change window.uiElementChanged
+        expandCommandPane()
 
 If we found a UI element that should have focus, give it focus; if there is
 an element that should be the default button or the cancel button, set up
@@ -78,7 +81,14 @@ For any press of the escape key, we redirect it to the control currently
 marked as the cancel control, if any.
 
     ( $ document.body ).on 'keyup', ( e ) ->
-        if e.keyCode is 27 then ( $ '#'+cancelControl ).click()
+        if e.which is 27 then ( $ '#'+cancelControl ).click()
+        letter = String.fromCharCode( e.which ).toLowerCase()
+        for own command, shortcut of currentStatus?.shortcuts or { }
+            if letter is shortcut
+                if command is 'hide/show command panel'
+                    toggleCommandPane()
+                else
+                    socket.emit 'command', name : command
 
 It uses the following function to create an array of cells forming an
 individual row in the table that populates that command pane.
@@ -113,8 +123,8 @@ individual row in the table that populates that command pane.
                 [
                     "<input type='text' id='input_#{data.name}'
                             class='form-control' placeholder='#{data.name}'
-                            style='width: 100%'#{attrs}>
-                     </input>"
+                            style='width: 100%'#{attrs}
+                            value='#{data.value or ''}'></input>"
                 ]
             when 'password input'
                 focus = "input_#{data.name}"
@@ -155,7 +165,7 @@ individual row in the table that populates that command pane.
                 name = data.name[0].toUpperCase() + data.name[1..]
                 [
                     "<div class='panel panel-default category'
-                     ><div class='panel-body'>#{name} Commands</div></div>"
+                     ><div class='panel-body'>#{name}</div></div>"
                 ]
             when 'command'
                 [
@@ -205,6 +215,14 @@ individual row in the table that populates that command pane.
                     "<p#{attrs} class='map-click' id='click_#{data.id}'
                      >#{data.value}</p>"
                 ]
+            when 'checkbox'
+                [
+                    "<div class='checkbox'#{attrs}>
+                     <label><input type='checkbox' id='input_#{data.name}'
+                      #{if data.checked then 'checked' else ''}
+                      value='#{data.name}'> #{data.name}</label>
+                     </div>"
+                ]
             else
                 [ "<p#{attrs}>#{JSON.stringify data}</p>" ]
         result.focus = focus
@@ -237,6 +255,8 @@ values, and stores them in a JSON object that can be sent to the server.
                 if input.getAttribute( 'type' ) in \
                         [ 'text', 'password', 'hidden' ]
                     value = input.value
+                if input.getAttribute( 'type' ) is 'checkbox'
+                    value = input.checked
                 if input.tagName is 'SELECT'
                     value = input.options[input.selectedIndex].value
                 result[name] = value

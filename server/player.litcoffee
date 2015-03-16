@@ -306,9 +306,21 @@ client before allowing this one to take over.
 This function creates a status object listing all data that the status
 display should show about the player.
 
+The initial loop in this routine is to ensure that we only send on
+information about commands to which the player actually has access, even if
+he/she formerly had access to (and created shortcuts for) a larger set of
+commands.
+
         getStatus : =>
+            shortcuts = { }
+            hudshorts = { }
+            for command in @commands().concat [ 'hide/show command panel' ]
+                shortcuts[command] = @saveData.shortcuts[command]
+                hudshorts[command] = @saveData.hudshorts[command]
             name : @name
             appearance : @saveData.avatar
+            shortcuts : shortcuts
+            HUD : hudshorts
 
 This function checks the status periodically to see if it has changed.  If
 so, it sends a status update message to the player.
@@ -400,7 +412,7 @@ access.
                     undefined
                 type : 'command'
                 name : command[0].toUpperCase() + command[1..]
-                category : commands[command].category
+                category : "#{commands[command].category} Commands"
                 shortInfo : commands[command].shortInfo
                 help : commands[command].help
                 icon : iconPath

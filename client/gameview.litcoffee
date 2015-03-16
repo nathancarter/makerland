@@ -81,7 +81,7 @@ that moves as the player walks.  Later, it will have an actual map in it.
             context.stroke()
         xcells = Math.ceil gameview.width/cellSize
         ycells = Math.ceil gameview.height/cellSize
-        context.strokeStyle = context.fillStyle = '#000000'
+        context.strokeStyle = context.fillStyle = '#999999'
         context.lineWidth = 1
         blockSize = window.gameSettings.mapBlockSizeInCells
         for own name, array of window.visibleBlocksCache
@@ -128,15 +128,57 @@ defined in a separate file.
 The following function draws the player's status as a HUD.  For now, this is
 just the player's name (after login only).
 
+    HUDZones = { }
     drawPlayerStatus = ( context ) ->
-        context.font = '20px serif'
+        fontsize = 20
+        context.font = "#{fontsize}px serif"
         context.fillStyle = '#000000'
         name = currentStatus.name[0].toUpperCase() + currentStatus.name[1..]
         size = context.measureText name
         context.fillText name, gameview.width - size.width - 40, 30
-        position = JSON.stringify getPlayerPosition()
-        size = context.measureText position
-        context.fillText position, gameview.width - size.width - 40, 60
+        #position = JSON.stringify getPlayerPosition()
+        #size = context.measureText position
+        #context.fillText position, gameview.width - size.width - 40, 60
+        i = 0 ; edge = 80 ; margin = 20
+        HUDZones = { }
+        for own command, icon of currentStatus.HUD
+            icon = getCommandIcon icon
+            if icon.complete
+                context.fillStyle = '#eeeeee'
+                left = margin+edge*i+margin*(i+1)
+                top = gameview.height-edge-margin
+                right = left + edge
+                bottom = top + edge
+                context.fillRect left, top, edge, edge
+                context.strokeStyle = '#555555'
+                context.beginPath()
+                context.rect left, top, edge, edge
+                context.stroke()
+                HUDZones["#{left},#{top},#{right},#{bottom}"] = command
+                context.fillStyle = '#000000'
+                text = command[0].toUpperCase() + command[1..]
+                size = context.measureText text
+                context.fillText text,
+                    margin+edge*i+margin*(i+1)+edge/2-size.width/2,
+                    gameview.height-margin-10
+                context.drawImage icon, margin+edge*i+margin*(i+1)+10,
+                    gameview.height-edge-margin+10
+                if currentStatus.shortcuts[command]
+                    text = currentStatus.shortcuts[command].toUpperCase()
+                    size = context.measureText text
+                    context.fillText text,
+                        margin+(edge+margin)*(i+1)-10-size.width,
+                        gameview.height-margin-edge+10+fontsize
+            i++
+
+It uses the following routine, which caches command icons.
+
+    commandIconCache = { }
+    getCommandIcon = ( name ) ->
+        if not commandIconCache.hasOwnProperty name
+            commandIconCache[name] = new Image
+            commandIconCache[name].src = "icons/#{name}"
+        commandIconCache[name]
 
 ## Interacting with the Game Map
 
@@ -211,21 +253,32 @@ following function supports doing so.
 
 ## Handling Map Clicks
 
-When the player clicks on the map, we must check to see if the server wants
-to know about that.  If it does, then we must send a message, after having
-converted the coordinates from screen to world.
+If the player clicks on a region that sits within a command box in their
+HUD, then we want to issue that command.
 
-However, if the server doesn't want to know about the click, then the player
-was just trying to use the click for motion.  In that case, we store the
-player's click destination so that we can have the avatar attempt to walk
-there over time.
+When the player clicks elsewhere on the map, we must check to see if the
+server wants to know about that.  If it does, then we must send a message,
+after having converted the coordinates from screen to world.
+
+In all other cases, the player was just trying to use the click for motion.
+In that case, we store the player's click destination so that we can have
+the avatar attempt to walk there over time.
 
     whereIWantToGo = null
     getWhereIWantToGo = -> whereIWantToGo
     setWhereIWantToGo = ( destination ) -> whereIWantToGo = destination
     ( $ '#gameview' ).on 'click', ( event ) ->
-        mapcoords = screenCoordsToMapCoords \
-            event.pageX - this.offsetLeft, event.pageY - this.offsetTop
+        screencoords =
+            x : event.pageX - this.offsetLeft
+            y : event.pageY - this.offsetTop
+        for own box, command of HUDZones
+            [ left, top, right, bottom ] =
+                ( parseInt i for i in box.split ',' )
+            if left <= screencoords.x and screencoords.x <= right
+                if top <= screencoords.y and screencoords.y <= bottom
+                    socket.emit 'command', name : command
+                    return
+        mapcoords = screenCoordsToMapCoords screencoords.x, screencoords.y
         listeners = $ '.map-click'
         if listeners.length
             socket.emit 'ui event',
