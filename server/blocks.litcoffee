@@ -18,17 +18,13 @@ and adding map-block-specific functionality.
 
 ## Constructor
 
-The constructor just names the table.
+The constructor just names the table, then ensures that the main plane of
+the game is editable only by the admin character.
 
         constructor : () ->
             super 'blocks'
-
-Makers cannot edit this database table in any way.
-
-        canEdit : -> no
-        canAdd : -> no
-        canRemove : -> no
-        duplicate : false
+            if not @getAuthors @planeKey 0
+                @setAuthors @planeKey( 0 ), [ 'admin' ]
 
 Implement routines for getting and setting blocks of cells.  Each requires
 plane, x, and y to be numbers, and it rounds x and y down to the nearest
@@ -85,6 +81,133 @@ functions.
             dy = ( y - ( N * Math.floor y/N ) ) | 0
             block[dx][dy] = parseInt i
             @setCells plane, x, y, block
+
+## Planes
+
+This table actually serves a dual purpose.  Not only does it store blocks,
+but it also stores planes.  That is, it has entries of both types.  Here we
+create functions relevant to the storing of planes.
+
+First, the function that creates the table key for plane with index i.
+
+        planeKey : ( i ) -> "plane #{i}"
+        isPlaneKey : ( key ) -> /^plane \d+$/.test key
+        indexOfPlaneKey : ( key ) -> parseInt key.split( ' ' ).pop()
+
+Now, when asked for entries, we only want to return planes, not the (tons!)
+of individual blocks.  Also, they should be sorted numerically by indices.
+
+        entries : =>
+            result = ( entry for entry in super() when @isPlaneKey entry )
+            result.sort ( a, b ) =>
+                @indexOfPlaneKey( a ) - @indexOfPlaneKey( b )
+
+An entry is shown as its index and name together.
+
+        show : ( entry ) =>
+            "#{@indexOfPlaneKey entry}. #{@get entry, 'name'}"
+
+Any maker can add new entries to the table, but that means adding planes,
+not new blocks.  The UI for doing so looks like the following.
+
+        canAdd : -> yes
+        add : ( player, callback = -> player.showCommandUI() ) =>
+            i = 0
+            while @exists @planeKey i
+                i++
+            @set @planeKey( i ), name : 'new plane'
+            @setAuthors @planeKey( i ), [ player.name ]
+            player.showOK "A new plane was created with index #{i}.
+                You have been set as its only author.
+                Feel free to edit it to suit your needs.",
+                => callback @planeKey i
+
+Who can edit individual planes is determined by the plane's authors list,
+which is the default implementation of `canEdit` in the `Table` class.
+
+The UI for editing a plane looks like the following.
+
+        edit : ( player, entry, callback = -> player.showCommandUI() ) =>
+            if not @isPlaneKey entry
+                return player.showOK 'Error.  Somehow you have attempted to
+                    edit something other than a plane.  This is not
+                    permitted.', callback
+            data = @get entry
+            again = => @edit player, entry, callback
+            player.showUI
+                type : 'text'
+                value : "<h4>Editing #{entry}:</h4>"
+            ,
+                [
+                    type : 'text'
+                    value : 'Name:'
+                ,
+                    type : 'text'
+                    value : data.name
+                ,
+                    type : 'action'
+                    value : 'Change'
+                    action : =>
+                        player.showUI
+                            type : 'text'
+                            value : "<h3>Changing name of #{entry}:</h3>"
+                        ,
+                            type : 'string input'
+                            name : 'new plane name'
+                        ,
+                            type : 'action'
+                            value : 'Change name'
+                            default : yes
+                            action : ( event ) =>
+                                newname = event['new plane name']
+                                if not /[a-z]/.test newname
+                                    return player.showOK 'New name must
+                                        contain at least one letter.', again
+                                @set entry, 'name', newname
+                                player.showOK "Name of #{entry} changed to
+                                    #{newname}.", again
+                        ,
+                            type : 'action'
+                            value : 'Cancel'
+                            cancel : yes
+                            action : again
+                ]
+            ,
+                [
+                    type : 'text'
+                    value : 'Authors:'
+                ,
+                    type : 'text'
+                    value : @getAuthors entry
+                ,
+                    type : 'action'
+                    value : 'Change'
+                    action : => require( './ui' ).editAuthorsList player,
+                        this, entry, again
+                ]
+            ,
+                type : 'action'
+                value : 'Teleport to this plane'
+                action : =>
+                    plane = @indexOfPlaneKey entry
+                    player.teleport [ plane, 0, 0 ]
+                    callback()
+            ,
+                type : 'action'
+                value : 'Done'
+                cancel : yes
+                action : callback
+
+A maker can remove an entry if and only if it is a plane that that maker can
+edit.
+
+        canRemove : ( player, entry ) =>
+            @isPlaneKey( entry ) and @canEdit player, entry
+        remove : ( player, entry, callback ) =>
+            action = => player.showOK @tryToRemove( entry ), callback
+            require( './ui' ).areYouSure player,
+                "remove #{entry} <i>permanently</i>.  This action
+                 <i>cannot</i> be undone!", action, callback
 
 Export a singleton of the class as the module.
 

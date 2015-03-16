@@ -361,6 +361,9 @@ the mouse on the map itself.
             run : ( player ) ->
                 table = require( './database' ).celltypes
                 chooser = table.entryChooser player, 'cell type', 1
+                fail = -> player.showOK 'You do not have permission to edit
+                    this plane.  Create your own plane and edit its map.'
+                bt = require './blocks'
                 do pick = => player.showUI
                     type : 'text'
                     value : '<h3>Editing Game Map</h3>'
@@ -377,8 +380,10 @@ the mouse on the map itself.
                                 cell type first.', pick
                         celltypename = table.get choice, 'name'
                         changeMapCell = ( x, y ) ->
-                            require( './blocks' ).setCell \
-                                player.position[0], x, y, choice
+                            if not bt.canEdit player, \
+                                    bt.planeKey player.position[0]
+                                return fail()
+                            bt.setCell player.position[0], x, y, choice
                         player.mapClickMode "Click any cell on the map to
                             change it to be \"#{celltypename}.\"",
                             changeMapCell, pick
@@ -401,8 +406,9 @@ the mouse on the map itself.
                                 fillRectangle( x, y ), pick, 'se-resize'
                         fillRectangle = ( x1, y1 ) ->
                             ( x2, y2 ) ->
-                                bt = require './blocks'
                                 plane = player.position[0]
+                                if not bt.canEdit player, bt.planeKey plane
+                                    return fail()
                                 if x1 > x2 then [ x1, x2 ] = [ x2, x1 ]
                                 if y1 > y2 then [ y1, y2 ] = [ y2, y1 ]
                                 x1 = ( Math.floor x1 ) | 0
@@ -433,8 +439,9 @@ the mouse on the map itself.
                                 drawRectangle( x, y ), pick, 'se-resize'
                         drawRectangle = ( x1, y1 ) ->
                             ( x2, y2 ) ->
-                                bt = require './blocks'
                                 plane = player.position[0]
+                                if not bt.canEdit player, bt.planeKey plane
+                                    return fail()
                                 if x1 > x2 then [ x1, x2 ] = [ x2, x1 ]
                                 if y1 > y2 then [ y1, y2 ] = [ y2, y1 ]
                                 x1 = ( Math.floor x1 ) | 0
