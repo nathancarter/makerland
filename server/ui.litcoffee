@@ -52,7 +52,7 @@ parameters.  Both callbacks default to showing the main command UI.
                     type : 'action'
                     value : 'Remove'
                     action : ->
-                        list = list.splice i, 1
+                        list.splice i, 1
                         again()
                 ]
         controls.push [
