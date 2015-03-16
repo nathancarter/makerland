@@ -82,7 +82,7 @@ the `set(entryName,A,B)` form is used.
 
         set : ( entryName, A, B ) =>
             if B?
-                current = @get entryName
+                current = @get( entryName ) or { }
                 current[A] = B
                 A = current
             fs.writeFileSync ( @filename entryName ), JSON.stringify A
@@ -159,7 +159,7 @@ that if the table does not use authors lists for entries, then these
 defaults are simply the same as saying no to every request for edit/remove
 permissions.
 
-        canEdit : ( player, entry ) ->
+        canEdit : ( player, entry ) =>
             authors = @getAuthors entry
             authors instanceof Array and player.name in authors
         canRemove : ( player, entry ) -> no
