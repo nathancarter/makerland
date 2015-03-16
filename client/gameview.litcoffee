@@ -171,10 +171,28 @@ sync.  Feel free to make computations herein depend on `frameRate`.
     handleKeysPressed = ->
         dx = dy = 0
         speed = 2 * frameRate/1000
-        if keysDown[keyCodes.left] then dx -= speed
-        if keysDown[keyCodes.right] then dx += speed
-        if keysDown[keyCodes.up] then dy -= speed
-        if keysDown[keyCodes.down] then dy += speed
+        if keysDown[keyCodes.left] or keysDown[keyCodes.right] or \
+                keysDown[keyCodes.up] or keysDown[keyCodes.down]
+            setWhereIWantToGo null
+            if keysDown[keyCodes.left] then dx -= speed
+            if keysDown[keyCodes.right] then dx += speed
+            if keysDown[keyCodes.up] then dy -= speed
+            if keysDown[keyCodes.down] then dy += speed
+        else if destination = getWhereIWantToGo()
+            [ plane, x, y ] = getPlayerPosition()
+            if ( Math.abs( x - destination.x ) <= speed ) and \
+                    ( Math.abs( y - destination.y ) <= speed )
+                setWhereIWantToGo null
+                return
+            else
+                if ( x < destination.x ) and ( destination.x - x > speed )
+                    dx = speed
+                if ( x > destination.x ) and ( x - destination.x > speed )
+                    dx = -speed
+                if ( y < destination.y ) and ( destination.y - y > speed )
+                    dy = speed
+                if ( y > destination.y ) and ( y - destination.y > speed )
+                    dy = -speed
         movePlayer dx, dy
 
 ## Splash Screen
@@ -197,12 +215,22 @@ When the player clicks on the map, we must check to see if the server wants
 to know about that.  If it does, then we must send a message, after having
 converted the coordinates from screen to world.
 
+However, if the server doesn't want to know about the click, then the player
+was just trying to use the click for motion.  In that case, we store the
+player's click destination so that we can have the avatar attempt to walk
+there over time.
+
+    whereIWantToGo = null
+    getWhereIWantToGo = -> whereIWantToGo
+    setWhereIWantToGo = ( destination ) -> whereIWantToGo = destination
     ( $ '#gameview' ).on 'click', ( event ) ->
+        mapcoords = screenCoordsToMapCoords \
+            event.pageX - this.offsetLeft, event.pageY - this.offsetTop
         listeners = $ '.map-click'
         if listeners.length
-            mapcoords = screenCoordsToMapCoords \
-                event.pageX - this.offsetLeft, event.pageY - this.offsetTop
             socket.emit 'ui event',
                 type : 'map click'
                 location : mapcoords
                 id : listeners.get( 0 ).getAttribute( 'id' )[6..]
+        else
+            setWhereIWantToGo mapcoords
