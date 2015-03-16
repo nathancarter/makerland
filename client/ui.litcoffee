@@ -82,6 +82,7 @@ marked as the cancel control, if any.
 
     ( $ document.body ).on 'keyup', ( e ) ->
         if e.which is 27 then ( $ '#'+cancelControl ).click()
+        if shouldIgnoreKeyboardEvent() then return
         letter = String.fromCharCode( e.which ).toLowerCase()
         for own command, shortcut of currentStatus?.shortcuts or { }
             if letter is shortcut
