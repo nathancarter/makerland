@@ -314,6 +314,8 @@ commands.
         getStatus : =>
             shortcuts = { }
             hudshorts = { }
+            @saveData.shortcuts ?= { }
+            @saveData.hudshorts ?= { }
             for command in @commands().concat [ 'hide/show command panel' ]
                 shortcuts[command] = @saveData.shortcuts[command]
                 hudshorts[command] = @saveData.hudshorts[command]
