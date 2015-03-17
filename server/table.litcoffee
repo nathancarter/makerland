@@ -25,6 +25,11 @@ can descend from this class.
 
 ### Constructor
 
+The constructor installs the table in the module's `exports` object, then
+ensures that the folder for storing the table on disk exists or can be
+created.  After that it initializes the defaults and cache data structures
+to empty values.
+
         constructor : ( @tableName ) ->
             module.exports[tableName] = this
             try
@@ -32,6 +37,11 @@ can descend from this class.
             catch e
                 throw e if e.code isnt 'EEXIST'
             @defaults = { }
+            @cache =
+                entries : { }
+                sizes : { }
+                order : [ ]
+                totalSize : 0
 
 ### Entries as Files
 
@@ -59,6 +69,67 @@ of course.
                 fs.readdirSync path.resolve dbroot, @tableName \
                 when f[-5..] is '.json' )
 
+### Caching
+
+The get and set routines below will use a cache, if it is available.  This
+prevents unnecessary reading from disk for recently-accessed table entries.
+
+Looking something up in the cache returns the cached value if it exists, and
+null otherwise.  If the cached value is used, then it gets promoted to the
+top of the list of cached values, meaning that it was most recently
+accessed, and thus last in line to be decached.
+
+        cacheLookup : ( entryName ) =>
+            if @cache.entries.hasOwnProperty entryName
+                @cache.order.splice @cache.order.indexOf( entryName ), 1
+                @cache.order.unshift entryName
+                @cache.entries[entryName]
+            else
+                null
+
+Putting something into the cache is done when a write operation takes place
+on the table, and a new value for an entry is about to be saved to disk.
+The same value must also be placed in the cache, so that the cache continues
+to reflect the state of the table on disk.  Writing to an entry also moves
+it to the most-recently-accessed spot in the cache order.
+
+We start this function by removing the old version from the cache, then
+proceed to re-cache the new version.  Putting something into the cache
+always triggers a call to `clearCache`, so that the cache never exceeds its
+maximum size.  Note that if this entry alone would be larger than the size
+of the cache, we simply don't bother caching it.
+
+        putIntoCache : ( entryName, entry, entrySize ) =>
+            @removeFromCache entryName
+            if entrySize <= @maxCacheSize
+                @cache.order.unshift entryName
+                @cache.entries[entryName] = entry
+                @cache.sizes[entryName] = entrySize
+                @cache.totalSize += entrySize
+                @clearCache()
+
+Removing something from the cache deletes it from memory, but of course not
+from disk.  The cache simply becomes smaller.  But the entry will re-appear
+in the cache if `cacheLookup` is called again on it later.
+
+        removeFromCache : ( entryName ) =>
+            if @cache.entries.hasOwnProperty entryName
+                @cache.totalSize -= @cache.sizes[entryName]
+                @cache.order.splice @cache.order.indexOf( entryName ), 1
+                delete @cache.sizes[entryName]
+                delete @cache.entries[entryName]
+
+Clearing the cache means calling `removeFromCache` repeatedly until the
+total cache size is below a certain level.  Subclasses can set this level
+by simply setting their `@maxCacheSize` member, which has the following
+default.
+
+        maxCacheSize : 25000
+        clearCache : =>
+            maxSize = @maxCacheSize
+            while @cache.order.length and @cache.totalSize > maxSize
+                @removeFromCache @cache.order[@cache.order.length-1]
+
 ### Reading and Writing
 
 Set the default value for a given key.  This will prevail for all entries
@@ -71,7 +142,10 @@ from that entry's key-value pairs.
 
         get : ( entryName, key ) =>
             try
-                entry = JSON.parse fs.readFileSync @filename entryName
+                if not entry = @cacheLookup entryName
+                    entryJSON = fs.readFileSync @filename entryName
+                    entry = JSON.parse entryJSON
+                    @putIntoCache entryName, entry, entryJSON.length
                 if not key? then entry else entry[key] or @defaults[key]
             catch e
                 undefined
@@ -85,7 +159,9 @@ the `set(entryName,A,B)` form is used.
                 current = @get( entryName ) or { }
                 current[A] = B
                 A = current
-            fs.writeFileSync ( @filename entryName ), JSON.stringify A
+            entryJSON = JSON.stringify A
+            @putIntoCache entryName, A, entryJSON.length
+            fs.writeFileSync ( @filename entryName ), entryJSON
 
 The following are just convenience functions that use a field with the
 special name "__authors" (unlikely to collide with any actual database
