@@ -361,10 +361,13 @@ thrown away when the player logs out.
 
 This function loads the player data from disk, based on the player's name.
 We discard the password hash, so the player object doesn't carry that
-around.
+around.  The load function creates a shallow copy, because we are about to
+delete the password from the copy, and we don't want to mess up the cache in
+the accounts table by messing with its original copy.
 
         load : =>
-            @saveData = accounts.get @name
+            @saveData = { }
+            @saveData[key] = value for own key, value of accounts.get @name
             delete @saveData.password
 
 This function saves the player data to disk, after first putting the
