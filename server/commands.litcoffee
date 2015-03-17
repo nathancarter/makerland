@@ -190,7 +190,7 @@ The settings command allows players to edit their personal settings.
                             shortcuts = player.saveData.shortcuts ?= { }
                             hudshorts = player.saveData.hudshorts ?= [ ]
                             commands = player.commands().concat [
-                                'hide/show command panel'
+                                hideshow = 'hide/show command panel'
                             ]
                             for command in commands
                                 controls = controls.concat [
@@ -205,11 +205,12 @@ The settings command allows players to edit their personal settings.
                                         name : "shortcut for #{command}"
                                         value : shortcuts[command] or ''
                                     ]
-                                ,
-                                    type : 'checkbox'
-                                    checked : command in hudshorts
-                                    name : "Show #{command} over map"
                                 ]
+                                if command isnt hideshow
+                                    controls.push
+                                        type : 'checkbox'
+                                        checked : command in hudshorts
+                                        name : "Show #{command} over map"
                             controls = controls.concat [
                                 type : 'action'
                                 value : 'Save'
@@ -249,6 +250,7 @@ The settings command allows players to edit their personal settings.
                     ,
                         type : 'action'
                         value : 'Done'
+                        cancel : yes
                         action : -> player.showCommandUI()
 
 ## Maker Commands
