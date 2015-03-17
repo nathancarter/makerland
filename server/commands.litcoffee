@@ -383,9 +383,9 @@ the mouse on the map itself.
                         celltypename = table.get choice, 'name'
                         changeMapCell = ( x, y ) ->
                             if not bt.canEdit player, \
-                                    bt.planeKey player.position[0]
+                                    bt.planeKey player.getPosition()[0]
                                 return fail()
-                            bt.setCell player.position[0], x, y, choice
+                            bt.setCell player.getPosition()[0], x, y, choice
                         player.mapClickMode "Click any cell on the map to
                             change it to be \"#{celltypename}.\"",
                             changeMapCell, pick
@@ -408,7 +408,7 @@ the mouse on the map itself.
                                 fillRectangle( x, y ), pick, 'se-resize'
                         fillRectangle = ( x1, y1 ) ->
                             ( x2, y2 ) ->
-                                plane = player.position[0]
+                                plane = player.getPosition()[0]
                                 if not bt.canEdit player, bt.planeKey plane
                                     return fail()
                                 if x1 > x2 then [ x1, x2 ] = [ x2, x1 ]
@@ -441,7 +441,7 @@ the mouse on the map itself.
                                 drawRectangle( x, y ), pick, 'se-resize'
                         drawRectangle = ( x1, y1 ) ->
                             ( x2, y2 ) ->
-                                plane = player.position[0]
+                                plane = player.getPosition()[0]
                                 if not bt.canEdit player, bt.planeKey plane
                                     return fail()
                                 if x1 > x2 then [ x1, x2 ] = [ x2, x1 ]
@@ -529,10 +529,14 @@ remember, then jump back to those locations later.
                                 player.showOK 'You are already using that
                                     destination name.  Try another.',
                                     showList
-                            tp[name] = player.position.slice()
+                            tp[name] = player.getPosition()
                             player.showOK "You have memorized your current
                                 location as \"#{name}.\"", showList
                     ]
+                ,
+                    type : 'action'
+                    value : 'Teleport to origin'
+                    action : => player.teleport [ 0, 0, 0 ] ; showList()
                 ,
                     type : 'action'
                     value : 'Done'

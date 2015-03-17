@@ -88,8 +88,7 @@ When this player disconnects, tell the console, and remove the player from
             socket.on 'disconnect', =>
                 console.log "disconnected #{@name or 'a player'}"
                 index = Player::allPlayers.indexOf this
-                Player::allPlayers = Player::allPlayers[...index].concat \
-                    Player::allPlayers[index+1..]
+                Player::allPlayers.splice index, 1
                 console.log "there are now #{Player::allPlayers.length}"
                 @stopStatusUpdates()
                 @save()
@@ -298,6 +297,7 @@ client before allowing this one to take over.
             @name = name
             @load()
             console.log "player logged in as #{name}"
+            @teleport @getPosition()
             @startStatusUpdates()
             @showCommandUI()
 
@@ -422,12 +422,19 @@ access.
 
 ## Player Location
 
+While the player's position will be stored in their `saveData`, we provide
+the following convenience functions for getting and setting it without
+needing to address the `saveData` member directly.
+
+        getPosition : => @saveData.position?.slice()
+        setPosition : ( newposition ) => @saveData.position = newposition
+
 The following function updates player position data and asks the blocks
 module to recompute visibility based on the given maximum vision distance.
 
         positionChanged : ( newPosition, visionDistance ) =>
-            oldPosition = @position
-            @position = newPosition
+            oldPosition = @getPosition()
+            @setPosition newPosition
             require( './blocks' ).updateVisibility this, visionDistance,
                 oldPosition
 

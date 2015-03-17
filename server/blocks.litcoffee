@@ -252,12 +252,12 @@ Now that we have that function, here's the bigger function that uses it.
 First, compute what blocks are visible to the given player now.
 
         visibleBlocks = [ ]
-        if player.position
-            plane = player.position[0]
-            x = player.position[1] - visionDistance
-            while x < player.position[1] + visionDistance
-                y = player.position[2] - visionDistance
-                while y < player.position[2] + visionDistance
+        if p = player.getPosition()
+            plane = p[0]
+            x = p[1] - visionDistance
+            while x < p[1] + visionDistance
+                y = p[2] - visionDistance
+                while y < p[2] + visionDistance
                     visibleBlocks.push "#{blockName [ plane, x, y ]}"
                     y += settings.mapBlockSizeInCells
                 x += settings.mapBlockSizeInCells
@@ -289,10 +289,10 @@ the locations of anyone in that block, since they can now see it.
                 playersWhoCanSeeBlock[block] ?= [ ]
                 for otherPlayer in playersWhoCanSeeBlock[block]
                     otherPlayer = Player.nameToPlayer otherPlayer
-                    theirBlock = "#{blockName otherPlayer.position}"
+                    theirBlock = "#{blockName otherPlayer.getPosition()}"
                     if theirBlock is block
                         notifyAboutMovement player, otherPlayer,
-                            otherPlayer.position
+                            otherPlayer.getPosition()
                 playersWhoCanSeeBlock[block].push player.name
 
 Now notify all players who could see the player's current or former block
@@ -302,8 +302,8 @@ that the player moved.
             playersWhoCanSeeBlock[blockName oldPosition]
         else
             [ ]
-        maybeMore = if player.position
-            playersWhoCanSeeBlock[blockName player.position]
+        maybeMore = if p
+            playersWhoCanSeeBlock[blockName p]
         else
             [ ]
         for name in maybeMore
@@ -312,7 +312,7 @@ that the player moved.
             canStillSee = name in maybeMore
             if name isnt player.name
                 notifyAboutMovement Player.nameToPlayer( name ),
-                    player, if canStillSee then player.position else null
+                    player, if canStillSee then p else null
 
 Also, any players whose set of visible blocks changed, notify those players
 about their new set of visible blocks.
