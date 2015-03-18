@@ -22,12 +22,30 @@ caching blocks in advance).
         socket.emit 'player position',
             position : playerPosition
             visionDistance : 1.5 * maximumVisionDistance()
+    validPosition = ( position ) ->
+        N = window.gameSettings.mapBlockSizeInCells
+        if not N then return yes
+        blockx = ( N * Math.floor position[1] / N ) | 0
+        blocky = ( N * Math.floor position[2] / N ) | 0
+        blockName = "#{position[0]},#{blockx},#{blocky}"
+        blockData = window.visibleBlocksCache[blockName]
+        if not blockData then return yes
+        x = ( position[1] - blockx ) | 0
+        y = ( position[2] - blocky ) | 0
+        celltype = lookupCellType blockData[x][y]
+        celltype['who can walk on it'] isnt 'none'
     movePlayer = ( dx, dy ) ->
-        playerPosition = [
-            playerPosition[0]
-            playerPosition[1] + dx
-            playerPosition[2] + dy
-        ]
+        if not validPosition playerPosition
+            setPlayerPosition [ 0, 0, 0 ]
+            sendPositionToServer()
+            return
+        newPosition = playerPosition.slice()
+        newPosition[1] += dx
+        newPosition[2] += dy
+        if not validPosition newPosition
+            setWhereIWantToGo null
+            return
+        playerPosition = newPosition
         playerMotionDirection =
             if dx > 0
                 1
@@ -46,6 +64,7 @@ character.)
     socket.on 'player position', ( data ) ->
         setPlayerPosition data
         sendPositionToServer()
+        setWhereIWantToGo null
 
 The vision distance is computed in both the x and y directions, and the
 maximum of the two is reported.  We divide by the cell size to convert from

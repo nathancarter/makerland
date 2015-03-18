@@ -131,3 +131,33 @@ parameter will be used as shown in the code immediately below.
             type : 'action'
             value : 'Yes, proceed'
             action : action
+
+## Pick one item from a list of choices
+
+This gives the player a prompt with the heading "Choose one:" followed by
+any instructions provided as text.  The choices given are then presented in
+a drop-down list.  The function calls the callback with null if the player
+cancels, or the choice (as a string) if they choose one and click OK.  If
+`selected` is on the list of choices, then it will be the one selected when
+the UI appears.
+
+    module.exports.pickFromList =
+    ( player, instructions, choices, selected, callback ) ->
+        player.showUI
+            type : 'text'
+            value : "<h3>Choose one:</h3><p>#{instructions}</p>"
+        ,
+            type : 'choice'
+            name : 'choice'
+            choices : choices
+            selected : selected
+        ,
+            type : 'action'
+            value : 'OK'
+            default : yes
+            action : ( data ) -> callback data.choice
+        ,
+            type : 'action'
+            value : 'Cancel'
+            cancel : yes
+            action : -> callback null

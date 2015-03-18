@@ -5,6 +5,7 @@ This module implements a game database table for storing types of map cells
 (e.g., grassland, water, cobblestone path, etc.).
 
     { Table } = require './table'
+    { Player } = require './player'
     hash = require 'password-hash'
 
 It does so by subclassing the main Table class and adding cell-type-specific
@@ -14,10 +15,20 @@ functionality.
 
 ## Constructor
 
-Just give the table its name.
+Just give the table its name.  The default value of what kind of creatures
+can walk on a cell type is "all."
 
         constructor : () ->
             super 'celltypes'
+            @setDefault 'who can walk on it', 'all'
+
+Together with the property whose default was just set, we provide an API for
+checking if a player can walk on a cell of a certain type.  Obviously, this
+function is limited for now, as we only have two values for that property,
+"none" and "all."  Later, this can become more complex.
+
+        canWalkOn : ( player, type ) =>
+            @get( type, 'who can walk on it' ) isnt 'none'
 
 ## Maker Database Browsing
 
@@ -34,6 +45,18 @@ Implement custom show method.
 Ensure entries are returned sorted in numerical order.
 
         entries : => super().sort ( a, b ) -> parseInt( a ) - parseInt( b )
+
+Whenever an entry in the table changes, notify all players to update their
+client-side cell type caches.
+
+        set : ( entryName, others... ) =>
+            super entryName, others...
+            for p in Player::allPlayers
+                p.socket.emit 'cell data changed', entryName
+        setFile : ( entryName, others... ) =>
+            super entryName, others...
+            for p in Player::allPlayers
+                p.socket.emit 'cell data changed', entryName
 
 ## Maker Permissions
 
@@ -134,9 +157,27 @@ The UI for editing a cell type looks like the following.
                             on your computer to be #{N}x#{N}.",
                             again, ( contents ) =>
                                 @setFile entry, 'icon', contents
-                                { Player } = require './player'
-                                for p in Player::allPlayers
-                                    p.socket.emit 'icon changed', entry
+                ]
+            ,
+                [
+                    type : 'text'
+                    value : 'Who can walk on this?'
+                ,
+                    type : 'text'
+                    value : @get entry, 'who can walk on it'
+                ,
+                    type : 'action'
+                    value : 'Change'
+                    action : =>
+                        require( './ui' ).pickFromList player,
+                            "Choose which kind of creatures can walk on
+                            cells of type \"#{data.name}.\"",
+                            { all : 'all', none : 'none' },
+                            @get( entry, 'who can walk on it' ),
+                            ( result ) =>
+                                if result
+                                    @set entry, 'who can walk on it', result
+                                again()
                 ]
             ,
                 type : 'action'

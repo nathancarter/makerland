@@ -94,6 +94,15 @@ When this player disconnects, tell the console, and remove the player from
                 @save()
                 @positionChanged null, null
 
+The client may also request data about the cell types in the map.  When they
+do, we must provide it, so they have enough information to draw the map.
+
+            socket.on 'get cell type data', ( cellTypeIndex ) =>
+                result = require( './celltypes' ).get cellTypeIndex
+                if result
+                    result.index = cellTypeIndex
+                    socket.emit 'cell type data', result
+
 Now that the player object is set up, tell the client all the main game
 settings and show the login screen.
 
@@ -297,7 +306,8 @@ client before allowing this one to take over.
             @name = name
             @load()
             console.log "player logged in as #{name}"
-            @teleport @getPosition()
+            @teleport if @validPosition @getPosition() then @getPosition() \
+                else [ 0, 0, 0 ]
             @startStatusUpdates()
             @showCommandUI()
 
@@ -432,10 +442,25 @@ needing to address the `saveData` member directly.
         getPosition : => @saveData.position?.slice()
         setPosition : ( newposition ) => @saveData.position = newposition
 
+And now, a function that checks to see if a player is permitted to be in a
+given position, based on the cell type at that position.
+
+        validPosition : ( position ) =>
+            if not position then return yes
+            [ plane, x, y ] = position
+            celltype = require( './blocks' ).getCell plane, x, y
+            require( './celltypes' ).canWalkOn this, celltype
+
 The following function updates player position data and asks the blocks
 module to recompute visibility based on the given maximum vision distance.
+If the player's new position isn't valid, then we use the `teleport`
+function to tell the client to put the player back to their previous (valid)
+position.
 
         positionChanged : ( newPosition, visionDistance ) =>
+            if not @validPosition newPosition
+                @teleport @getPosition()
+                return
             oldPosition = @getPosition()
             @setPosition newPosition
             require( './blocks' ).updateVisibility this, visionDistance,

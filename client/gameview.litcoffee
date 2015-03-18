@@ -4,6 +4,32 @@
 The game view is the left pane, in which the player sees the map and
 interacts with the game.
 
+## Cell Type Cache
+
+In order to be able to draw cells on the map, we need to know about them.
+Thus we have a cache of information about them, and routines for accessing
+it, and requesting its data from the server.  This includes the icon and
+other data as well.
+
+    cellTypeData = { }
+    lookupCellType = ( index ) ->
+        if not cellTypeData.hasOwnProperty index
+            cellTypeData[index] = { }
+            socket.emit 'get cell type data', index
+        cellTypeData[index]
+    socket.on 'cell type data', ( data ) ->
+        cellTypeData[data.index] = data
+    getCellTypeIcon = ( index ) ->
+        key = "#{index} icon"
+        if not cellTypeData.hasOwnProperty key
+            cellTypeData[key] = new Image
+            cellTypeData[key].src =
+                "db/celltypes/#{index}/icon?#{encodeURIComponent new Date}"
+        cellTypeData[key]
+    socket.on 'cell data changed', ( data ) ->
+        delete cellTypeData[data]
+        delete cellTypeData["#{data} icon"]
+
 ## Drawing
 
 Set up redrawing of the canvas about 30 times per second.
@@ -55,19 +81,6 @@ Last, draw the player's status as a HUD.
 
         drawPlayerStatus context
 
-In order to draw the cells in the game map, we need to cache their icons.
-This datum and routine do so.
-
-    gameMapCache = { }
-    getCellTypeIcon = ( index ) ->
-        if not gameMapCache.hasOwnProperty index
-            gameMapCache[index] = new Image
-            gameMapCache[index].src =
-                "db/celltypes/#{index}/icon?#{encodeURIComponent new Date}"
-        gameMapCache[index]
-    socket.on 'icon changed', ( data ) ->
-        delete gameMapCache[parseInt data]
-
 The following function draws the game map.  For now, this just makes a grid
 that moves as the player walks.  Later, it will have an actual map in it.
 
@@ -91,7 +104,9 @@ that moves as the player walks.  Later, it will have an actual map in it.
                     screen = mapCoordsToScreenCoords x+i, y+j
                     drawn = no
                     if array[i][j] > -1
-                        image = getCellTypeIcon array[i][j]
+                        index = array[i][j]
+                        lookupCellType index
+                        image = getCellTypeIcon index
                         if image.complete
                             try
                                 context.drawImage image, screen.x, screen.y,
