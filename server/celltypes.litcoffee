@@ -6,7 +6,6 @@ This module implements a game database table for storing types of map cells
 
     { Table } = require './table'
     { Player } = require './player'
-    hash = require 'password-hash'
 
 It does so by subclassing the main Table class and adding cell-type-specific
 functionality.
@@ -34,11 +33,6 @@ function is limited for now, as we only have two values for that property,
 
 Implement custom show method.
 
-        smallIcon : ( entry ) =>
-            db = require './database'
-            "<img width=100
-                  src='#{db.createDatabaseURL @tableName, entry, 'icon'}'
-                  onerror='this.style.display=\"none\"'/>"
         show : ( entry ) =>
             "<p>#{entry}. #{@smallIcon entry} #{@get( entry ).name}</p>"
 
@@ -192,7 +186,9 @@ A maker can remove a cell type if and only if that maker can edit it.
             action = => player.showOK @tryToRemove( entry ), callback
             require( './ui' ).areYouSure player,
                 "remove the cell type #{entry} <i>permanently</i>.
-                 This action <i>cannot</i> be undone!", action, callback
+                 This action <i>cannot</i> be undone!  If there are any
+                 instances of this cell type in the game map, they will
+                 disappear!", action, callback
 
 ## Exporting
 

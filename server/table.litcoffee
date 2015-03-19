@@ -227,6 +227,16 @@ this more specific to be more user-friendly.
 
         show : ( entry ) -> "<p>#{entry}</p>"
 
+The `show` functions of subclasses may like to fetch an icon from the
+database, if the item has one.  We provide the following tool for doing so
+conveniently.
+
+        smallIcon : ( entry, keyName = 'icon', size = 100 ) =>
+            db = require './database'
+            "<img width=#{size}
+                  src='#{db.createDatabaseURL @tableName, entry, keyName}'
+                  onerror='this.style.display=\"none\"'/>"
+
 These functions determine whether a maker can edit or remove a given entry
 from the table, or add new entries.  The defaults check to see if the
 player's name is on the authors list for an entry, but subclasses can
