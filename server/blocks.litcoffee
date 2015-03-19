@@ -72,6 +72,8 @@ functions.
             N = settings.mapBlockSizeInCells
             dx = ( x - ( N * Math.floor x/N ) ) | 0
             dy = ( y - ( N * Math.floor y/N ) ) | 0
+            if dx >= N then dx = N - 1 # prevent float rounding inaccuracies
+            if dy >= N then dy = N - 1 # prevent float rounding inaccuracies
             block[dx][dy]
         setCell : ( plane, x, y, i ) =>
             block = @getCells plane, x, y
@@ -79,6 +81,8 @@ functions.
             N = settings.mapBlockSizeInCells
             dx = ( x - ( N * Math.floor x/N ) ) | 0
             dy = ( y - ( N * Math.floor y/N ) ) | 0
+            if dx >= N then dx = N - 1 # prevent float rounding inaccuracies
+            if dy >= N then dy = N - 1 # prevent float rounding inaccuracies
             block[dx][dy] = parseInt i
             @setCells plane, x, y, block
 
