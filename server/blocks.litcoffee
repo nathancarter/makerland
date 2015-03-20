@@ -128,9 +128,38 @@ place (in cells, in x or y) of another landscape item, to ensure uniqueness.
             yes
         removeLandscapeItem : ( plane, x, y ) =>
             items = @getBlockData plane, x, y, 'landscape items'
+            N = settings.mapBlockSizeInCells
+            blockx = x - N * Math.floor x/N
+            blocky = y - N * Math.floor y/N
             @setBlockData plane, x, y, 'landscape items',
                 ( item for item in items when not @pointsAreClose \
-                  item.position[0], item.position[1], x, y )
+                  item.position[0], item.position[1], blockx, blocky )
+
+This function checks all blocks touching the current one and finds all
+landscape items whose rectangle includes the given map coordinates.
+
+        getItemsOverPoint : ( plane, x, y ) =>
+            corner = ( parseInt i for i in \
+                @positionToBlockName( plane, x, y ).split ',' )
+            corner = x : corner[1], y : corner[2]
+            N = settings.mapBlockSizeInCells
+            results = [ ]
+            typetable = require './landscapeitems'
+            for i in [corner.x-N,corner.x,corner.x+N]
+                for j in [corner.y-N,corner.y,corner.y+N]
+                    for item in @getBlockData plane, i, j, 'landscape items'
+                        globalPos =
+                            x : item.position[0] + i
+                            y : item.position[1] + j
+                        size = typetable.get item.type, 'size'
+                        if Math.abs( x - globalPos.x ) < size/2 and \
+                           Math.abs( y - globalPos.y ) < size/2
+                            results.push
+                                type : item.type
+                                plane : plane
+                                x : globalPos.x
+                                y : globalPos.y
+            results
 
 ## Planes
 
@@ -383,7 +412,7 @@ And when a block is edited by a maker, we want to call the above function on
 every player who can see the block.
 
     notifyAboutBlockUpdate = ( blockName ) ->
-        for playerName in playersWhoCanSeeBlock[blockName]
+        for playerName in playersWhoCanSeeBlock?[blockName] or [ ]
             player = Player.nameToPlayer playerName
             if player
                 notifyAboutVisibility player,

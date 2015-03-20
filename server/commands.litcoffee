@@ -467,7 +467,7 @@ the mouse on the map itself.
                     action : -> mainMenu()
                 putItems = -> player.showUI
                     type : 'text'
-                    value : '<h3>Editing Landscape Items</h3>'
+                    value : '<h3>Adding landscape items</h3>'
                 ,
                     ichooser( putItems )
                 ,
@@ -496,6 +496,62 @@ the mouse on the map itself.
                     value : 'Done'
                     cancel : yes
                     action : -> mainMenu()
+                editItem = ( item ) ->
+                    player.showUI
+                        type : 'text'
+                        value : '<h3>Editing landscape item</h3>'
+                    ,
+                        type : 'text'
+                        value : "<p>You are editing the
+                            \"#{itable.get item.type, 'name'}\" at
+                            coordinates (#{item.x},#{item.y}).</p>"
+                    ,
+                        type : 'action'
+                        value : 'Delete it'
+                        action : ->
+                            bt.removeLandscapeItem item.plane,
+                                item.x, item.y
+                            changeItems()
+                    ,
+                        type : 'action'
+                        value : 'Done'
+                        cancel : yes
+                        action : -> changeItems()
+                changeItems = ->
+                    player.mapClickMode \
+                        'Click on a landscape item on the map to edit it.',
+                        ( x, y ) ->
+                            items = bt.getItemsOverPoint \
+                                player.getPosition()[0], x, y
+                            if items.length is 1
+                                editItem items[0]
+                            else if items.length > 1
+                                controls = [ ]
+                                for item in items
+                                    do ( item ) ->
+                                        name = itable.get item.type, 'name'
+                                        controls = controls.concat [
+                                            type : 'text'
+                                            value : "#{name} at coordinates
+                                                (#{item.x},#{item.y})"
+                                        ,
+                                            type : 'action'
+                                            value : 'Edit this one'
+                                            action : -> editItem item
+                                        ]
+                                controls.unshift
+                                    type : 'text'
+                                    value : '<h3>Which one?</h3>
+                                        <p>You clicked on or near several
+                                        landscape items.  Which do you want
+                                        to edit?</p>'
+                                controls.push
+                                    type : 'action'
+                                    value : 'Cancel'
+                                    cancel : yes
+                                    action : -> changeItems()
+                                player.showUI controls
+                        , -> mainMenu()
                 do mainMenu = -> player.showUI
                     type : 'text'
                     value : '<h3>Editing game world</h3>'
@@ -507,6 +563,10 @@ the mouse on the map itself.
                     type : 'action'
                     value : 'Put landscape items on map'
                     action : putItems
+                ,
+                    type : 'action'
+                    value : 'Edit landscape items on map'
+                    action : changeItems
                 ,
                     type : 'action'
                     value : 'Done'
