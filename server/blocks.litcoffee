@@ -306,6 +306,28 @@ blocks that are visible to players.
                 if playersWhoCanSeeBlock[entryName]?.length is 0
                     @removeFromCache entryName
 
+Whenever a block is added to the cache, we ensure that instances of the
+LandscapeItem class are constructed for all its landscape items.
+
+        putIntoCache : ( entryName, entry, entrySize ) =>
+            @landscapeItems ?= { }
+            super entryName, entry, entrySize
+            { LandscapeItem } = require './landscapeitems'
+            for item in entry['landscape items'] or [ ]
+                [ plane, x, y ] =
+                    ( parseInt i for i in entryName.split( ',' ) )
+                x += item.position[0]
+                y += item.position[1]
+                ( @landscapeItems[entryName] ?= [ ] ).push \
+                    new LandscapeItem item.type, plane, x, y
+
+When a block is removed from the cache, we destroy all the landscape item
+instances that go with it.
+
+        removeFromCache : ( entryName ) =>
+            super entryName
+            delete ( @landscapeItems ?= { } )[entryName]
+
 Export a singleton of the class as the module.
 
     module.exports = new BlocksTable
@@ -410,6 +432,21 @@ Also, any players whose set of visible blocks changed, notify those players
 about their new set of visible blocks.
 
         if blockSetChanged then notifyAboutVisibility player, visibleBlocks
+
+Finally, for all landscape items in all visible blocks, check to see if the
+player just entered it.
+
+        playerTopLeft = x : p[1] - 0.25, y : p[2] - 0.75
+        playerBottomRight = x : p[1] + 0.25, y : p[2]
+        previousTopLeft =
+            x : oldPosition[1] - 0.25, y : oldPosition[2] - 0.75
+        previousBottomRight = x : oldPosition[1] + 0.25, y : oldPosition[2]
+        for block in visibleBlocks
+            for item in @landscapeItems?[block] or [ ]
+                old = item.collides( previousTopLeft, previousBottomRight )
+                now = item.collides( playerTopLeft, playerBottomRight )
+                if now and not old then item.emit 'entered', player
+                if old and not now then item.emit 'exited', player
 
 The following function notifies players about their set of visible blocks.
 

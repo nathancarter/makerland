@@ -19,10 +19,12 @@ any object, class, or prototype.
             object[name] = method
         object
     module.exports.mixIntoClass = ( klass ) ->
-        module.exports.mixIntoObject class.prototype
+        module.exports.mixIntoObject klass.prototype
     module.exports.mixIntoConstructor = module.exports.mixIntoClass
 
 ## Handlers Functions
+
+    module.exports.methods = { }
 
 Each of the functions below uses `@`-style identifier access as a shorthand
 for the JavaScript `this` keyword, because these methods are only intended

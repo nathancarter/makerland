@@ -9,7 +9,45 @@ Landscape items sit on top of the map and are not necessarily at integer
 coordinates, nor equally spaced, nor arranged one per cell (trees, rocks,
 signs, etc.).
 
-It is a database table, so we require the table module, plus some others.
+## Landscape Items Class
+
+We now create a class for embodying those landscape items which exist in
+blocks of the map that are currently loaded.
+
+    class LandscapeItem
+
+At construction time, store the name of the block in which we live, and
+compute our size based on our type, then our top-left and bottom-right
+corners as well.
+
+        constructor : ( @type, @plane, @x, @y ) ->
+            @block =
+                require( './blocks' ).positionToBlockName @plane, @x, @y
+            @size = module.exports.get @type, 'size'
+            @topLeft = x : @x - @size/2, y : @y - @size/2
+            @bottomRight = x : @x + @size/2, y : @y + @size/2
+
+This utility tests whether an object at a given position is bumping into
+this landscape item.  The object's position is given by a rectangular
+bounding box.  The `rectanglesCollide` function is general, and just happens
+to be placed here.  The `@collides` function is the one that matters for
+landscape items.
+
+        rectanglesCollide : ( x1, y1, x2, y2, x3, y3, x4, y4 ) ->
+            not ( x3 > x2 or x4 < x1 or y3 > y2 or y4 < y1 )
+        collides : ( topLeft, bottomRight ) =>
+            @rectanglesCollide @topLeft.x, @topLeft.y,
+                @bottomRight.x, @bottomRight.y, topLeft.x, topLeft.y,
+                bottomRight.x, bottomRight.y
+
+Mix handlers into `LandscapeItem`s.
+
+    require( './handlers' ).mixIntoClass LandscapeItem
+
+## Landscape Items Table
+
+Most of this module is a database table, so we require the table module,
+plus some others.
 
     { Table } = require './table'
     { Player } = require './player'
@@ -21,7 +59,7 @@ functionality.
 
     class LandscapeItemsTable extends Table
 
-## Constructor
+## Table Constructor
 
         constructor : () ->
 
@@ -240,6 +278,7 @@ it.
 ## Exporting
 
 The module then exports a single instance of the `LandscapeItemsTable`
-class.
+class, and the `LandscapeItem` class as an attribute thereof.
 
     module.exports = new LandscapeItemsTable
+    module.exports.LandscapeItem = LandscapeItem
