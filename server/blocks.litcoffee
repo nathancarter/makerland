@@ -357,6 +357,8 @@ the player from its entry in `playersWhoCanSeeBlock`.
                 if array = playersWhoCanSeeBlock[block]
                     i = array.indexOf player.name
                     if i > -1 then array.splice i, 1
+                    if array.length is 0
+                        delete playersWhoCanSeeBlock[block]
 
 Next, for any block that was recently invisible but became visible, add the
 player to its entry in `playersWhoCanSeeBlock`.  Also, notify the player of
