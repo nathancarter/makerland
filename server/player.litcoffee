@@ -94,14 +94,22 @@ When this player disconnects, tell the console, and remove the player from
                 @save()
                 @positionChanged null, null
 
-The client may also request data about the cell types in the map.  When they
-do, we must provide it, so they have enough information to draw the map.
+The client may also request data about the cell types and landscape items in
+the map.  When they do, we must provide it, so they have enough information
+to draw the map.
 
             socket.on 'get cell type data', ( cellTypeIndex ) =>
-                result = require( './celltypes' ).get cellTypeIndex
+                result =
+                    require( './celltypes' ).getWithDefaults cellTypeIndex
                 if result
                     result.index = cellTypeIndex
                     socket.emit 'cell type data', result
+            socket.on 'get landscape item data', ( itemIndex ) =>
+                result =
+                    require( './landscapeitems' ).getWithDefaults itemIndex
+                if result
+                    result.index = itemIndex
+                    socket.emit 'landscape item data', result
 
 Now that the player object is set up, tell the client all the main game
 settings and show the login screen.

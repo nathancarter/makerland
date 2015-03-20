@@ -23,12 +23,36 @@ other data as well.
         key = "#{index} icon"
         if not cellTypeData.hasOwnProperty key
             cellTypeData[key] = new Image
+            timestamp = encodeURIComponent new Date
             cellTypeData[key].src =
-                "db/celltypes/#{index}/icon?#{encodeURIComponent new Date}"
+                "db/celltypes/#{index}/icon?#{timestamp}"
         cellTypeData[key]
     socket.on 'cell data changed', ( data ) ->
         delete cellTypeData[data]
         delete cellTypeData["#{data} icon"]
+
+Now we create very similar functions for getting data on landscape items
+from the server.
+
+    landscapeItemData = { }
+    lookupLandscapeItemType = ( index ) ->
+        if not landscapeItemData.hasOwnProperty index
+            landscapeItemData[index] = { }
+            socket.emit 'get landscape item data', index
+        landscapeItemData[index]
+    socket.on 'landscape item data', ( data ) ->
+        landscapeItemData[data.index] = data
+    getLandscapeItemIcon = ( index ) ->
+        key = "#{index} icon"
+        if not landscapeItemData.hasOwnProperty key
+            landscapeItemData[key] = new Image
+            timestamp = encodeURIComponent new Date
+            landscapeItemData[key].src =
+                "db/landscapeitems/#{index}/icon?#{timestamp}"
+        landscapeItemData[key]
+    socket.on 'landscape item changed', ( data ) ->
+        delete landscapeItemData[data]
+        delete landscapeItemData["#{data} icon"]
 
 ## Drawing
 
@@ -67,15 +91,12 @@ Update the game state based on whatever keys the player has pressed.
 
         handleKeysPressed()
 
-Next, draw the game map.
+Next, draw the game map, then the layer of landscape items on top of it.
+Landscape items include the player's avatar, together with any other avatars
+of other players nearby.
 
         drawGameMap context
-
-Next, draw the player's avatar, together with the avatars of anything moving
-nearby.
-
-        drawPlayer context
-        drawOtherPlayers context
+        drawLandscapeItems context
 
 Last, draw the player's status as a HUD.
 
@@ -92,13 +113,12 @@ that moves as the player walks.  Later, it will have an actual map in it.
             context.moveTo x1, y1
             context.lineTo x2, y2
             context.stroke()
-        xcells = Math.ceil gameview.width/cellSize
-        ycells = Math.ceil gameview.height/cellSize
         context.strokeStyle = context.fillStyle = '#999999'
         context.lineWidth = 1
         blockSize = window.gameSettings.mapBlockSizeInCells
-        for own name, array of window.visibleBlocksCache
+        for own name, data of window.visibleBlocksCache
             [ plane, x, y ] = ( parseInt i for i in name.split ',' )
+            array = data.cells
             for i in [0...blockSize]
                 for j in [0...blockSize]
                     screen = mapCoordsToScreenCoords x+i, y+j
@@ -126,19 +146,78 @@ that moves as the player walks.  Later, it will have an actual map in it.
         x : position[1] + ( x - gameview.width*0.5 ) / cellSize
         y : position[2] + ( y - gameview.height*0.5 ) / cellSize
 
-The following function draws the player's avatar by calling a routine
-defined in a separate file.
+A similar function draws the landscape items that sit in a layer on top of
+the map.  It creates an objects called `orderedItems` that maps y
+coordinates to arrays of objects that have that y coordinate.  Then it draws
+items in increasing order of y coordinates, so that things that belong near
+the front of the screen are drawn as if they are in front of things behind
+them.
 
-    drawPlayer = ( context ) ->
-        name = currentStatus.name[0].toUpperCase() + currentStatus.name[1..]
-        drawAvatar context, name, getPlayerPosition(),
-            getPlayerMotionDirection(), currentStatus.appearance
-    drawOtherPlayers = ( context ) ->
+This function includes players' avatars among the landscape items, because
+they are z-ordered in among them, so that players can, f.ex., hide behind a
+tree.
+
+    drawLandscapeItems = ( context ) ->
+        orderedItems = { }
+        add = ( item ) ->
+            if not item.x or not item.y
+                screencoords = mapCoordsToScreenCoords item.position[1],
+                    item.position[2]
+                item.x = screencoords.x
+                item.y = screencoords.y
+            if item.type is 'item'
+                item.x -= item.width/2
+                item.y -= item.height/2
+            bottomy = switch item.type
+                when 'player' then item.y
+                when 'item' then item.y + item.height
+                else undefined
+            orderedItems[bottomy] ?= [ ]
+            orderedItems[bottomy].push item
+        cellSize = window.gameSettings.cellSizeInPixels
+        if not cellSize then return
+        blockSize = window.gameSettings.mapBlockSizeInCells
+        for own name, data of window.visibleBlocksCache
+            [ plane, x, y ] = ( parseInt i for i in name.split ',' )
+            for item in data['landscape items'] or [ ]
+                [ itemx, itemy ] = item.position
+                screenpos = mapCoordsToScreenCoords itemx+x, itemy+y
+                if typeinfo = lookupLandscapeItemType item.type
+                    image = getLandscapeItemIcon item.type
+                    if image.complete
+                        add
+                            type : 'item'
+                            image : image
+                            x : screenpos.x
+                            y : screenpos.y
+                            width : cellSize*typeinfo.size
+                            height : cellSize*typeinfo.size
+        add
+            type : 'player'
+            name : currentStatus.name[0].toUpperCase() + \
+                currentStatus.name[1..]
+            position : getPlayerPosition()
+            direction : getPlayerMotionDirection()
+            appearance : currentStatus.appearance
         for own key, value of getNearbyObjects()
             if value.type is 'player'
-                key = key[0].toUpperCase() + key[1..]
-                drawAvatar context, key, value.position,
-                    value.motionDirection, value.appearance
+                add
+                    type : 'player'
+                    name : key[0].toUpperCase() + key[1..]
+                    position : value.position
+                    direction : value.motionDirection
+                    appearance : value.appearance
+        keys = Object.keys orderedItems
+        keys.sort ( a, b ) -> parseFloat( a ) - parseFloat( b )
+        for key in keys
+            for item in orderedItems[key]
+                if item.type is 'item'
+                    try
+                        context.drawImage item.image, item.x, item.y,
+                            item.width, item.height
+                if item.type is 'player'
+                    drawAvatar context, item.name, item.position,
+                        item.direction, item.appearance
 
 The following function draws the player's status as a HUD.  For now, this is
 just the player's name (after login only).

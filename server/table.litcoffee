@@ -133,9 +133,16 @@ default.
 ### Reading and Writing
 
 Set the default value for a given key.  This will prevail for all entries
-that do not have that key.
+that do not have that key.  If you fetch an entire entry, you can also fill
+in default values for all its keys with the `installDefault` function.
 
         setDefault : ( key, value ) => @defaults[key] = value
+        installDefaults : ( entry ) =>
+            entry[key] = value for own key, value of @defaults
+        getWithDefaults : ( entryName ) =>
+            result = @get entryName
+            @installDefaults result if result
+            result
 
 Fetch the JSON object for a given entry in the table, or a specific value
 from that entry's key-value pairs.

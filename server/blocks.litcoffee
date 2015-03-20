@@ -26,13 +26,15 @@ the game is editable only by the admin character.
             if not @getAuthors @planeKey 0
                 @setAuthors @planeKey( 0 ), [ 'admin' ]
 
+## Specialized Getters and Setters
+
 Implement routines for getting and setting blocks of cells.  Each requires
 plane, x, and y to be numbers, and it rounds x and y down to the nearest
 (lower) multiples of N.  It ensures plane is an integer.  The set routine
 ensures that the cells array is of the correct size and full of only
 integers.
 
-        getCells : ( plane, x, y ) =>
+        positionToBlockName : ( plane, x, y ) ->
             if typeof plane isnt 'number' or typeof x isnt 'number' or \
                typeof y isnt 'number' then return null
             plane = plane | 0
@@ -40,51 +42,95 @@ integers.
             x = ( N * Math.floor x/N ) | 0
             y = ( N * Math.floor y/N ) | 0
             key = "#{plane},#{x},#{y}"
-            if not @exists key
-                @set key, { }
-                @set key, 'cells',
-                    ( ( -1 for i in [1..N] ) for i in [1..N] )
-            @get key, 'cells'
-        setCells : ( plane, x, y, array ) =>
-            if typeof plane isnt 'number' or typeof x isnt 'number' or \
-               typeof y isnt 'number' then return
-            if array not instanceof Array then return
-            for row in array
-                if row not instanceof Array then return
-                for item, index in row
-                    if typeof item isnt 'number' then return
-                    row[index] = item | 0
-            plane = plane | 0
-            N = settings.mapBlockSizeInCells
-            x = ( N * Math.floor x/N ) | 0
-            y = ( N * Math.floor y/N ) | 0
-            key = "#{plane},#{x},#{y}"
+        getBlock : ( plane, x, y ) =>
+            if not key = @positionToBlockName plane, x, y then return null
             if not @exists key then @set key, { }
-            @set key, 'cells', array
+            @get key
+        setBlock : ( plane, x, y, block ) =>
+            if not key = @positionToBlockName plane, x, y then return
+            if not @exists key then @set key, { }
+            @set key, block
             notifyAboutBlockUpdate key
 
-You can also get or set just one cell at a time, with the following
-functions.
+When getting block data, we provide our own default values rather than using
+the `@setDefault` method, because many of the default values are arrays, and
+we want a different array for every block, rather than having one instance
+shared, which could have data from one block unintentionally polluting
+another.
 
-        getCell : ( plane, x, y ) =>
-            block = @getCells plane, x, y
-            if not block then return null
+        getBlockData : ( plane, x, y, key ) =>
+            if not block = @getBlock plane, x, y then return null
+            if not block.hasOwnProperty key
+                dflt = undefined
+                if key is 'cells'
+                    N = settings.mapBlockSizeInCells
+                    dflt = ( ( -1 for i in [1..N] ) for i in [1..N] )
+                if key is 'landscape items'
+                    dflt = [ ]
+                if typeof dflt isnt 'undefined'
+                    block[key] = dflt
+                    @setBlock plane, x, y, block
+            block[key]
+        setBlockData : ( plane, x, y, key, value ) =>
+            if not block = @getBlock plane, x, y then return
+            if key is 'cells'
+                if value not instanceof Array then return
+                for row in value
+                    if row not instanceof Array then return
+                    for item, index in row
+                        if typeof item isnt 'number' then return
+                        row[index] = item | 0
+            block[key] = value
+            @setBlock plane, x, y, block
+
+We also provide convenience functions for getting/setting the cell grid of a
+block, as well as getting/setting just one cell at a time.
+
+        getCells : ( plane, x, y ) => @getBlockData plane, x, y, 'cells'
+        setCells : ( plane, x, y, array ) =>
+            @setBlockData plane, x, y, 'cells', array
+        positionToBlockIndices : ( plane, x, y ) ->
             N = settings.mapBlockSizeInCells
             dx = ( x - ( N * Math.floor x/N ) ) | 0
             dy = ( y - ( N * Math.floor y/N ) ) | 0
             if dx >= N then dx = N - 1 # prevent float rounding inaccuracies
             if dy >= N then dy = N - 1 # prevent float rounding inaccuracies
+            [ dx, dy ]
+        getCell : ( plane, x, y ) =>
+            block = @getCells plane, x, y
+            if not block then return null
+            [ dx, dy ] = @positionToBlockIndices plane, x, y
             block[dx][dy]
         setCell : ( plane, x, y, i ) =>
             block = @getCells plane, x, y
             if not block then return null
-            N = settings.mapBlockSizeInCells
-            dx = ( x - ( N * Math.floor x/N ) ) | 0
-            dy = ( y - ( N * Math.floor y/N ) ) | 0
-            if dx >= N then dx = N - 1 # prevent float rounding inaccuracies
-            if dy >= N then dy = N - 1 # prevent float rounding inaccuracies
+            [ dx, dy ] = @positionToBlockIndices plane, x, y
             block[dx][dy] = parseInt i
             @setCells plane, x, y, block
+
+When editing the map, makers will want to add new landscape items.  These
+are uniquely identified by their positions, which we must therefore ensure
+are unique.  We do not allow adding a landscape item to within one decimal
+place (in cells, in x or y) of another landscape item, to ensure uniqueness.
+
+        pointsAreClose : ( x1, y1, x2, y2 ) ->
+            Math.abs( x1 - x2 ) < 0.1 and Math.abs( y1 - y2 ) < 0.1
+        addLandscapeItem : ( plane, x, y, itemIndex ) =>
+            items = @getBlockData plane, x, y, 'landscape items'
+            N = settings.mapBlockSizeInCells
+            blockx = x - N * Math.floor x/N
+            blocky = y - N * Math.floor y/N
+            for item in items
+                if @pointsAreClose item.position[0], item.position[1], \
+                    blockx, blocky then return no
+            items.push { type : itemIndex, position : [ blockx, blocky ] }
+            @setBlockData plane, x, y, 'landscape items', items
+            yes
+        removeLandscapeItem : ( plane, x, y ) =>
+            items = @getBlockData plane, x, y, 'landscape items'
+            @setBlockData plane, x, y, 'landscape items',
+                ( item for item in items when not @pointsAreClose \
+                  item.position[0], item.position[1], x, y )
 
 ## Planes
 
@@ -330,7 +376,7 @@ The following function notifies players about their set of visible blocks.
         data = { }
         for block in blockSet
             [ plane, x, y ] = ( parseInt i for i in block.split ',' )
-            data[block] = module.exports.getCells plane, x, y
+            data[block] = module.exports.getBlock plane, x, y
         notifyThisPlayer.socket.emit 'visible blocks', data
 
 And when a block is edited by a maker, we want to call the above function on

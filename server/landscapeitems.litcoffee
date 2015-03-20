@@ -9,9 +9,10 @@ Landscape items sit on top of the map and are not necessarily at integer
 coordinates, nor equally spaced, nor arranged one per cell (trees, rocks,
 signs, etc.).
 
-It is a database table, so we require the table module.
+It is a database table, so we require the table module, plus some others.
 
     { Table } = require './table'
+    { Player } = require './player'
     fs = require 'fs'
     path = require 'path'
 
@@ -56,6 +57,14 @@ Implement custom show method.
 Ensure entries are returned sorted in numerical order.
 
         entries : => super().sort ( a, b ) -> parseInt( a ) - parseInt( b )
+
+Whenever an entry in the table changes, notify all players to update their
+client-side landscape item caches.
+
+        set : ( entryName, others... ) =>
+            super entryName, others...
+            for p in Player::allPlayers
+                p.socket.emit 'landscape item changed', entryName
 
 ## Maker Permissions
 

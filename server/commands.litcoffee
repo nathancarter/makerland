@@ -361,26 +361,28 @@ the mouse on the map itself.
                 choosing cell types, then clicking the map to fill the map
                 with that type of cell.'
             run : ( player ) ->
-                table = require( './database' ).celltypes
-                chooser = table.entryChooser player, 'cell type', 1
+                ctable = require( './database' ).celltypes
+                itable = require( './database' ).landscapeitems
+                cchooser = ctable.entryChooser player, 'cell type', 1
+                ichooser = itable.entryChooser player, 'item type', 1
                 fail = -> player.showOK 'You do not have permission to edit
                     this plane.  Create your own plane and edit its map.'
                 bt = require './blocks'
-                do pick = => player.showUI
+                putCells = => player.showUI
                     type : 'text'
-                    value : '<h3>Editing Game Map</h3>'
+                    value : '<h3>Editing Map Cells</h3>'
                 ,
-                    chooser( pick )
+                    cchooser( putCells )
                 ,
                     type : 'action'
                     value : 'Place individual cells'
                     default : yes
                     action : ( data ) =>
                         choice = data['cell type']
-                        if not table.exists choice
+                        if not ctable.exists choice
                             return player.showOK 'You must choose a valid
-                                cell type first.', pick
-                        celltypename = table.get choice, 'name'
+                                cell type first.', putCells
+                        celltypename = ctable.get choice, 'name'
                         changeMapCell = ( x, y ) ->
                             if not bt.canEdit player, \
                                     bt.planeKey player.getPosition()[0]
@@ -388,24 +390,24 @@ the mouse on the map itself.
                             bt.setCell player.getPosition()[0], x, y, choice
                         player.mapClickMode "Click any cell on the map to
                             change it to be \"#{celltypename}.\"",
-                            changeMapCell, pick
+                            changeMapCell, putCells
                 ,
                     type : 'action'
                     value : 'Fill rectangles of cells'
                     action : ( data ) =>
                         choice = data['cell type']
-                        if not table.exists choice
+                        if not ctable.exists choice
                             return player.showOK 'You must choose a valid
-                                cell type first.', pick
-                        celltypename = table.get choice, 'name'
+                                cell type first.', putCells
+                        celltypename = ctable.get choice, 'name'
                         firstCorner = ->
                             player.mapClickMode "Click the first corner of
                                 the area to fill with \"#{celltypename}.\"",
-                                secondCorner, pick, 'nw-resize'
+                                secondCorner, putCells, 'nw-resize'
                         secondCorner = ( x, y ) ->
                             player.mapClickMode "Click the second corner of
                                 the area to fill with \"#{celltypename}.\"",
-                                fillRectangle( x, y ), pick, 'se-resize'
+                                fillRectangle( x, y ), putCells, 'se-resize'
                         fillRectangle = ( x1, y1 ) ->
                             ( x2, y2 ) ->
                                 plane = player.getPosition()[0]
@@ -427,18 +429,18 @@ the mouse on the map itself.
                     value : 'Rectangular border of cells'
                     action : ( data ) =>
                         choice = data['cell type']
-                        if not table.exists choice
+                        if not ctable.exists choice
                             return player.showOK 'You must choose a valid
-                                cell type first.', pick
-                        celltypename = table.get choice, 'name'
+                                cell type first.', putCells
+                        celltypename = ctable.get choice, 'name'
                         firstCorner = ->
                             player.mapClickMode "Click the first corner of
                                 the area to fill with \"#{celltypename}.\"",
-                                secondCorner, pick, 'nw-resize'
+                                secondCorner, putCells, 'nw-resize'
                         secondCorner = ( x, y ) ->
                             player.mapClickMode "Click the second corner of
                                 the area to fill with \"#{celltypename}.\"",
-                                drawRectangle( x, y ), pick, 'se-resize'
+                                drawRectangle( x, y ), putCells, 'se-resize'
                         drawRectangle = ( x1, y1 ) ->
                             ( x2, y2 ) ->
                                 plane = player.getPosition()[0]
@@ -458,6 +460,53 @@ the mouse on the map itself.
                                     bt.setCell plane, x2, i, choice
                                 firstCorner()
                         firstCorner()
+                ,
+                    type : 'action'
+                    value : 'Done'
+                    cancel : yes
+                    action : -> mainMenu()
+                putItems = -> player.showUI
+                    type : 'text'
+                    value : '<h3>Editing Landscape Items</h3>'
+                ,
+                    ichooser( putItems )
+                ,
+                    type : 'action'
+                    value : 'Place landscape items'
+                    default : yes
+                    action : ( data ) =>
+                        choice = data['item type']
+                        if not itable.exists choice
+                            return player.showOK 'You must choose a valid
+                                item type first.', putItems
+                        itemtypename = itable.get choice, 'name'
+                        addItem = ( x, y ) ->
+                            if not bt.canEdit player, \
+                                    bt.planeKey player.getPosition()[0]
+                                return fail()
+                            bt.addLandscapeItem player.getPosition()[0],
+                                x, y, choice
+                        player.mapClickMode "Click anywhere on the map to
+                            add an instance of the item
+                            \"#{itemtypename}.\"  But you cannot place the
+                            item at the same location (or very close to) an
+                            existing landscape item.", addItem, putItems
+                ,
+                    type : 'action'
+                    value : 'Done'
+                    cancel : yes
+                    action : -> mainMenu()
+                do mainMenu = -> player.showUI
+                    type : 'text'
+                    value : '<h3>Editing game world</h3>'
+                ,
+                    type : 'action'
+                    value : 'Change cells in map'
+                    action : putCells
+                ,
+                    type : 'action'
+                    value : 'Put landscape items on map'
+                    action : putItems
                 ,
                     type : 'action'
                     value : 'Done'

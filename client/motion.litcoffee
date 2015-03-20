@@ -28,7 +28,7 @@ caching blocks in advance).
         blockx = ( N * Math.floor position[1] / N ) | 0
         blocky = ( N * Math.floor position[2] / N ) | 0
         blockName = "#{position[0]},#{blockx},#{blocky}"
-        blockData = window.visibleBlocksCache[blockName]
+        blockData = window.visibleBlocksCache[blockName]?.cells
         if not blockData then return yes
         x = ( position[1] - blockx ) | 0
         y = ( position[2] - blocky ) | 0
