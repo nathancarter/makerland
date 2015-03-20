@@ -9,6 +9,13 @@ First, let's import some things we'll need below.
     { Player } = require './player'
     { Table } = require './table'
 
+The following two global data structures map players to the blocks they can
+see, and blocks to the players who can see them.  Each map uses player names
+and block names as strings (all lower case).  These are maintained by functions in the section "Non-table Functions", below.
+
+    blocksVisibleToPlayer = { }
+    playersWhoCanSeeBlock = { }
+
 ## Table Subclass
 
 This module implements a database table by subclassing the main Table class
@@ -288,6 +295,17 @@ edit.
                 "remove #{entry} <i>permanently</i>.  This action
                  <i>cannot</i> be undone!", action, callback
 
+## Block Caching
+
+We also override the cache-clearing function so that it does not pay
+attention only to cache size, but rather it keeps in the cache just those
+blocks that are visible to players.
+
+        clearCache : =>
+            for entryName in Object.keys @cache.entries
+                if playersWhoCanSeeBlock[entryName]?.length is 0
+                    @removeFromCache entryName
+
 Export a singleton of the class as the module.
 
     module.exports = new BlocksTable
@@ -303,13 +321,6 @@ corner of the block.
         x = size * Math.floor position[1] / size
         y = size * Math.floor position[2] / size
         [ position[0], x, y ]
-
-The following two global data structures map players to the blocks they can
-see, and blocks to the players who can see them.  Each map uses player names
-and block names as strings (all lower case).
-
-    blocksVisibleToPlayer = { }
-    playersWhoCanSeeBlock = { }
 
 Below we have a function that's called by the player object for any player
 that moves.  We use it to update the above two mappings, so that this module
