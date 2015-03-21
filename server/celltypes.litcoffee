@@ -81,7 +81,7 @@ The UI for editing a cell type looks like the following.
             again = => @edit player, entry, callback
             player.showUI
                 type : 'text'
-                value : "<h4>Editing cell type #{entry}:</h4>"
+                value : "<h3>Editing cell type #{entry}:</h3>"
             ,
                 [
                     type : 'text'

@@ -224,6 +224,16 @@ individual row in the table that populates that command pane.
                       value='#{data.name}'> #{data.name}</label>
                      </div>"
                 ]
+            when 'text input'
+                [
+                    "<textarea id='input_#{data.name}' class='form-control'
+                     rows=20>#{data.value or ''}</textarea>"
+                ]
+            when 'code input'
+                [
+                    "<textarea id='input_#{data.name}' class='form-control'
+                     rows=20>#{data.value or ''}</textarea>"
+                ]
             else
                 [ "<p#{attrs}>#{JSON.stringify data}</p>" ]
         result.focus = focus
@@ -248,7 +258,8 @@ values, and stores them in a JSON object that can be sent to the server.
 
     dataFromUI = ->
         result = { }
-        for input in ( $ '#rightpane input, #rightpane select' ).get()
+        elts = $ '#rightpane input, #rightpane select, #rightpane textarea'
+        for input in elts.get()
             id = input.getAttribute 'id'
             if id?[...6] is 'input_'
                 name = id[6..]
@@ -260,6 +271,8 @@ values, and stores them in a JSON object that can be sent to the server.
                     value = input.checked
                 if input.tagName is 'SELECT'
                     value = input.options[input.selectedIndex].value
+                if input.tagName is 'TEXTAREA'
+                    value = input.value
                 result[name] = value
         result
 

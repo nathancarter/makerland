@@ -69,7 +69,7 @@ The settings command allows players to edit their personal settings.
                         action : ->
                             player.showUI
                                 type : 'text'
-                                value : '<h4>Changing password</h4>'
+                                value : '<h3>Changing password</h3>'
                             ,
                                 type : 'password input'
                                 name : 'old password'
@@ -108,7 +108,7 @@ The settings command allows players to edit their personal settings.
                                 sky    : '#28726E'
                             player.showUI
                                 type : 'text'
-                                value : '<h4>Changing appearance</h4>'
+                                value : '<h3>Changing appearance</h3>'
                             ,
                                 type : 'choice'
                                 name : 'head color'

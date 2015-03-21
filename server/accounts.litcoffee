@@ -87,7 +87,7 @@ doing so looks like the following.
             again = => @edit player, entry, callback
             player.showUI
                 type : 'text'
-                value : "<h4>Editing account for \"#{entry}\":</h4>
+                value : "<h3>Editing account for \"#{entry}\":</h3>
                         #{warning}"
             ,
                 type : 'action'

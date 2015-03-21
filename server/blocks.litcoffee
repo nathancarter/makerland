@@ -222,7 +222,7 @@ The UI for editing a plane looks like the following.
             again = => @edit player, entry, callback
             player.showUI
                 type : 'text'
-                value : "<h4>Editing #{entry}:</h4>"
+                value : "<h3>Editing #{entry}:</h3>"
             ,
                 [
                     type : 'text'
@@ -413,11 +413,11 @@ Now notify all players who could see the player's current or former block
 that the player moved.
 
         toNotify = if oldPosition
-            playersWhoCanSeeBlock[blockName oldPosition]
+            playersWhoCanSeeBlock[blockName oldPosition] ? [ ]
         else
             [ ]
         maybeMore = if p
-            playersWhoCanSeeBlock[blockName p]
+            playersWhoCanSeeBlock[blockName p] ? [ ]
         else
             [ ]
         for name in maybeMore
@@ -436,17 +436,19 @@ about their new set of visible blocks.
 Finally, for all landscape items in all visible blocks, check to see if the
 player just entered it.
 
-        playerTopLeft = x : p[1] - 0.25, y : p[2] - 0.75
-        playerBottomRight = x : p[1] + 0.25, y : p[2]
-        previousTopLeft =
-            x : oldPosition[1] - 0.25, y : oldPosition[2] - 0.75
-        previousBottomRight = x : oldPosition[1] + 0.25, y : oldPosition[2]
-        for block in visibleBlocks
-            for item in @landscapeItems?[block] or [ ]
-                old = item.collides( previousTopLeft, previousBottomRight )
-                now = item.collides( playerTopLeft, playerBottomRight )
-                if now and not old then item.emit 'entered', player
-                if old and not now then item.emit 'exited', player
+        if p
+            playerTopLeft = x : p[1] - 0.25, y : p[2] - 0.75
+            playerBottomRight = x : p[1] + 0.25, y : p[2]
+            previousTopLeft =
+                x : oldPosition[1] - 0.25, y : oldPosition[2] - 0.75
+            previousBottomRight =
+                x : oldPosition[1] + 0.25, y : oldPosition[2]
+            for block in visibleBlocks
+                for item in @landscapeItems?[block] or [ ]
+                    old = item.collides previousTopLeft, previousBottomRight
+                    now = item.collides playerTopLeft, playerBottomRight
+                    if now and not old then item.emit 'entered', player
+                    if old and not now then item.emit 'exited', player
 
 The following function notifies players about their set of visible blocks.
 
