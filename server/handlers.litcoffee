@@ -55,7 +55,7 @@ them returns a value, thus stopping further execution.  The value of the
 last-run handler is returned (or undefined if none returns a value).
 
     module.exports.methods.emit = ( eventName, args... ) ->
-        for handler in @handlers[eventName] or [ ]
+        for handler in @handlers?[eventName] or [ ]
             if result = handler.apply this, args then return result
         undefined
 
