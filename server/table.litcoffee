@@ -30,7 +30,9 @@ ensures that the folder for storing the table on disk exists or can be
 created.  After that it initializes the defaults and cache data structures
 to empty values.
 
-        constructor : ( @tableName ) ->
+        constructor : ( @tableName, @humanReadableName ) ->
+            @humanReadableName ?=
+                @tableName[0].toUpperCase() + @tableName[1..]
             module.exports[tableName] = this
             try
                 fs.mkdirSync path.resolve dbroot, tableName

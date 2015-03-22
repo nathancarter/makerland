@@ -18,7 +18,7 @@ Just give the table its name.  The default value of what kind of creatures
 can walk on a cell type is "all."
 
         constructor : () ->
-            super 'celltypes'
+            super 'celltypes', 'Cell Types'
             @setDefault 'who can walk on it', 'all'
 
 Together with the property whose default was just set, we provide an API for

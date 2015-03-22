@@ -269,12 +269,11 @@ adding, removing, and changing entries.
             run : ( player ) ->
                 database = require './database'
                 do browseDB = ->
-                    buttons = for name in database.tables
+                    buttons = for name in database.tables.sort()
                         do ( name ) ->
                             table = database[name]
-                            name = name[0].toUpperCase() + name[1..]
                             type : 'action'
-                            value : name
+                            value : table.humanReadableName
                             action : browseTable = ->
                                 contents = [
                                     type : 'text'

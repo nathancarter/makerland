@@ -65,7 +65,7 @@ functionality.
 
 First, give the table its name and set default values for keys.
 
-            super 'landscapeitems'
+            super 'landscapeitems', 'Landscape Items'
             @setDefault 'size', 1.0
             @setDefault 'visible', yes
 
