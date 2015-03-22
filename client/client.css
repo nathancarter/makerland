@@ -70,6 +70,10 @@ body {
     font-size : larger;
 }
 
+.fixed-width {
+    font-family : Consolas, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
+}
+
 /*
  * These styles were taken from the following URL, to help style file-type
  * inputs in HTML forms according to the Bootstrap look-and-feel.

@@ -231,7 +231,8 @@ individual row in the table that populates that command pane.
                 ]
             when 'code input'
                 [
-                    "<textarea id='input_#{data.name}' class='form-control'
+                    "<textarea id='input_#{data.name}'
+                      class='form-control fixed-width'
                      rows=20>#{data.value or ''}</textarea>"
                 ]
             else
