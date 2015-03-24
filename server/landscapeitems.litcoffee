@@ -20,12 +20,22 @@ At construction time, store the name of the block in which we live, and
 compute our size based on our type, then our top-left and bottom-right
 corners as well.
 
-        constructor : ( @type, @plane, @x, @y ) ->
-            @block =
-                require( './blocks' ).positionToBlockName @plane, @x, @y
+        constructor : ( @plane, @x, @y ) ->
+            blockTable = require './blocks'
+            @block = blockTable.positionToBlockName @plane, @x, @y
+            if tableEntry = blockTable.getLandscapeItem @plane, @x, @y
+                @type = tableEntry.type
+                @behaviors = tableEntry.behaviors or [ ]
+            @typeName = require( './landscapeitems' ).get @type, 'name'
+            N = require( './settings' ).mapBlockSizeInCells
+            @localX = @x - N * Math.floor @x/N
+            @localY = @y - N * Math.floor @y/N
             @size = module.exports.get @type, 'size'
             @topLeft = x : @x - @size/2, y : @y - @size/2
             @bottomRight = x : @x + @size/2, y : @y + @size/2
+            for behavior in @behaviors ?= [ ]
+                require( './behaviors' ).installBehavior \
+                    behavior['behavior type'], this
 
 This utility tests whether an object at a given position is bumping into
 this landscape item.  The object's position is given by a rectangular
@@ -39,6 +49,14 @@ landscape items.
             @rectanglesCollide @topLeft.x, @topLeft.y,
                 @bottomRight.x, @bottomRight.y, topLeft.x, topLeft.y,
                 bottomRight.x, bottomRight.y
+
+Landscape items can also save themselves to disk, by writing to the block in
+which they sit.  This is done through a special method provided by the
+blocks table.  We just pass this object, and that method reads all the
+necessary data (including its global position as a unique ID) out of this
+object's members.
+
+        save : => require( './blocks' ).setLandscapeItem this
 
 Mix handlers into `LandscapeItem`s.
 

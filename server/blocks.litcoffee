@@ -133,6 +133,20 @@ place (in cells, in x or y) of another landscape item, to ensure uniqueness.
             items.push { type : itemIndex, position : [ blockx, blocky ] }
             @setBlockData plane, x, y, 'landscape items', items
             yes
+        getLandscapeItem : ( plane, x, y ) =>
+            items = @getBlockData plane, x, y, 'landscape items'
+            N = settings.mapBlockSizeInCells
+            blockx = x - N * Math.floor x/N
+            blocky = y - N * Math.floor y/N
+            for item in items
+                if @pointsAreClose item.position[0], item.position[1], \
+                    blockx, blocky then return item
+            null
+
+Makers can also remove landscape items based on their coordinates, again
+uniquely identifying a landscape item by its position, up to one decimal
+place of accuracy.
+
         removeLandscapeItem : ( plane, x, y ) =>
             items = @getBlockData plane, x, y, 'landscape items'
             N = settings.mapBlockSizeInCells
@@ -141,9 +155,28 @@ place (in cells, in x or y) of another landscape item, to ensure uniqueness.
             @setBlockData plane, x, y, 'landscape items',
                 ( item for item in items when not @pointsAreClose \
                   item.position[0], item.position[1], blockx, blocky )
+        setLandscapeItem : ( updatedItem ) =>
+            { plane, x, y, type, behaviors } = updatedItem
+            items = @getBlockData plane, x, y, 'landscape items'
+            N = settings.mapBlockSizeInCells
+            blockx = x - N * Math.floor x/N
+            blocky = y - N * Math.floor y/N
+            for item in items
+                if @pointsAreClose item.position[0], item.position[1], \
+                        blockx, blocky
+                    item.position = [ blockx, blocky ]
+                    item.type = type
+                    item.behaviors =
+                        JSON.parse JSON.stringify( behaviors or [ ] )
+                    @setBlockData plane, x, y, 'landscape items', items
+                    return yes
+            no
 
 This function checks all blocks touching the current one and finds all
-landscape items whose rectangle includes the given map coordinates.
+landscape items whose rectangle includes the given map coordinates.  The
+limitation here is that this can only be called on blocks that are visible
+to some player, because it returns actual `LandscapeItem` instances, which
+only exist in cached blocks, and only visible blocks are cached.
 
         getItemsOverPoint : ( plane, x, y ) =>
             corner = ( parseInt i for i in \
@@ -152,20 +185,13 @@ landscape items whose rectangle includes the given map coordinates.
             N = settings.mapBlockSizeInCells
             results = [ ]
             typetable = require './landscapeitems'
+            #console.log '\n@landscapeItems:', @landscapeItems
             for i in [corner.x-N,corner.x,corner.x+N]
                 for j in [corner.y-N,corner.y,corner.y+N]
-                    for item in @getBlockData plane, i, j, 'landscape items'
-                        globalPos =
-                            x : item.position[0] + i
-                            y : item.position[1] + j
-                        size = typetable.get item.type, 'size'
-                        if Math.abs( x - globalPos.x ) < size/2 and \
-                           Math.abs( y - globalPos.y ) < size/2
-                            results.push
-                                type : item.type
-                                plane : plane
-                                x : globalPos.x
-                                y : globalPos.y
+                    for item in @landscapeItems["#{plane},#{i},#{j}"] or [ ]
+                        if Math.abs( x - item.x ) < item.size/2 and \
+                           Math.abs( y - item.y ) < item.size/2
+                            results.push item
             results
 
 ## Planes
@@ -319,7 +345,7 @@ LandscapeItem class are constructed for all its landscape items.
                 x += item.position[0]
                 y += item.position[1]
                 ( @landscapeItems[entryName] ?= [ ] ).push \
-                    new LandscapeItem item.type, plane, x, y
+                    new LandscapeItem plane, x, y
 
 When a block is removed from the cache, we destroy all the landscape item
 instances that go with it.
@@ -444,7 +470,7 @@ player just entered it.
             previousBottomRight =
                 x : oldPosition[1] + 0.25, y : oldPosition[2]
             for block in visibleBlocks
-                for item in @landscapeItems?[block] or [ ]
+                for item in module.exports.landscapeItems?[block] or [ ]
                     old = item.collides previousTopLeft, previousBottomRight
                     now = item.collides playerTopLeft, playerBottomRight
                     if now and not old then item.emit 'entered', player

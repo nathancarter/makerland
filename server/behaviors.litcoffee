@@ -8,11 +8,11 @@ types of objects, such as landscape items.
     { Table } = require './table'
 
 Behaviors come in a variety of types.  The following list will grow as new
-types of behaviors are added to the game.
+types of behaviors are added to the game.  Each type name maps to the class
+for objects of that type, so we can test `instanceof` later.
 
-    behaviorTypeList = [
-        'landscape item'
-    ]
+    behaviorTypes =
+        'landscape item' : require( './landscapeitems' ).LandscapeItem
 
 It does so by subclassing the main Table class and adding behavior-specific
 functionality.
@@ -21,10 +21,12 @@ functionality.
 
 ## Constructor
 
-The constructor just sets the name of the table.
+The constructor just sets the name of the table, then some defaults.
 
         constructor : () ->
             super 'behaviors'
+            @setDefault 'description', ''
+            @setDefault 'code', ''
 
 ## Maker Database Browsing
 
@@ -130,7 +132,7 @@ for doing so looks like the following.
                             value : "<h3>Editing list of valid targets for
                                 behavior #{entry}, #{data.name}:</h3>"
                         ]
-                        for type in behaviorTypeList
+                        for own type of behaviorTypes
                             controls.push
                                 type : 'checkbox'
                                 name : type
@@ -140,8 +142,9 @@ for doing so looks like the following.
                             value : 'Save changes'
                             default : yes
                             action : ( event ) =>
-                                @set entry, 'targets', ( type for type in \
-                                    behaviorTypeList when event[type] )
+                                @set entry, 'targets',
+                                    ( type for own type of behaviorTypes \
+                                      when event[type] )
                                 again()
                         ,
                             type : 'action'
@@ -226,6 +229,108 @@ A maker can remove a behavior if and only if that maker can edit it.
                  This action <i>cannot</i> be undone!  If there are any
                  objects using this behavior in the game, they will no
                  longer have this functionality!", action, callback
+
+## Attaching Behaviors to Objects
+
+The following UI can be used to let a maker choose which behaviors they want
+to attach to a given object.  The object must be an instance of a type of
+thing that can have behaviors attached, such as a `LandscapeItem`.
+
+The player can make edits to the object, which will be written to the
+object's `behaviors` attribute, and `save()` called in the object.  The
+callback will be called when the player clicks Done.
+
+        editAttachments : ( player, object, callback ) =>
+            again = => @editAttachments player, object, callback
+            object.behaviors ?= [ ]
+            beTable = require './behaviors'
+            for own name, type of behaviorTypes
+                if object instanceof type then typeName = name
+            if not typeName?
+                return player.showOK 'Somehow you are editing the behaviors
+                    of an invalid object.  You cannot do that.  Sorry!',
+                    -> callback no
+            controls = [
+                type : 'text'
+                value : "<h3>Editing behaviors of a #{typeName}:</h3>"
+            ,
+                type : 'text'
+                value : '<h4>Behaviors already attached to the object:</h4>'
+                class : 'line-above'
+            ]
+            for behavior, index in object.behaviors
+                do ( index ) =>
+                    controls.push [
+                        type : 'text'
+                        value : beTable.get behavior['behavior type'],
+                            'name'
+                    ,
+                        type : 'action'
+                        value : 'Edit'
+                        action : =>
+                            player.showOK 'Not yet implemented.', again
+                    ,
+                        type : 'action'
+                        value : 'Remove'
+                        action : =>
+                            object.behaviors.splice index, 1
+                            object.save()
+                            again()
+                    ]
+            if object.behaviors.length is 0
+                controls.push
+                    type : 'text'
+                    value : '(no behaviors attached to this object)'
+            controls.push
+                type : 'text'
+                value : '<h4>Behaviors you can attach to the object:</h4>'
+                class : 'line-above'
+            before = controls.length
+            for index in @entries()
+                do ( index ) =>
+                    behavior = @get index
+                    if typeName in behavior.targets or [ ]
+                        controls.push [
+                            type : 'text'
+                            value : behavior.name
+                        ,
+                            type : 'action'
+                            value : 'Attach'
+                            action : =>
+                                object.behaviors.push \
+                                    'behavior type' : index
+                                object.save()
+                                again()
+                        ]
+            if controls.length is before
+                controls.push
+                    type : 'text'
+                    value : '(no behaviors can be attached to the object)'
+            controls.push
+                type : 'action'
+                value : 'Done'
+                cancel : yes
+                action : callback
+            player.showUI controls
+
+The following function takes a code string and turns it into a function we
+can run multiple times on multiple objects.
+
+        makeCodeRunnable : ( codeString ) ->
+            applyMe = eval "( function ( args ) { #{codeString} } )"
+            ( object ) -> applyMe.apply object
+
+The following function installs a behavior in an object by creating (or
+loading from a cache) a runnable version of the behavior's code, then
+running that code on the object.
+
+        installBehavior : ( behaviorIndex, object ) =>
+            runnable = ( @runnableCache ?= { } )[behaviorIndex] ?=
+                @makeCodeRunnable @get behaviorIndex, 'code'
+            try
+                runnable object
+            catch e
+                console.log 'Running behavior code threw an error:', e
 
 ## Exporting
 

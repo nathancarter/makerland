@@ -502,8 +502,14 @@ the mouse on the map itself.
                     ,
                         type : 'text'
                         value : "<p>You are editing the
-                            \"#{itable.get item.type, 'name'}\" at
-                            coordinates (#{item.x},#{item.y}).</p>"
+                            \"#{item.typeName}\" at coordinates
+                            (#{item.x},#{item.y}).</p>"
+                    ,
+                        type : 'action'
+                        value : 'Edit behaviors'
+                        action : ->
+                            require( './behaviors' ).editAttachments \
+                                player, item, changeItems
                     ,
                         type : 'action'
                         value : 'Delete it'
@@ -528,10 +534,10 @@ the mouse on the map itself.
                                 controls = [ ]
                                 for item in items
                                     do ( item ) ->
-                                        name = itable.get item.type, 'name'
                                         controls = controls.concat [
                                             type : 'text'
-                                            value : "#{name} at coordinates
+                                            value : "#{item.typeName}
+                                                at coordinates
                                                 (#{item.x},#{item.y})"
                                         ,
                                             type : 'action'
