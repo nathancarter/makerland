@@ -127,7 +127,7 @@ place (in cells, in x or y) of another landscape item, to ensure uniqueness.
             N = settings.mapBlockSizeInCells
             blockx = x - N * Math.floor x/N
             blocky = y - N * Math.floor y/N
-            for item in items
+            for item in items or [ ]
                 if @pointsAreClose item.position[0], item.position[1], \
                     blockx, blocky then return no
             items.push { type : itemIndex, position : [ blockx, blocky ] }
@@ -138,7 +138,7 @@ place (in cells, in x or y) of another landscape item, to ensure uniqueness.
             N = settings.mapBlockSizeInCells
             blockx = x - N * Math.floor x/N
             blocky = y - N * Math.floor y/N
-            for item in items
+            for item in items or [ ]
                 if @pointsAreClose item.position[0], item.position[1], \
                     blockx, blocky then return item
             null

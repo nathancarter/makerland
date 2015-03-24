@@ -191,6 +191,24 @@ for doing so looks like the following.
                         action : again
             ,
                 type : 'action'
+                value : 'Edit parameters'
+                action : =>
+                    require( './ui' ).editKeyValuePairs player,
+                        'parameter name', 'parameter description',
+                        "Parameters for #{data.name}",
+                        'Create parameters for the behavior by adding the
+                        parameter name on the left, then describing it in
+                        words a user can understand on the right.  You can
+                        provide a default value for a parameter named, for
+                        example, "duration", by creating another entry
+                        called "default duration" and settings its value to
+                        your desired default.',
+                        data.parameters or [ ],
+                        ( result ) =>
+                            if result then @set entry, 'parameters', result
+                            again()
+            ,
+                type : 'action'
                 value : 'Edit implementation'
                 action : =>
                     player.showUI
@@ -259,16 +277,68 @@ callback will be called when the player clicks Done.
                 class : 'line-above'
             ]
             for behavior, index in object.behaviors
-                do ( index ) =>
+                do ( index, behavior ) =>
+                    type = beTable.get behavior['behavior type']
+                    params = [ ]
+                    for own key, value of behavior
+                        if key isnt 'behavior type'
+                            params.push "#{key}: #{value ?
+                                type.parameters["default #{key}"] ?
+                                '(unspecified)'}"
                     controls.push [
                         type : 'text'
-                        value : beTable.get behavior['behavior type'],
-                            'name'
+                        value : "<b>Name:</b><br>#{type.name}"
                     ,
+                        type : 'text'
+                        value : "<b>Parameters:</b><br>#{params.join ', '}"
+                    ]
+                    controls.push [
                         type : 'action'
                         value : 'Edit'
                         action : =>
-                            player.showOK 'Not yet implemented.', again
+                            controls = [
+                                type : 'text'
+                                value : "<h3>Editing #{name}:</h3>"
+                            ]
+                            for own name, desc of type.parameters or { }
+                                if name[...8] isnt 'default '
+                                    value = behavior[name] ? \
+                                        type.parameters["default #{name}"] \
+                                        ? ''
+                                    controls.push
+                                        type : 'text'
+                                        value : "<p>#{desc}</p>"
+                                        class : 'line-above'
+                                    controls.push [
+                                        type : 'text'
+                                        value : "<b>#{name}:</b>"
+                                    ,
+                                        type : 'string input'
+                                        name : "parameter #{name}"
+                                        value : value
+                                    ]
+                            controls = controls.concat [
+                                type : 'action'
+                                value : 'Save'
+                                default : yes
+                                action : ( event ) =>
+                                    for own key, value of event
+                                        if key[...10] is 'parameter '
+                                            behavior[key[10..]] = value
+                                    object.save()
+                                    again()
+                            ,
+                                type : 'action'
+                                value : 'Cancel'
+                                cancel : yes
+                                action : again
+                            ,
+                                type : 'text'
+                                value : "<p>The behavior's description, for
+                                         reference:</p><div class='well'
+                                         >#{type.description}</div>"
+                            ]
+                            player.showUI controls
                     ,
                         type : 'action'
                         value : 'Remove'
@@ -318,17 +388,22 @@ can run multiple times on multiple objects.
 
         makeCodeRunnable : ( codeString ) ->
             applyMe = eval "( function ( args ) { #{codeString} } )"
-            ( object ) -> applyMe.apply object
+            ( object, args ) -> applyMe.apply object, [ args ]
 
 The following function installs a behavior in an object by creating (or
 loading from a cache) a runnable version of the behavior's code, then
-running that code on the object.
+running that code on the object.  The `behaviorData` parameter should be an
+object created by the `editAttachments` routine above, which will contain
+the member "behavior type" as well as members for each parameter specified
+at the time of attachment.
 
-        installBehavior : ( behaviorIndex, object ) =>
-            runnable = ( @runnableCache ?= { } )[behaviorIndex] ?=
-                @makeCodeRunnable @get behaviorIndex, 'code'
+        installBehavior : ( behaviorData, object ) =>
+            return unless index = behaviorData['behavior type']
+            return unless code = @get index, 'code'
+            runnable = ( @runnableCache ?= { } )[index] ?=
+                @makeCodeRunnable code
             try
-                runnable object
+                runnable object, behaviorData
             catch e
                 console.log 'Running behavior code threw an error:', e
 

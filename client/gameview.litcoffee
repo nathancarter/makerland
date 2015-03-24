@@ -274,6 +274,12 @@ It uses the following routine, which caches command icons.
             commandIconCache[name].src = "icons/#{name}"
         commandIconCache[name]
 
+Later we will also draw text over the map, but for now, we just dump info
+about the text to the console, for testing purposes.
+
+    socket.on 'show text', ( data ) ->
+        console.log 'Would show this text data:', data
+
 ## Interacting with the Game Map
 
 First we track all keys pressed in the game view, so that several times per

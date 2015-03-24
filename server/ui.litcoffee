@@ -161,3 +161,122 @@ the UI appears.
             value : 'Cancel'
             cancel : yes
             action : -> callback null
+
+## Editing a set of key-value pairs
+
+This shows a UI for entering a set of key-value pairs.  But if it presented
+that UI to the user in those terms ("Please enter a set of key-value pairs")
+that would often be confusing.  Thus it accepts parameters for what to call
+the keys and values.  For example, if you are mapping names of coins to
+their values, you might set `keyName` to "name of coin" and `valueName` to
+"value of coin" for example.  You should also provide a title for the UI.
+
+The callback will be called with a parameter of null if the user cancels, or
+with a valid object (which may have zero or more key-value pairs in it) that
+is `JSON.stringify`able.  Any data the user entered as a key was treated as
+a string; any data the user entered as a value was converted to one of the
+following data types, in this order of priority.
+
+ * a boolean if it's true/false/yes/no/on/off
+ * a number if possible
+ * a JSON object if JSON.parse succeeds
+ * a string otherwise
+
+This conversion is accomplished by the following auxiliary function, used in
+the key-value-pair editing function defined further below.
+
+    valueInputToData = ( input ) ->
+        if input in [ 'true', 'yes', 'on' ] then return true
+        if input in [ 'false', 'no', 'off' ] then return false
+        finput = parseFloat input
+        if not isNaN finput and isFinite input then return finput
+        try return JSON.parse input
+        input
+
+That function also has an inverse.
+
+    dataToValueInput = ( data ) ->
+        if data is true then return 'true'
+        if data is false then return 'false'
+        if typeof data is 'number' then return "#{data}"
+        if typeof data is 'string' then return data
+        try return JSON.stringify data
+        "#{data}" # shouldn't happen, but just in case
+
+We need one other auxiliary function, for taking the UI and forming the set
+of key-value pairs from it.
+
+    buildObjectFromUI = ( event ) ->
+        result = { }
+        for own key, value of event
+            if key[...4] is 'key '
+                count = key[4..]
+                if event.hasOwnProperty "value #{count}"
+                    result[value] = valueInputToData event["value #{count}"]
+        console.log "computed this object:", JSON.stringify result, null, 4
+        result
+
+Now the actual public-facing function itself.  The only parameter not yet
+explained is "instructions," which must be text, but can be empty.  If
+non-empty, it will be inserted below the title, explaining to the user
+whatever you feel needs explaining about what they're editing.
+
+    module.exports.editKeyValuePairs =
+    ( player, keyName, valueName, title, instructions, initialData,
+      callback ) =>
+        again = ( data ) -> module.exports.editKeyValuePairs player,
+            keyName, valueName, title, instructions, data, callback
+        controls = [
+            type : 'text'
+            value : "<h3>#{title}</h3>"
+        ]
+        if instructions.length > 0 then controls.push
+            type : 'text'
+            value : instructions
+        controls.push
+            type : 'text'
+            value : "Entries in the list below have \"#{keyName}\" on the
+                left and \"#{valueName}\" on the right."
+        count = 0
+        for own key, value of initialData
+            controls.push [
+                type : 'string input'
+                name : "key #{count}"
+                value : key
+            ,
+                type : 'string input'
+                name : "value #{count}"
+                value : dataToValueInput value
+            ]
+            controls.push
+                type : 'action'
+                value : 'Remove previous'
+                action : do ( count ) -> ( event ) ->
+                    delete event["key #{count}"]
+                    again buildObjectFromUI event
+            count++
+        if count is 0 then controls.push
+            type : 'text'
+            value : '(no entries in the list yet--you may add some)'
+        controls = controls.concat [
+            type : 'action'
+            value : 'Add'
+            action : ( event ) ->
+                data = buildObjectFromUI event
+                i = 1
+                while data.hasOwnProperty "new #{keyName} #{i}"
+                    i++
+                data["new #{keyName} #{i}"] = "new #{valueName} #{i}"
+                again data
+        ,
+            type : 'action'
+            value : 'Done'
+            default : yes
+            action : ( event ) -> callback buildObjectFromUI event
+        ,
+            type : 'action'
+            value : 'Cancel'
+            cancel : yes
+            action : ( event ) -> callback null
+        ]
+        player.showUI controls

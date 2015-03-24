@@ -34,8 +34,7 @@ corners as well.
             @topLeft = x : @x - @size/2, y : @y - @size/2
             @bottomRight = x : @x + @size/2, y : @y + @size/2
             for behavior in @behaviors ?= [ ]
-                require( './behaviors' ).installBehavior \
-                    behavior['behavior type'], this
+                require( './behaviors' ).installBehavior behavior, this
 
 This utility tests whether an object at a given position is bumping into
 this landscape item.  The object's position is given by a rectangular
