@@ -23,6 +23,7 @@ caching blocks in advance).
             position : playerPosition
             visionDistance : 1.5 * maximumVisionDistance()
     validPosition = ( position ) ->
+        if not position then return no
         N = window.gameSettings.mapBlockSizeInCells
         if not N then return yes
         blockx = ( N * Math.floor position[1] / N ) | 0

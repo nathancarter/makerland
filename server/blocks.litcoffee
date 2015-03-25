@@ -465,16 +465,23 @@ player just entered it.
         if p
             playerTopLeft = x : p[1] - 0.25, y : p[2] - 0.75
             playerBottomRight = x : p[1] + 0.25, y : p[2]
+        else
+            playerTopLeft = playerBottomRight = null
+        if oldPosition
             previousTopLeft =
                 x : oldPosition[1] - 0.25, y : oldPosition[2] - 0.75
             previousBottomRight =
                 x : oldPosition[1] + 0.25, y : oldPosition[2]
-            for block in visibleBlocks
-                for item in module.exports.landscapeItems?[block] or [ ]
-                    old = item.collides previousTopLeft, previousBottomRight
-                    now = item.collides playerTopLeft, playerBottomRight
-                    if now and not old then item.emit 'entered', player
-                    if old and not now then item.emit 'exited', player
+        else
+            previousTopLeft = previousBottomRight = null
+        for block in visibleBlocks
+            for item in module.exports.landscapeItems?[block] or [ ]
+                old = previousTopLeft and previousBottomRight and \
+                    item.collides previousTopLeft, previousBottomRight
+                now = playerTopLeft and playerBottomRight and \
+                    item.collides playerTopLeft, playerBottomRight
+                if now and not old then item.emit 'entered', player
+                if old and not now then item.emit 'exited', player
 
 The following function notifies players about their set of visible blocks.
 
