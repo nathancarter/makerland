@@ -51,7 +51,11 @@ integers.
             key = "#{plane},#{x},#{y}"
         getBlock : ( plane, x, y ) =>
             if not key = @positionToBlockName plane, x, y then return null
-            if not @exists key then @set key, { }
+            if not @exists key
+                N = settings.mapBlockSizeInCells
+                @set key,
+                    cells : ( ( -1 for i in [1..N] ) for i in [1..N] )
+                    'landscape items' : [ ]
             @get key
         setBlock : ( plane, x, y, block ) =>
             if not key = @positionToBlockName plane, x, y then return
