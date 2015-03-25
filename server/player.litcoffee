@@ -341,6 +341,7 @@ commands.
             appearance : @saveData.avatar
             shortcuts : shortcuts
             HUD : hudshorts
+            isMaker : @isMaker()
 
 This function checks the status periodically to see if it has changed.  If
 so, it sends a status update message to the player.
@@ -422,6 +423,11 @@ access.
                     if key not in @saveData.commands
                         @saveData.commands.push key
             @saveData.commands
+
+We determine whether a player is a maker or not based on whether they have
+access to the "database" command.
+
+        isMaker : => 'database' in @commands()
 
 This command shows the player the UI for all commands to which they have
 access.

@@ -405,7 +405,12 @@ at the time of attachment.
             try
                 runnable object, behaviorData
             catch e
-                console.log 'Running behavior code threw an error:', e
+                code = ( "#{index+1}. #{line}" \
+                    for line, index in code.split '\n' ).join '\n'
+                console.log "While running code for behavior of type
+                    #{index}:\n
+                    #{e.stack.split( '\n' )[..1].join '\n'}\n
+                    #{code}"
 
 ## Exporting
 

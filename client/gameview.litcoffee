@@ -230,9 +230,13 @@ just the player's name (after login only).
         name = currentStatus.name[0].toUpperCase() + currentStatus.name[1..]
         size = context.measureText name
         context.fillText name, gameview.width - size.width - 40, 30
-        #position = JSON.stringify getPlayerPosition()
-        #size = context.measureText position
-        #context.fillText position, gameview.width - size.width - 40, 60
+        if currentStatus.isMaker
+            [ plane, x, y ] = getPlayerPosition()
+            x = "#{x}".substring 0, "#{x|0}".length+3
+            y = "#{y}".substring 0, "#{y|0}".length+3
+            position = "#{plane},#{x},#{y}"
+            size = context.measureText position
+            context.fillText position, gameview.width - size.width - 40, 60
         i = 0 ; edge = 80 ; margin = 20
         HUDZones = { }
         for own command, icon of currentStatus.HUD
