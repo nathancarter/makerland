@@ -213,7 +213,6 @@ of key-value pairs from it.
                 count = key[4..]
                 if event.hasOwnProperty "value #{count}"
                     result[value] = valueInputToData event["value #{count}"]
-        console.log "computed this object:", JSON.stringify result, null, 4
         result
 
 Now the actual public-facing function itself.  The only parameter not yet
