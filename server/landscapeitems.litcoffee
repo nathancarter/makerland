@@ -26,6 +26,7 @@ corners as well.
             if tableEntry = blockTable.getLandscapeItem @plane, @x, @y
                 @type = tableEntry.type
                 @behaviors = tableEntry.behaviors or [ ]
+                @visible = tableEntry.visible ? yes
             @typeName = require( './landscapeitems' ).get @type, 'name'
             N = require( './settings' ).mapBlockSizeInCells
             @localX = @x - N * Math.floor @x/N

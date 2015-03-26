@@ -488,13 +488,28 @@ player just entered it.
                 if old and not now then item.emit 'exited', player
 
 The following function notifies players about their set of visible blocks.
+Each block is shallow-copied, so that manipulations to it can be made if
+needed before sending to the player.  For instance, for non-maker players,
+any landscape items visible only to makers get filtered out.
 
     notifyAboutVisibility = ( notifyThisPlayer, blockSet ) ->
         if not notifyThisPlayer then return
         data = { }
         for block in blockSet
             [ plane, x, y ] = ( parseInt i for i in block.split ',' )
-            data[block] = module.exports.getBlock plane, x, y
+            data[block] = { }
+            for own key, value of module.exports.getBlock plane, x, y
+                data[block][key] = value
+            if not notifyThisPlayer.isMaker()
+                itemtypes = [ ]
+                for item in data[block]['landscape items']
+                    itemtypes.push item.type if item.type not in itemtypes
+                visibleItems = [ ]
+                for type in itemtypes
+                    if require( './landscapeitems' ).get type, 'visible'
+                        for item in data[block]['landscape items']
+                            visibleItems.push item if item.type is type
+                data[block]['landscape items'] = visibleItems
         notifyThisPlayer.socket.emit 'visible blocks', data
 
 And when a block is edited by a maker, we want to call the above function on
