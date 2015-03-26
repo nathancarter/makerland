@@ -268,10 +268,10 @@ The UI for editing a landscape item looks like the following.
                             {
                                 'yes' : true
                                 'no' : false
-                            }, @get( entry, 'name' ),
+                            }, @get( entry, 'visible' ),
                             ( choice ) =>
                                 if choice isnt null
-                                    @set entry, 'visible', choice
+                                    @set entry, 'visible', choice is 'true'
                                 again()
                 ]
             ,
