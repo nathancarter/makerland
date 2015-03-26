@@ -140,7 +140,7 @@ in default values for all its keys with the `installDefault` function.
 
         setDefault : ( key, value ) => @defaults[key] = value
         installDefaults : ( entry ) =>
-            entry[key] = value for own key, value of @defaults
+            entry[key] ?= value for own key, value of @defaults
         getWithDefaults : ( entryName ) =>
             result = @get entryName
             @installDefaults result if result
