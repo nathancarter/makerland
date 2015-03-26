@@ -155,7 +155,7 @@ from that entry's key-value pairs.
                     entryJSON = fs.readFileSync @filename entryName
                     entry = JSON.parse entryJSON
                     @putIntoCache entryName, entry, entryJSON.length
-                if not key? then entry else entry[key] or @defaults[key]
+                if not key? then entry else entry[key] ? @defaults[key]
             catch e
                 undefined
 
