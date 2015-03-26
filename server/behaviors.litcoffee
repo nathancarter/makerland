@@ -412,6 +412,14 @@ at the time of attachment.
                     #{e.stack.split( '\n' )[..1].join '\n'}\n
                     #{code}"
 
+If the behavior is updated, we need to clear out the cached version of its
+former state, so that the next request for the behavior gets the updated
+version.
+
+        set : ( entryName, others... ) =>
+            super entryName, others...
+            delete @runnableCache[entryName]
+
 ## Exporting
 
 The module then exports a single instance of the `BehaviorsTable` class.

@@ -658,3 +658,22 @@ remember, then jump back to those locations later.
                     action : => player.showCommandUI()
                 ]
                 player.showUI controls
+
+The reset command deletes all landscape items in all blocks visible to the
+maker, and recreates them all from scratch.  This has the advantage of also
+reinstalling all their behaviors, which will thus be updated to the latest
+versions.
+
+        reset :
+            category : 'maker'
+            icon : 'reset.png'
+            shortInfo : 'Reset the items near you in the map'
+            help : 'This command destroys and instantly recreates all items
+                that belong on the map near you.  This also reinstalls any
+                behaviors in them, thus updating them to the latest versions
+                of those behaviors.  It does nothing to map cells, only to
+                items that sit on top of the map.'
+            run : ( player ) ->
+                require( './blocks' ).resetBlocksNearPlayer player
+                player.showOK 'The objects near you have been reset.',
+                    => player.showCommandUI()

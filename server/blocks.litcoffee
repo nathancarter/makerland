@@ -358,6 +358,13 @@ instances that go with it.
             super entryName
             delete ( @landscapeItems ?= { } )[entryName]
 
+To reset a block to its initial state (reloading all landscape items and
+their behaviors) we just remove it from the cache and re-add it.
+
+        resetBlock : ( blockName ) =>
+            @removeFromCache blockName
+            @get blockName
+
 Export a singleton of the class as the module.
 
     module.exports = new BlocksTable
@@ -521,3 +528,10 @@ every player who can see the block.
             if player
                 notifyAboutVisibility player,
                     blocksVisibleToPlayer[playerName]
+
+Makers have a reset command that reloads all the items in all the blocks
+near the maker.  That command calls the following function.
+
+    module.exports.resetBlocksNearPlayer = ( player ) =>
+        for block in blocksVisibleToPlayer[player.name]
+            module.exports.resetBlock block
