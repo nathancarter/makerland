@@ -272,9 +272,10 @@ adding, removing, and changing entries.
                     buttons = for name in database.tables.sort()
                         do ( name ) ->
                             table = database[name]
-                            type : 'action'
-                            value : table.humanReadableName
-                            action : browseTable = ->
+                            if table.browse?
+                                browseTable = ->
+                                    table.browse player, browseDB
+                            browseTable ?= ->
                                 contents = [
                                     type : 'text'
                                     value : "<h3>#{name} table:</h3>"
@@ -338,6 +339,9 @@ adding, removing, and changing entries.
                                     cancel : yes
                                     action : browseDB
                                 player.showUI contents
+                            type : 'action'
+                            value : table.humanReadableName
+                            action : browseTable
                     buttons.unshift
                         type : 'text'
                         value : '<h3>Tables in Database:</h3>

@@ -384,10 +384,23 @@ callback will be called when the player clicks Done.
             player.showUI controls
 
 The following function takes a code string and turns it into a function we
-can run multiple times on multiple objects.
+can run multiple times on multiple objects.  We wrap the given code string
+in not just one function call, but two, so that if it has an error, the
+innermost stack frame's line and column numbers correctly address the given
+code, and are not impacted by the size of the template around it.
 
-        makeCodeRunnable : ( codeString ) ->
-            applyMe = eval "( function ( args ) { #{codeString} } )"
+        makeCodeRunnable : ( codeString, author ) ->
+            log = if author then \
+                "function log () {
+                    require( './logs' ).logMessage( '#{author}',
+                        Array.prototype.slice.apply( arguments )
+                            .join( ' ' ) );
+                }" else ""
+            codeString = "( function ( args ) {
+                #{log}
+                ( function () {#{codeString}\n} ).apply( this );
+            } )"
+            applyMe = eval codeString
             ( object, args ) -> applyMe.apply object, [ args ]
 
 The following function installs a behavior in an object by creating (or
@@ -400,17 +413,14 @@ at the time of attachment.
         installBehavior : ( behaviorData, object ) =>
             return unless index = behaviorData['behavior type']
             return unless code = @get index, 'code'
+            author = @getAuthors( index )[0]
             runnable = ( @runnableCache ?= { } )[index] ?=
-                @makeCodeRunnable code
+                @makeCodeRunnable code, author
             try
                 runnable object, behaviorData
             catch e
-                code = ( "#{index+1}. #{line}" \
-                    for line, index in code.split '\n' ).join '\n'
-                console.log "While running code for behavior of type
-                    #{index}:\n
-                    #{e.stack.split( '\n' )[..1].join '\n'}\n
-                    #{code}"
+                require( './logs' ).logError author,
+                    "behavior #{@get index, 'name'}", code, e
 
 If the behavior is updated, we need to clear out the cached version of its
 former state, so that the next request for the behavior gets the updated
