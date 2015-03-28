@@ -116,6 +116,11 @@ The settings command allows players to edit their personal settings.
                                 selected : player.saveData.avatar?.headColor
                             ,
                                 type : 'choice'
+                                name : 'hair color'
+                                choices : colors
+                                selected : player.saveData.avatar?.hairColor
+                            ,
+                                type : 'choice'
                                 name : 'body color'
                                 choices : colors
                                 selected : player.saveData.avatar?.bodyColor
@@ -139,6 +144,23 @@ The settings command allows players to edit their personal settings.
                                 selected : player.saveData.avatar?.thickness
                             ,
                                 type : 'choice'
+                                name : 'shoulders'
+                                choices :
+                                    narrow : 0.03
+                                    normal : 0.06
+                                    broad : 0.10
+                                selected : \
+                                    player.saveData.avatar?.shouldersWidth
+                            ,
+                                type : 'choice'
+                                name : 'hips'
+                                choices :
+                                    narrow : 0.03
+                                    normal : 0.06
+                                    broad : 0.10
+                                selected : player.saveData.avatar?.hipsWidth
+                            ,
+                                type : 'choice'
                                 name : 'height'
                                 choices :
                                     'very short' : 0.5
@@ -155,6 +177,29 @@ The settings command allows players to edit their personal settings.
                                     large : 0.13
                                 selected : player.saveData.avatar?.headSize
                             ,
+                                type : 'choice'
+                                name : 'hair style'
+                                choices :
+                                    none : 0
+                                    short : 1
+                                    medium : 2
+                                    bob : 3
+                                    shoulders : 4
+                                    'very long' : 5
+                                selected : \
+                                    player.saveData.avatar?.hairLength
+                            ,
+                                type : 'choice'
+                                name : 'hair volume'
+                                choices :
+                                    thin : 0.5
+                                    normal : 1
+                                    thick : 1.5
+                                    fluffy : 2
+                                    'very fluffy' : 3
+                                selected : \
+                                    player.saveData.avatar?.hairFluff
+                            ,
                                 type : 'action'
                                 value : 'Done'
                                 action : settings
@@ -163,13 +208,21 @@ The settings command allows players to edit their personal settings.
                                 action : ( event ) ->
                                     player.saveData.avatar =
                                         headColor : event['head color']
+                                        hairColor : event['hair color']
                                         bodyColor : event['body color']
                                         armColor : event['arm color']
                                         legColor : event['leg color']
                                         thickness : parseInt event.thickness
+                                        hipsWidth : parseFloat event.hips
+                                        shouldersWidth : parseFloat \
+                                            event.shoulders
                                         height : parseFloat event.height
                                         headSize : parseFloat \
                                             event['head size']
+                                        hairLength : parseFloat \
+                                            event['hair style']
+                                        hairFluff : parseFloat \
+                                            event['hair volume']
                                     player.updateStatus()
                     ,
                         type : 'action'

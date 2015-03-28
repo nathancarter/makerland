@@ -53,12 +53,12 @@ right and left, to complete the full cycle.
 There is also a standing pose that is not part of the walk cycle.
 
     standing =
-        head : [ 0, 1 ]
+        head : [ 0, 1.1 ]
         hips : [ 0, 0.5 ]
         lfoot : [ -0.15, 0, 0 ]
         rfoot : [ 0.15, 0, 0 ]
-        lhand : [ 0.1, 0.5, 0 ]
-        rhand : [ -0.1, 0.5, 0 ]
+        lhand : [ -0.1, 0.5, 0 ]
+        rhand : [ 0.1, 0.5, 0 ]
 
 This routine takes two endpoints of a limb and puts a bend in the center of
 the limb by an amount proportional to the final parameter.  The left
@@ -94,49 +94,89 @@ structure specifying data such as leg color, body color, height, and so on.
         dy = ( position[2] - myPosition[2] ) * cellSize
         scale = cellSize/2 * ( appearance?.height or 1 )
         flip = if left then -1 else 1
-        point = ( array ) ->
-            x : gameview.width/2 + dx + array[0]*scale*flip
+        point = ( array, hshift = 0 ) ->
+            x : gameview.width/2 + dx + (array[0]+hshift)*scale*flip
             y : gameview.height/2 + dy - array[1]*scale
+        leftMult = if left then 1 else -1
+        hwidth = ( appearance?.hipsWidth or 0.03 ) * leftMult
+        swidth = ( appearance?.shouldersWidth or 0.03 ) * leftMult
         head = point pose.head
-        hips = point pose.hips
+        lhips = point pose.hips, -hwidth
+        rhips = point pose.hips, +hwidth
         lfoot = point pose.lfoot
-        lknee = bumpJoint hips, lfoot, left, pose.lfoot[2]
+        lknee = bumpJoint lhips, lfoot, left, pose.lfoot[2]
         rfoot = point pose.rfoot
-        rknee = bumpJoint hips, rfoot, left, pose.rfoot[2]
-        shoulder = x : hips.x*0.2+head.x*0.8, y : hips.y*0.2 + head.y*0.8
-        lhand = point pose.lhand
-        lelbow = bumpJoint shoulder, lhand, not left, pose.lhand[2]
-        rhand = point pose.rhand
-        relbow = bumpJoint shoulder, rhand, not left, pose.rhand[2]
+        rknee = bumpJoint rhips, rfoot, left, pose.rfoot[2]
+        shoulder = [ pose.hips[0]*0.2 + pose.head[0]*0.8,
+                     pose.hips[1]*0.2 + pose.head[1]*0.8 ]
+        lshoulder = point shoulder, -swidth
+        rshoulder = point shoulder, +swidth
+        lhand = point pose.lhand, -swidth
+        lelbow = bumpJoint lshoulder, lhand, not left, pose.lhand[2]
+        rhand = point pose.rhand, +swidth
+        relbow = bumpJoint rshoulder, rhand, not left, pose.rhand[2]
         context.lineWidth = appearance?.thickness or 1
         context.lineCap = 'round'
-        context.strokeStyle = appearance?.legColor or '#000000'
-        context.beginPath()
-        context.moveTo lfoot.x, lfoot.y
-        context.lineTo lknee.x, lknee.y
-        context.lineTo hips.x, hips.y
-        context.lineTo rknee.x, rknee.y
-        context.lineTo rfoot.x, rfoot.y
-        context.stroke()
-        context.strokeStyle = appearance?.bodyColor or '#000000'
-        context.beginPath()
-        context.moveTo shoulder.x, shoulder.y
-        context.lineTo hips.x, hips.y
-        context.stroke()
-        context.strokeStyle = appearance?.armColor or '#000000'
-        context.beginPath()
-        context.moveTo lhand.x, lhand.y
-        context.lineTo lelbow.x, lelbow.y
-        context.lineTo shoulder.x, shoulder.y
-        context.lineTo relbow.x, relbow.y
-        context.lineTo rhand.x, rhand.y
-        context.stroke()
+        polyLine = ( start, rest... ) ->
+            context.beginPath()
+            context.moveTo start.x, start.y
+            context.lineTo pt.x, pt.y for pt in rest
+            context.stroke()
+        polyGon = ( start, rest... ) ->
+            context.beginPath()
+            context.moveTo start.x, start.y
+            context.lineTo pt.x, pt.y for pt in rest
+            context.lineTo start.x, start.y
+            context.fill()
+        # draw leg and arm that are in the back (farther from the viewer)
+        if left
+            context.strokeStyle = appearance?.legColor or '#000000'
+            polyLine rfoot, rknee, rhips
+            context.strokeStyle = appearance?.armColor or '#000000'
+            polyLine rhand, relbow, rshoulder
+        else
+            context.strokeStyle = appearance?.legColor or '#000000'
+            polyLine lfoot, lknee, lhips
+            context.strokeStyle = appearance?.armColor or '#000000'
+            polyLine lhand, lelbow, lshoulder
+        # draw body
+        context.fillStyle = appearance?.bodyColor or '#000000'
+        polyGon lshoulder, rshoulder, rhips, lhips
+        # draw leg and arm that are in the front (closer to the viewer)
+        if left
+            context.strokeStyle = appearance?.legColor or '#000000'
+            polyLine lfoot, lknee, lhips
+            context.strokeStyle = appearance?.armColor or '#000000'
+            polyLine lhand, lelbow, lshoulder
+        else
+            context.strokeStyle = appearance?.legColor or '#000000'
+            polyLine rfoot, rknee, rhips
+            context.strokeStyle = appearance?.armColor or '#000000'
+            polyLine rhand, relbow, rshoulder
+        # draw head
         context.fillStyle = context.strokeStyle =
             appearance?.headColor or '#000000'
         hs = appearance?.headSize or 0.1
         context.beginPath()
         context.arc head.x, head.y, hs*scale, 0, 2 * Math.PI, false
         context.fill()
+        # draw hair
+        context.strokeStyle = appearance?.hairColor or '#000000'
+        context.lineWidth = appearance?.hairFluff or 1
+        hlen = appearance?.hairLength or 0
+        if hlen > 0
+            rad = hs*scale*1.1
+            arcAmt = ( Math.min 2, hlen ) * Math.PI/4
+            context.beginPath()
+            context.arc head.x, head.y, rad,
+                -Math.PI/2 - arcAmt, -Math.PI/2 + arcAmt
+            hangAmt = ( Math.max 0, hlen - 2 ) / 2
+            context.moveTo head.x + rad, head.y
+            context.lineTo head.x + rad, head.y + hangAmt * rad
+            context.moveTo head.x - rad, head.y
+            context.lineTo head.x - rad, head.y + hangAmt * rad
+            context.stroke()
+        # write name
         context.font = '16px serif'
         size = context.measureText name
         context.fillText name, head.x-size.width/2, head.y-20
