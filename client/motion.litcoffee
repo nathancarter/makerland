@@ -35,7 +35,10 @@ caching blocks in advance).
         y = ( position[2] - blocky ) | 0
         if x >= N then x = N - 1 # prevent float rounding inaccuracies
         if y >= N then y = N - 1 # prevent float rounding inaccuracies
-        celltype = lookupCellType blockData[x][y]
+        celltype = blockData[x][y]
+        if celltype is -1
+            celltype = currentStatus?.defaultCellType ? -1
+        celltype = lookupCellType celltype
         celltype['who can walk on it'] isnt 'none'
     movePlayer = ( dx, dy ) ->
         if not validPosition playerPosition

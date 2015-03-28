@@ -32,6 +32,7 @@ the game is editable only by the admin character.
             super 'blocks'
             if not @getAuthors @planeKey 0
                 @setAuthors @planeKey( 0 ), [ 'admin' ]
+            @setDefault 'default cell type', -1
 
 ## Specialized Getters and Setters
 
@@ -249,8 +250,9 @@ The UI for editing a plane looks like the following.
                     edit something other than a plane.  This is not
                     permitted.', callback
             data = @get entry
-            again = => @edit player, entry, callback
-            player.showUI
+            cellTypeChooser = require( './celltypes' ).entryChooser player,
+                'Default cell type', @get entry, 'default cell type'
+            do again = => player.showUI
                 type : 'text'
                 value : "<h3>Editing #{entry}:</h3>"
             ,
@@ -302,6 +304,11 @@ The UI for editing a plane looks like the following.
                         this, entry, again
                 ]
             ,
+                type : 'text'
+                value : 'Default cell type for this plane:'
+            ,
+                cellTypeChooser( again )
+            ,
                 type : 'action'
                 value : 'Teleport to this plane'
                 action : =>
@@ -312,7 +319,10 @@ The UI for editing a plane looks like the following.
                 type : 'action'
                 value : 'Done'
                 cancel : yes
-                action : callback
+                action : ( event ) =>
+                    @set entry, 'default cell type',
+                        event['Default cell type']
+                    callback()
 
 A maker can remove an entry if and only if it is a plane that that maker can
 edit.

@@ -123,8 +123,11 @@ that moves as the player walks.  Later, it will have an actual map in it.
                 for j in [0...blockSize]
                     screen = mapCoordsToScreenCoords x+i, y+j
                     drawn = no
-                    if array[i][j] > -1
-                        index = array[i][j]
+                    cellType = array[i][j]
+                    if cellType is -1
+                        cellType = currentStatus.defaultCellType
+                    if cellType > -1
+                        index = cellType
                         lookupCellType index
                         image = getCellTypeIcon index
                         if image.complete

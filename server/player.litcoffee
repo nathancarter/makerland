@@ -337,11 +337,18 @@ commands.
             for command in @commands().concat [ 'hide/show command panel' ]
                 shortcuts[command] = @saveData.shortcuts[command]
                 hudshorts[command] = @saveData.hudshorts[command]
+            if ( plane = @getPosition()?[0] )?
+                btable = require './blocks'
+                defaultCellType = btable.get btable.planeKey( plane ),
+                    'default cell type'
+            else
+                defaultCellType = -1
             name : @name
             appearance : @saveData.avatar
             shortcuts : shortcuts
             HUD : hudshorts
             isMaker : @isMaker()
+            defaultCellType : defaultCellType
 
 This function checks the status periodically to see if it has changed.  If
 so, it sends a status update message to the player.
@@ -462,7 +469,11 @@ given position, based on the cell type at that position.
         validPosition : ( position ) =>
             if not position then return yes
             [ plane, x, y ] = position
-            celltype = require( './blocks' ).getCell plane, x, y
+            btable = require './blocks'
+            celltype = btable.getCell plane, x, y
+            if celltype is -1
+                celltype = btable.get btable.planeKey( plane ),
+                    'default cell type'
             require( './celltypes' ).canWalkOn this, celltype
 
 The following function updates player position data and asks the blocks
@@ -477,6 +488,7 @@ position.
                 return
             oldPosition = @getPosition()
             @setPosition newPosition
+            if newPosition?[0] isnt oldPosition?[0] then @updateStatus()
             require( './blocks' ).updateVisibility this, visionDistance,
                 oldPosition
 
