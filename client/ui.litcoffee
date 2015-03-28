@@ -62,6 +62,18 @@ just invoked, e.g., via a shortcut key.
              <form action='/upload/#{currentStatus?.name}'
                    method='post' id='commandPaneForm'
                    enctype='multipart/form-data'>#{html}</form></div>"
+        if codeEditor = ( $ '.code-editor' ).get 0
+            console.log 'found code editor:', codeEditor
+            codeEditor.codeMirror = CodeMirror.fromTextArea codeEditor,
+                lineNumbers : true
+                extraKeys:
+                    'F11' : ( c ) ->
+                        console.log 'you hit F11'
+                        c.setOption 'fullScreen', !c.getOption 'fullScreen'
+                    'Esc' : ( c ) ->
+                        console.log 'you hit Esc'
+                        if c.getOption 'fullScreen'
+                            c.setOption 'fullScreen', no
         ( $ '#rightpane input, select' ).change window.uiElementChanged
         expandCommandPane()
 
@@ -231,9 +243,11 @@ individual row in the table that populates that command pane.
                 ]
             when 'code input'
                 [
-                    "<textarea id='input_#{data.name}'
-                      class='form-control fixed-width'
-                     rows=20>#{data.value or ''}</textarea>"
+                    "<div style='border: solid 1px black; padding: 0;
+                      margin: 0;'><textarea id='input_#{data.name}'
+                      class='form-control fixed-width code-editor'
+                     rows=20>#{data.value or ''}</textarea></div>
+                     <p align=right>F11 toggles full-screen editing.</p>"
                 ]
             else
                 [ "<p#{attrs}>#{JSON.stringify data}</p>" ]
@@ -273,6 +287,7 @@ values, and stores them in a JSON object that can be sent to the server.
                 if input.tagName is 'SELECT'
                     value = input.options[input.selectedIndex].value
                 if input.tagName is 'TEXTAREA'
+                    input.codeMirror?.save()
                     value = input.value
                 result[name] = value
         result

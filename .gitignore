@@ -1,9 +1,9 @@
 planning/
 node_modules/
-client/*.js
-client/*.js.map
-client/*.min.js
-client/*.min.js.map
+client/all*.js
+client/all*.js.map
+client/all*.min.js
+client/all*.min.js.map
 npm-debug.log
 client/all.litcoffee
 lessons/
