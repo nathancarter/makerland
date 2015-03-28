@@ -4,9 +4,11 @@
 ## HTTP
 
 Start an HTTP server to serve game files.  Pass the responsibility off to
-the file server, declared in the following separate module.
+the file server, declared in the following separate module.  We also need to
+be able to look up some global settings.
 
     fileserver = require './fileserver'
+    settings = require './settings'
 
 The following built-in node modules are relevant.
 
@@ -25,7 +27,7 @@ The entirety of the HTTP server is defined here.
             catch e
                 console.log 'Error uploading file', uri, 'Message:', e
         fileserver.serveFile uri, response
-    .listen 9999
+    .listen settings.port or 9999
 
 ## Handling File Uploads
 
@@ -35,7 +37,7 @@ First, make sure the folder for handling file uploads exists.  If it
 doesn't, create it.  If you can't, abort with an error.
 
     fs = require 'fs'
-    uploadFolder = require( './settings' ).getPath 'fileUploadFolder'
+    uploadFolder = settings.getPath 'fileUploadFolder'
     try
         fs.mkdirSync uploadFolder
     catch e
@@ -81,3 +83,33 @@ players before exiting the game.  This handler does so.
     process.on 'SIGINT', ->
         player.save() for player in Player::allPlayers
         process.exit()
+
+## Detecting IP Address
+
+We want to tell the user their internal IP address, which will be known to
+their own computer's network interfaces.  So we query those.
+
+    for own name, list of require( 'os' ).networkInterfaces()
+        for iface in list
+            if iface.family is 'IPv4' and iface.address isnt '127.0.0.1'
+                console.log 'Game ready to receive connections.'
+                console.log "\tInternal users connect here:\t
+                    http://#{iface.address}:#{settings.port or 9999}"
+
+We want to tell the user running the server process what their internal and
+external IP addresses are, so that they can advertise these facts to anyone
+whom they want to join them in the game.
+
+    require( 'request' ) 'http://www.myexternalip.com',
+        ( error, response, body ) ->
+            if error
+                console.log 'Error attempting to find external IP address:',
+                    error.message
+            else if response.statusCode isnt 200
+                console.log 'Attempting to find external IP address gave
+                    bad HTTP status code:', response.statusCode
+            else if match = /data-ip="([^"]+)"/.exec body
+                console.log "\tExternal users connect here:\t
+                    http://#{match[1]}:#{settings.port or 9999}"
+            else
+                console.log 'Could not find external IP address.'

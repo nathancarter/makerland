@@ -7,5 +7,6 @@
     "clientSettings" : [ "cellSizeInPixels", "mapBlockSizeInCells" ],
     "privateGame" : false,
     "gameTitle" : "<h3>Log in or sign up</h3>",
-    "gameTitleImage" : "makerlandlogo.png"
+    "gameTitleImage" : "makerlandlogo.png",
+    "port" : 9999
 }
