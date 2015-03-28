@@ -78,8 +78,11 @@ error, and the error object itself.
         logError : ( makerName, codeDescription, code, errorObject ) =>
             lines = code.split '\n'
             stack = errorObject.stack.split '\n'
-            [ whole, line, column ] = /:(\d+):(\d+)\)\s*$/.exec stack[1]
+            re = /[:(](\d+):(\d+)[)]/.exec stack[0]
+            if not re then re = /[:(](\d+):(\d+)[)]/.exec stack[1]
+            [ whole, line, column ] = re
             line = parseInt line ; column = parseInt column
+            line -= errorObject.prefixLength ? 0
             start = Math.max 1, line - 3
             end = Math.min lines.length, line + 3
             lineNo = ( n ) -> "    #{n}. "[-5..]

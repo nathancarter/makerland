@@ -384,24 +384,33 @@ callback will be called when the player clicks Done.
             player.showUI controls
 
 The following function takes a code string and turns it into a function we
-can run multiple times on multiple objects.  We wrap the given code string
-in not just one function call, but two, so that if it has an error, the
-innermost stack frame's line and column numbers correctly address the given
-code, and are not impacted by the size of the template around it.
+can run multiple times on multiple objects.
 
-        makeCodeRunnable : ( codeString, author ) ->
+        makeCodeRunnable : ( codeString, author = null, argnames = [ ] ) =>
+            result = require( 'acorn' ).parse codeString,
+                { allowReturnOutsideFunction : true }
             log = if author then \
                 "function log () {
                     require( './logs' ).logMessage( '#{author}',
                         Array.prototype.slice.apply( arguments )
                             .join( ' ' ) );
                 }" else ""
-            codeString = "( function ( args ) {
-                #{log}
-                ( function () {#{codeString}\n} ).apply( this );
-            } )"
-            applyMe = eval codeString
-            ( object, args ) -> applyMe.apply object, [ args ]
+            declarations = ( "var #{identifier} = args.#{identifier};" \
+                for identifier in argnames ).join '\n'
+            mayNotUse = [ 'require', 'setInterval', 'process' ] # more later
+            for identifier in mayNotUse
+                declarations += "\nvar #{identifier} = null;"
+            prefix = "( function ( args ) { #{log} #{declarations}\n"
+            prefixLength = prefix.split( '\n' ).length - 1
+            codeString = prefix + codeString + ' } )'
+            try
+                applyMe = eval codeString
+                result = ( object, args ) -> applyMe.apply object, [ args ]
+                result.prefixLength = prefixLength
+                result
+            catch e
+                e.prefixLength = prefixLength
+                throw e
 
 The following function installs a behavior in an object by creating (or
 loading from a cache) a runnable version of the behavior's code, then
@@ -414,11 +423,13 @@ at the time of attachment.
             return unless index = behaviorData['behavior type']
             return unless code = @get index, 'code'
             author = @getAuthors( index )[0]
-            runnable = ( @runnableCache ?= { } )[index] ?=
-                @makeCodeRunnable code, author
             try
+                runnable = ( @runnableCache ?= { } )[index] ?=
+                    @makeCodeRunnable code, author,
+                        Object.keys @get index, 'parameters'
                 runnable object, behaviorData
             catch e
+                e.prefixLength ?= runnable.prefixLength
                 require( './logs' ).logError author,
                     "behavior #{@get index, 'name'}", code, e
 
