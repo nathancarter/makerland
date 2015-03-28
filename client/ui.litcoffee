@@ -66,6 +66,7 @@ just invoked, e.g., via a shortcut key.
             console.log 'found code editor:', codeEditor
             codeEditor.codeMirror = CodeMirror.fromTextArea codeEditor,
                 lineNumbers : true
+                indentUnit : 4
                 extraKeys:
                     'F11' : ( c ) ->
                         console.log 'you hit F11'
