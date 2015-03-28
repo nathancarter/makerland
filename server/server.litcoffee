@@ -104,12 +104,12 @@ whom they want to join them in the game.
         ( error, response, body ) ->
             if error
                 console.log 'Error attempting to find external IP address:',
-                    error.message
+                    error.message, '\n'
             else if response.statusCode isnt 200
                 console.log 'Attempting to find external IP address gave
-                    bad HTTP status code:', response.statusCode
+                    bad HTTP status code:', response.statusCode, '\n'
             else if match = /data-ip="([^"]+)"/.exec body
                 console.log "\tExternal users connect here:\t
-                    http://#{match[1]}:#{settings.port or 9999}"
+                    http://#{match[1]}:#{settings.port or 9999}\n"
             else
-                console.log 'Could not find external IP address.'
+                console.log 'Could not find external IP address.\n'

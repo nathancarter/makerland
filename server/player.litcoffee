@@ -35,9 +35,9 @@ channel to the client page used by this player.
 Dump to the console a message about the connection, and add the player to
 the class variable `allPlayers`.
 
-            console.log 'connected a player'
             Player::allPlayers.push this
-            console.log "there are now #{Player::allPlayers.length}"
+            console.log "Connected a player; there are now
+                #{Player::allPlayers.length} players."
 
 Set up a handler for UI events from the client.
 
@@ -50,7 +50,8 @@ if the player object has within it a handler installed for that event.
                     if @handlers?[event.id]
                         @handlers[event.id] event
                     else
-                        console.log 'No action handler installed for', event
+                        console.log 'ERROR: No action handler installed
+                            for', event
 
 If the event handler is a "contents changed" event, then we see if the
 player object has within it a handler installed for watching changes.
@@ -59,12 +60,13 @@ player object has within it a handler installed for watching changes.
                     if @handlers?.__watcher
                         @handlers.__watcher event
                     else
-                        console.log 'No handler installed to watch changes.'
+                        console.log 'ERROR: No handler installed to watch
+                            changes.'
 
 Any other type we don't know how to handle, so we log it.
 
                 else
-                    console.log 'unknown ui event type:', event.type
+                    console.log 'ERROR: Unknown ui event type:', event.type
 
 If the event is a "command" event, then we see if the player has access to
 the command in question, and if so, run it.
@@ -86,10 +88,10 @@ When this player disconnects, tell the console, and remove the player from
 `allPlayers`.  Also, end the player's periodic status updates.
 
             socket.on 'disconnect', =>
-                console.log "disconnected #{@name or 'a player'}"
                 index = Player::allPlayers.indexOf this
                 Player::allPlayers.splice index, 1
-                console.log "there are now #{Player::allPlayers.length}"
+                console.log "Disconnected #{@name or 'a player'};
+                    there are now #{Player::allPlayers.length} players."
                 @stopStatusUpdates()
                 @save()
                 @positionChanged null, null
@@ -143,7 +145,7 @@ the given data into this player.
             installHandlers = ( piece ) =>
                 if piece.type in [ 'action', 'upload button', 'map click' ]
                     if not piece.action instanceof Function
-                        console.log "Error: Cannot install handler for
+                        console.log "ERROR: Cannot install handler for
                             action #{piece.value} because its action is not
                             a function."
                         return
@@ -313,7 +315,7 @@ client before allowing this one to take over.
                 otherCopy.socket.disconnect()
             @name = name
             @load()
-            console.log "player logged in as #{name}"
+            console.log "\tPlayer logged in as #{name}."
             @teleport if @validPosition @getPosition() then @getPosition() \
                 else [ 0, 0, 0 ]
             @startStatusUpdates()
