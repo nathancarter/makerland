@@ -449,7 +449,8 @@ the locations of anyone in that block, since they can now see it.
                 blockSetChanged = yes
                 playersWhoCanSeeBlock[block] ?= [ ]
                 for otherPlayer in playersWhoCanSeeBlock[block]
-                    otherPlayer = Player.nameToPlayer otherPlayer
+                    if not otherPlayer = Player.nameToPlayer otherPlayer
+                        continue
                     theirBlock = "#{blockName otherPlayer.getPosition()}"
                     if theirBlock is block
                         notifyAboutMovement player, otherPlayer,
@@ -519,12 +520,12 @@ any landscape items visible only to makers get filtered out.
                 data[block][key] = value
             if not notifyThisPlayer.isMaker()
                 itemtypes = [ ]
-                for item in data[block]['landscape items']
+                for item in data[block]['landscape items'] or [ ]
                     itemtypes.push item.type if item.type not in itemtypes
                 visibleItems = [ ]
                 for type in itemtypes
                     if require( './landscapeitems' ).get type, 'visible'
-                        for item in data[block]['landscape items']
+                        for item in data[block]['landscape items'] or [ ]
                             visibleItems.push item if item.type is type
                 data[block]['landscape items'] = visibleItems
         notifyThisPlayer.socket.emit 'visible blocks', data
