@@ -293,6 +293,7 @@ but not overwriting any existing accounts.
                         if not event.username or not event.password
                             return @showOK 'You must supply both username
                                 and password.', => @showLoginUI()
+                        event.username = event.username.toLowerCase()
                         if accounts.exists event.username
                             return @showOK 'That username is already
                                 taken.', => @showLoginUI()
