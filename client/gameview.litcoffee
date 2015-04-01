@@ -301,7 +301,7 @@ or a button.
 
     shouldIgnoreKeyboardEvent = ->
         tagType = document.activeElement.tagName.toLowerCase()
-        tagType in [ 'input', 'button', 'textarea' ]
+        tagType in [ 'input', 'button', 'textarea', 'select' ]
 
 Otherwise, it should record key down and up events so that we can handle
 them periodically.
