@@ -177,6 +177,7 @@ structure specifying data such as leg color, body color, height, and so on.
             context.lineTo head.x - rad, head.y + hangAmt * rad
             context.stroke()
         # write name
+        context.fillStyle = '#000000'
         context.font = '16px serif'
         size = context.measureText name
         context.fillText name, head.x-size.width/2, head.y-20
