@@ -94,6 +94,7 @@ The settings command allows players to edit their personal settings.
                         value : 'Change appearance'
                         action : ->
                             colors =
+                                white    : '#FFFFFF'
                                 black    : '#000000'
                                 dark     : '#313131'
                                 gray     : '#626262'
