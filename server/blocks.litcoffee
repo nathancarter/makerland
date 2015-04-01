@@ -314,7 +314,7 @@ The UI for editing a plane looks like the following.
                 action : =>
                     plane = @indexOfPlaneKey entry
                     player.teleport [ plane, 0, 0 ]
-                    callback()
+                    # no need to change UI at all
             ,
                 type : 'action'
                 value : 'Done'
