@@ -89,12 +89,14 @@ players before exiting the game.  This handler does so.
 We want to tell the user their internal IP address, which will be known to
 their own computer's network interfaces.  So we query those.
 
+    console.log 'Game ready to receive connections.'
+    message = 'Internal users connect here'
     for own name, list of require( 'os' ).networkInterfaces()
         for iface in list
             if iface.family is 'IPv4' and iface.address isnt '127.0.0.1'
-                console.log 'Game ready to receive connections.'
-                console.log "\tInternal users connect here:\t
+                console.log "\t#{message}:\t
                     http://#{iface.address}:#{settings.port or 9999}"
+                message = 'Alternate internal address'
 
 We want to tell the user running the server process what their internal and
 external IP addresses are, so that they can advertise these facts to anyone
