@@ -90,6 +90,44 @@ doing so looks like the following.
                 value : "<h3>Editing account for \"#{entry}\":</h3>
                         #{warning}"
             ,
+                [
+                    type : 'text'
+                    value : '<b>Commands:</b>'
+                ,
+                    type : 'text'
+                    value : @get( entry, 'commands' ).join ', '
+                ,
+                    type : 'action'
+                    value : 'Change'
+                    action : =>
+                        player.showUI
+                            type : 'text'
+                            value : "<h3>Changing commands for
+                                     \"#{entry}\":</h3>
+                                     <p>Current list of commands:</p>
+                                     <p>#{@get( entry, 'commands' ) \
+                                          .join ', '}</p>
+                                     <p>Type the new list separated by
+                                     commas, as shown above.</p>"
+                        ,
+                            type : 'string input'
+                            name : 'new command list'
+                        ,
+                            type : 'action'
+                            value : 'Change'
+                            default : yes
+                            action : ( event ) =>
+                                @set entry, 'commands', \
+                                    ( i.trim() for i in \
+                                      event['new command list'].split ',' )
+                                again()
+                        ,
+                            type : 'action'
+                            value : 'Cancel'
+                            cancel : yes
+                            action : again
+                ]
+            ,
                 type : 'action'
                 value : 'Change name'
                 action : =>
