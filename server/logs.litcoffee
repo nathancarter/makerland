@@ -89,12 +89,13 @@ error, and the error object itself.
             indent = ( n ) -> if n <= 0 then '' else ' ' + indent n-1
             lines = ( "#{lineNo start+i}#{L}" \
                 for L, i in lines[start-1..end-1] )
-            newline = lines[line-start][...column+4] + \
-                '<span style="background-color: red">'
-            lines[line-start] = lines[line-start][...column+4] + \
-                '<span style="background-color: red">' + \
-                ( lines[line-start][column+4] ? '(HERE)' ) + '</span>' + \
-                lines[line-start][column+5..]
+            if 0 <= line-start and line-start < lines.length
+                newline = lines[line-start][...column+4] + \
+                    '<span style="background-color: red">'
+                lines[line-start] = lines[line-start][...column+4] + \
+                    '<span style="background-color: red">' + \
+                    ( lines[line-start][column+4] ? '(HERE)' ) + '</span>' \
+                    + lines[line-start][column+5..]
             @logMessage makerName,
                 "<b><u>Error in: #{codeDescription}</u></b>
                 \n<font color=red>#{stack[0]}</font>
