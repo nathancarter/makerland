@@ -397,6 +397,7 @@ can send information to clients about what's moving on their screen.  But
 first we need the function we'll use to send the notification to clients.
 
     notifyAboutMovement = ( notifyThisPlayer, aboutThisPlayer, position ) ->
+        if notifyThisPlayer is aboutThisPlayer then return
         notifyThisPlayer?.socket.emit 'movement nearby',
             type : 'player'
             name : aboutThisPlayer.name
