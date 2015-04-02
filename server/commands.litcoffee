@@ -119,27 +119,37 @@ The settings command allows players to edit their personal settings.
                                 type : 'choice'
                                 name : 'head color'
                                 choices : colors
-                                selected : player.saveData.avatar?.headColor
+                                selected :
+                                    player.saveData.avatar?.headColor ? \
+                                    '#000000'
                             ,
                                 type : 'choice'
                                 name : 'hair color'
                                 choices : colors
-                                selected : player.saveData.avatar?.hairColor
+                                selected :
+                                    player.saveData.avatar?.hairColor ? \
+                                    '#000000'
                             ,
                                 type : 'choice'
                                 name : 'body color'
                                 choices : colors
-                                selected : player.saveData.avatar?.bodyColor
+                                selected :
+                                    player.saveData.avatar?.bodyColor ? \
+                                    '#000000'
                             ,
                                 type : 'choice'
                                 name : 'arm color'
                                 choices : colors
-                                selected : player.saveData.avatar?.armColor
+                                selected :
+                                    player.saveData.avatar?.armColor ? \
+                                    '#000000'
                             ,
                                 type : 'choice'
                                 name : 'leg color'
                                 choices : colors
-                                selected : player.saveData.avatar?.legColor
+                                selected :
+                                    player.saveData.avatar?.legColor ? \
+                                    '#000000'
                             ,
                                 type : 'choice'
                                 name : 'thickness'
@@ -147,7 +157,8 @@ The settings command allows players to edit their personal settings.
                                     thin : 1
                                     normal : 2
                                     thick : 3
-                                selected : player.saveData.avatar?.thickness
+                                selected :
+                                    player.saveData.avatar?.thickness ? 1
                             ,
                                 type : 'choice'
                                 name : 'shoulders'
@@ -155,8 +166,9 @@ The settings command allows players to edit their personal settings.
                                     narrow : 0.03
                                     normal : 0.06
                                     broad : 0.10
-                                selected : \
-                                    player.saveData.avatar?.shouldersWidth
+                                selected :
+                                    player.saveData.avatar?.shouldersWidth \
+                                    ? 0.03
                             ,
                                 type : 'choice'
                                 name : 'hips'
@@ -164,7 +176,8 @@ The settings command allows players to edit their personal settings.
                                     narrow : 0.03
                                     normal : 0.06
                                     broad : 0.10
-                                selected : player.saveData.avatar?.hipsWidth
+                                selected :
+                                    player.saveData.avatar?.hipsWidth ? 0.03
                             ,
                                 type : 'choice'
                                 name : 'height'
@@ -173,7 +186,8 @@ The settings command allows players to edit their personal settings.
                                     short : 0.8
                                     normal : 1
                                     tall : 1.2
-                                selected : player.saveData.avatar?.height
+                                selected :
+                                    player.saveData.avatar?.height ? 1
                             ,
                                 type : 'choice'
                                 name : 'head size'
@@ -181,7 +195,8 @@ The settings command allows players to edit their personal settings.
                                     small : 0.07
                                     medium : 0.1
                                     large : 0.13
-                                selected : player.saveData.avatar?.headSize
+                                selected :
+                                    player.saveData.avatar?.headSize ? 0.1
                             ,
                                 type : 'choice'
                                 name : 'hair style'
@@ -192,8 +207,8 @@ The settings command allows players to edit their personal settings.
                                     bob : 3
                                     shoulders : 4
                                     'very long' : 5
-                                selected : \
-                                    player.saveData.avatar?.hairLength
+                                selected :
+                                    player.saveData.avatar?.hairLength ? 0
                             ,
                                 type : 'choice'
                                 name : 'hair volume'
@@ -203,11 +218,12 @@ The settings command allows players to edit their personal settings.
                                     thick : 1.5
                                     fluffy : 2
                                     'very fluffy' : 3
-                                selected : \
-                                    player.saveData.avatar?.hairFluff
+                                selected :
+                                    player.saveData.avatar?.hairFluff ? 1
                             ,
                                 type : 'action'
                                 value : 'Done'
+                                cancel : yes
                                 action : settings
                             ,
                                 type : 'watcher'
