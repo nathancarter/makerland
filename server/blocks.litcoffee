@@ -413,14 +413,15 @@ First, compute what blocks are visible to the given player now.
 
         visibleBlocks = [ ]
         if p = player.getPosition()
+            c = settings.mapBlockSizeInCells
             plane = p[0]
             x = p[1] - visionDistance
-            while x < p[1] + visionDistance
+            while x < p[1] + visionDistance + c
                 y = p[2] - visionDistance
-                while y < p[2] + visionDistance
+                while y < p[2] + visionDistance + c
                     visibleBlocks.push "#{blockName [ plane, x, y ]}"
-                    y += settings.mapBlockSizeInCells
-                x += settings.mapBlockSizeInCells
+                    y += c
+                x += c
 
 Store that in the mapping `blocksVisibleToPlayer`, but not before we keep a
 copy of its old value for use below.
