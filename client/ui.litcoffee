@@ -151,9 +151,9 @@ individual row in the table that populates that command pane.
             when 'choice'
                 name = data.name[0].toUpperCase() + data.name[1..]
                 focus = "input_#{data.name}"
-                [
-                    "<label for='input_#{data.name}'>#{name}:</label>
-                    <select class='form-control' id='input_#{data.name}'>
+                tmp = [
+                    "<label for='input_#{data.name}'>#{name}:</label>"
+                    "<select class='form-control' id='input_#{data.name}'>
                     #{for own key, value of data.choices
                         selected = if value is data.selected \
                             then 'selected' else ''
@@ -161,6 +161,7 @@ individual row in the table that populates that command pane.
                          >#{key}</option>"}
                     </select>"
                 ]
+                if data.wide then tmp.join '' else tmp
             when 'action'
                 type = if data.default then 'submit' else 'button'
                 name = data.value.replace /\s/g, '_'

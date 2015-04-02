@@ -116,6 +116,18 @@ The settings command allows players to edit their personal settings.
                                 type : 'text'
                                 value : '<h3>Changing appearance</h3>'
                             ,
+                                type : 'text'
+                                value : '<center>Head</center>'
+                            ,
+                                type : 'choice'
+                                name : 'head size'
+                                choices :
+                                    small : 0.07
+                                    medium : 0.1
+                                    large : 0.13
+                                selected :
+                                    player.saveData.avatar?.headSize ? 0.1
+                            ,
                                 type : 'choice'
                                 name : 'head color'
                                 choices : colors
@@ -129,74 +141,6 @@ The settings command allows players to edit their personal settings.
                                 selected :
                                     player.saveData.avatar?.hairColor ? \
                                     '#000000'
-                            ,
-                                type : 'choice'
-                                name : 'body color'
-                                choices : colors
-                                selected :
-                                    player.saveData.avatar?.bodyColor ? \
-                                    '#000000'
-                            ,
-                                type : 'choice'
-                                name : 'arm color'
-                                choices : colors
-                                selected :
-                                    player.saveData.avatar?.armColor ? \
-                                    '#000000'
-                            ,
-                                type : 'choice'
-                                name : 'leg color'
-                                choices : colors
-                                selected :
-                                    player.saveData.avatar?.legColor ? \
-                                    '#000000'
-                            ,
-                                type : 'choice'
-                                name : 'thickness'
-                                choices :
-                                    thin : 1
-                                    normal : 2
-                                    thick : 3
-                                selected :
-                                    player.saveData.avatar?.thickness ? 1
-                            ,
-                                type : 'choice'
-                                name : 'shoulders'
-                                choices :
-                                    narrow : 0.03
-                                    normal : 0.06
-                                    broad : 0.10
-                                selected :
-                                    player.saveData.avatar?.shouldersWidth \
-                                    ? 0.03
-                            ,
-                                type : 'choice'
-                                name : 'hips'
-                                choices :
-                                    narrow : 0.03
-                                    normal : 0.06
-                                    broad : 0.10
-                                selected :
-                                    player.saveData.avatar?.hipsWidth ? 0.03
-                            ,
-                                type : 'choice'
-                                name : 'height'
-                                choices :
-                                    'very short' : 0.5
-                                    short : 0.8
-                                    normal : 1
-                                    tall : 1.2
-                                selected :
-                                    player.saveData.avatar?.height ? 1
-                            ,
-                                type : 'choice'
-                                name : 'head size'
-                                choices :
-                                    small : 0.07
-                                    medium : 0.1
-                                    large : 0.13
-                                selected :
-                                    player.saveData.avatar?.headSize ? 0.1
                             ,
                                 type : 'choice'
                                 name : 'hair style'
@@ -220,6 +164,71 @@ The settings command allows players to edit their personal settings.
                                     'very fluffy' : 3
                                 selected :
                                     player.saveData.avatar?.hairFluff ? 1
+                            ,
+                                type : 'text'
+                                value : '<center>Body</center>'
+                            ,
+                                type : 'choice'
+                                name : 'shoulders'
+                                choices :
+                                    narrow : 0.03
+                                    normal : 0.06
+                                    broad : 0.10
+                                selected :
+                                    player.saveData.avatar?.shouldersWidth \
+                                    ? 0.03
+                            ,
+                                type : 'choice'
+                                name : 'hips'
+                                choices :
+                                    narrow : 0.03
+                                    normal : 0.06
+                                    broad : 0.10
+                                selected :
+                                    player.saveData.avatar?.hipsWidth ? 0.03
+                            ,
+                                type : 'choice'
+                                name : 'body color'
+                                choices : colors
+                                selected :
+                                    player.saveData.avatar?.bodyColor ? \
+                                    '#000000'
+                            ,
+                                type : 'choice'
+                                name : 'height'
+                                choices :
+                                    'very short' : 0.5
+                                    short : 0.8
+                                    normal : 1
+                                    tall : 1.2
+                                selected :
+                                    player.saveData.avatar?.height ? 1
+                            ,
+                                type : 'text'
+                                value : '<center>Limbs</center>'
+                            ,
+                                type : 'choice'
+                                name : 'arm color'
+                                choices : colors
+                                selected :
+                                    player.saveData.avatar?.armColor ? \
+                                    '#000000'
+                            ,
+                                type : 'choice'
+                                name : 'leg color'
+                                choices : colors
+                                selected :
+                                    player.saveData.avatar?.legColor ? \
+                                    '#000000'
+                            ,
+                                type : 'choice'
+                                name : 'thickness'
+                                choices :
+                                    thin : 1
+                                    normal : 2
+                                    thick : 3
+                                selected :
+                                    player.saveData.avatar?.thickness ? 1
                             ,
                                 type : 'action'
                                 value : 'Done'
