@@ -287,6 +287,18 @@ about the text to the console, for testing purposes.
     socket.on 'show text', ( data ) ->
         console.log 'Would show this text data:', data
 
+## Animations
+
+For now, we just dump animation messages to the console.  We will later
+implement functionality that actually shows them.
+
+    animationCache = { }
+    socket.on 'animation data', ( message ) ->
+        animationCache[message.index] = message.data
+        console.log 'updated animation cache', message, animationCache
+    socket.on 'show animation', ( message ) ->
+        console.log 'would show animation', message
+
 ## Interacting with the Game Map
 
 First we track all keys pressed in the game view, so that several times per

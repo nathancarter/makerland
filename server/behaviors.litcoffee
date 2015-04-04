@@ -389,18 +389,22 @@ can run multiple times on multiple objects.
         makeCodeRunnable : ( codeString, author = null, argnames = [ ] ) =>
             result = require( 'acorn' ).parse codeString,
                 { allowReturnOutsideFunction : true }
-            log = if author then \
-                "function log () {
+            functions = "function showAnimation ( loc, name, paramObj ) {
+                    require( './animations' )
+                        .showAnimation( loc, name, paramObj );
+                }"
+            if author
+                functions += "function log () {
                     require( './logs' ).logMessage( '#{author}',
                         Array.prototype.slice.apply( arguments )
                             .join( ' ' ) );
-                }" else ""
+                }"
             declarations = ( "var #{identifier} = args.#{identifier};" \
                 for identifier in argnames ).join '\n'
             mayNotUse = [ 'require', 'setInterval', 'process' ] # more later
             for identifier in mayNotUse
                 declarations += "\nvar #{identifier} = null;"
-            prefix = "( function ( args ) { #{log} #{declarations}\n"
+            prefix = "( function ( args ) { #{functions} #{declarations}\n"
             prefixLength = prefix.split( '\n' ).length - 1
             codeString = prefix + codeString + ' } )'
             try

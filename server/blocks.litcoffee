@@ -548,3 +548,17 @@ near the maker.  That command calls the following function.
     module.exports.resetBlocksNearPlayer = ( player ) =>
         for block in blocksVisibleToPlayer[player.name]
             module.exports.resetBlock block
+
+Other parts of the game may wish to send a message to all players who can
+see a given block.  We thus provide the following function for fetching that
+list of players, which this table maintains.
+
+    module.exports.getPlayersWhoCanSeeBlock = ( position ) =>
+        if typeof position is 'string'
+            position = ( parseInt i for i in position.split ',' )
+        blockName = @positionToBlockName position
+        results = [ ]
+        for name in playersWhoCanSeeBlock[blockName] or [ ]
+            player = Player.nameToPlayer playerName
+            if player then results.push player
+        results
