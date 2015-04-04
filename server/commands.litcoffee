@@ -359,10 +359,11 @@ adding, removing, and changing entries.
                             if table.browse?
                                 browseTable = ->
                                     table.browse player, browseDB
+                            capname = name[0].toUpperCase() + name[1..]
                             browseTable ?= ->
                                 contents = [
                                     type : 'text'
-                                    value : "<h3>#{name} table:</h3>"
+                                    value : "<h3>#{capname} table:</h3>"
                                 ]
                                 hasEdit = 'edit' of table
                                 hasRemove = 'remove' of table

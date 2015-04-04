@@ -81,7 +81,12 @@ If the user who ran the game process presses Ctrl-C, we want to save all
 players before exiting the game.  This handler does so.
 
     process.on 'SIGINT', ->
-        player.save() for player in Player::allPlayers
+        console.log "\nReceived Ctrl+C signal.
+            Saving all players before quitting..."
+        for player in Player::allPlayers
+            console.log "\tSaving #{player.name}..."
+            player.save()
+        console.log 'Done.'
         process.exit()
 
 ## Detecting IP Address
