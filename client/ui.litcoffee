@@ -63,7 +63,6 @@ just invoked, e.g., via a shortcut key.
                    method='post' id='commandPaneForm'
                    enctype='multipart/form-data'>#{html}</form></div>"
         if codeEditor = ( $ '.code-editor' ).get 0
-            console.log 'found code editor:', codeEditor
             codeEditor.codeMirror = CodeMirror.fromTextArea codeEditor,
                 lineNumbers : true
                 indentUnit : 4
