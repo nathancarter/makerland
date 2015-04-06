@@ -68,10 +68,8 @@ just invoked, e.g., via a shortcut key.
                 indentUnit : 4
                 extraKeys:
                     'F11' : ( c ) ->
-                        console.log 'you hit F11'
                         c.setOption 'fullScreen', !c.getOption 'fullScreen'
                     'Esc' : ( c ) ->
-                        console.log 'you hit Esc'
                         if c.getOption 'fullScreen'
                             c.setOption 'fullScreen', no
         ( $ '#rightpane input, select' ).change window.uiElementChanged
