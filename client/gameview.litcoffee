@@ -98,6 +98,10 @@ of other players nearby.
         drawGameMap context
         drawLandscapeItems context
 
+On top of all those things, draw any animations currently running.
+
+        drawAnimations context
+
 Last, draw the player's status as a HUD.
 
         drawPlayerStatus context
@@ -289,15 +293,77 @@ about the text to the console, for testing purposes.
 
 ## Animations
 
-For now, we just dump animation messages to the console.  We will later
-implement functionality that actually shows them.
+The following function responds to a message from the server that lists all
+animations that are currently running in a specific block, together with the
+definitions of any that the client does not currently know about (or for
+which its known definition is out-of-date).  It creates all the necessary
+animation data for drawing the animation, then sticks it into a global
+object of active animations that is used in each call to `redrawCanvas`,
+indirectly, by the `drawAnimations` routine below.
 
     animationCache = { }
-    socket.on 'animation data', ( message ) ->
-        animationCache[message.index] = message.data
-        console.log 'updated animation cache', message, animationCache
-    socket.on 'show animation', ( message ) ->
-        console.log 'would show animation', message
+    activeAnimations = { }
+    socket.on 'animations for block', ( message ) ->
+        activeAnimations[message.block] = [ ]
+        for animation in message.animations
+            if animation.definition?
+                animationCache[animation.type] = animation.definition
+            if not code = animationCache[animation.type]?.code then continue
+            for own paramName of animation.parameters
+                code = "var #{paramName} = args.#{paramName};\n#{code}"
+            code = "(function(t,args,view){
+                        view.save();\n
+                        function POS ( name ) {
+                            var all = getNearbyObjects();
+                            return all.hasOwnProperty( name ) ?
+                                all[name].position : null;
+                        }
+                        function XY ( position ) {
+                            var mypos = getPlayerPosition();
+                            if ( !mypos ) return null;
+                            return ( position[0] == mypos[0] ) ?
+                                mapCoordsToScreenCoords(
+                                    position[1], position[2] ) : null;
+                        }
+                        function X ( position ) {
+                            var xy = XY( position ); return xy ? xy.x : NaN;
+                        }
+                        function Y ( position ) {
+                            var xy = XY( position ); return xy ? xy.y : NaN;
+                        }
+                        var CELL =
+                            #{window.gameSettings.cellSizeInPixels};\n
+                        #{code}\n
+                        view.restore();
+                    })"
+            try
+                animationFunction = eval code
+            catch e
+                console.log "Could not create animation:", code, e
+                return
+            activeAnimations[message.block].push
+                startTime : ( new Date ) - animation.elapsed
+                function : animationFunction
+                parameters : animation.parameters
+                duration : animationCache[animation.type]?.duration or 1
+
+This routine is called by `redrawCanvas`, not only to draw all active
+animations, but also to clear out those that have run their full course.
+
+    drawAnimations = ( context ) ->
+        now = new Date
+        for own block, animations of activeAnimations
+            updatedList = [ ]
+            for animation in animations
+                elapsed = ( now - animation.startTime ) / 1000
+                pctElapsed = elapsed / animation.duration
+                if pctElapsed < 1
+                    animation.function pctElapsed, animation.parameters,
+                        context
+                    updatedList.push animation
+            activeAnimations[block] = updatedList
+        for own block, animations of activeAnimations
+            if animations.length is 0 then delete activeAnimations[block]
 
 ## Interacting with the Game Map
 

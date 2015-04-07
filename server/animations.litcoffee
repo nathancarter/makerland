@@ -230,39 +230,79 @@ A maker can remove an animation if and only if that maker can edit it.
                  events in the game that trigger this animation, it will
                  stop working!", action, callback
 
-The following function sends to all relevant players a message indicating
-that an animation is happening near them.  It provides those players'
-clients with all the information they need to show the animation on those
-players' screens.
+The following function stores in this table's temporary memory the fact that
+an animation of the given type has just started; the given parameters and
+location are stored with it.  Immediately thereafter, any players who can
+see the block in which the animation just began will have their block data
+updated, so that their clients receive the information about the animation.
+(The block table, before sending block data to players, queries this table,
+to see if any running animations need to be sent as well.)
 
-        namesToIndices = null
         showAnimation : ( location, animationType, parameterObject ) =>
-            if not namesToIndices
-                namesToIndices = { }
+            if not @namesToIndices?
+                @namesToIndices = { }
                 for entry in @entries()
-                    namesToIndices[@get entry, 'name'] = entry
-            if namesToIndices.hasOwnProperty entry
-                entry = namesToIndices[entry]
-            if not entry? then return
-            animation = @get entry
+                    @namesToIndices[@get entry, 'name'] = entry
+            if @namesToIndices.hasOwnProperty animationType
+                animationType = @namesToIndices[animationType]
+            if not animationType? then return
+            animation = @getWithDefaults animationType
+            if not animation? then return
+            @runningAnimations ?= { }
+            if typeof location is 'string'
+                location = ( parseFloat i for i in location.split ',' )
             bt = require './blocks'
-            for recipient in bt.getPlayersWhoCanSeeBlock location
-                if not recipient.animationCache?[entry]
-                    recipient.socket.emit 'animation data',
-                        index : entry
-                        data : animation
-                    ( recipient.animationCache ?= { } )[entry] = true
-                recipient.socket.emit 'show animation',
-                    index : entry
-                    data : parameterObject
+            blockName = bt.positionToBlockName location...
+            ( @runningAnimations[blockName] ?= [ ] ).push
+                type : animationType
+                definition : animation
+                parameters : parameterObject
+                startTime : new Date
+            bt.notifyAboutBlockUpdate blockName
+
+The block table, when it sends data to players about what blocks they can
+see, will want this table to be able to send animation data.  The block
+table will call the following function, and we will send the players all the
+information they need.  Note that we only send the player the definition of
+an animation (from the table) if that player doesn't already have it, a flag
+we track in the player object.  This function also removes from the list any
+animations that have completed; it does so before sending any to the player,
+of course.
+
+        sendBlockAnimationsToPlayer : ( blockName, playerObject ) =>
+            toSend = [ ]
+            ( @runningAnimations ?= { } )[blockName] ?= [ ]
+            now = new Date
+            stillRunning = ( anim ) =>
+                later = new Date anim.startTime.getTime() \
+                      + anim.definition.duration * 1000
+                later > now
+            @runningAnimations[blockName] = ( anim for anim in \
+                @runningAnimations[blockName] when stillRunning anim )
+            for animation in @runningAnimations[blockName]
+                elapsed = now - animation.startTime
+                record =
+                    type : animation.type
+                    parameters : animation.parameters
+                    elapsed : elapsed
+                if not playerObject.animationCache?[animation.type]
+                    record.definition = animation.definition
+                    ( playerObject.animationCache ?= { } )[animation.type] \
+                        = true
+                toSend.push record
+            if @runningAnimations[blockName].length is 0
+                delete @runningAnimations[blockName]
+            playerObject.socket.emit 'animations for block',
+                block : blockName
+                animations : toSend
 
 If the animation is updated, we need to clear out the cached version of its
 former state in all clients.  The following function does so.
 
         set : ( entryName, others... ) =>
             super entryName, others...
-            if namesToIndices
-                namesToIndices[@get entryName, 'name'] = entryName
+            if @namesToIndices
+                @namesToIndices[@get entryName, 'name'] = entryName
             for player in Player::allPlayers
                 if player.animationCache
                     delete player.animationCache[entryName]

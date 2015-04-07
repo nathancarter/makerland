@@ -49,7 +49,7 @@ integers.
             N = settings.mapBlockSizeInCells
             x = ( N * Math.floor x/N ) | 0
             y = ( N * Math.floor y/N ) | 0
-            key = "#{plane},#{x},#{y}"
+            "#{plane},#{x},#{y}"
         getBlock : ( plane, x, y ) =>
             if not key = @positionToBlockName plane, x, y then return null
             if not @exists key
@@ -514,6 +514,7 @@ any landscape items visible only to makers get filtered out.
 
     notifyAboutVisibility = ( notifyThisPlayer, blockSet ) ->
         if not notifyThisPlayer then return
+        blockSet ?= blocksVisibleToPlayer[notifyThisPlayer.name]
         data = { }
         for block in blockSet
             [ plane, x, y ] = ( parseInt i for i in block.split ',' )
@@ -531,16 +532,17 @@ any landscape items visible only to makers get filtered out.
                             visibleItems.push item if item.type is type
                 data[block]['landscape items'] = visibleItems
         notifyThisPlayer.socket.emit 'visible blocks', data
+        for block in blockSet
+            require( './animations' ).sendBlockAnimationsToPlayer block,
+                notifyThisPlayer
 
 And when a block is edited by a maker, we want to call the above function on
 every player who can see the block.
 
-    notifyAboutBlockUpdate = ( blockName ) ->
+    module.exports.notifyAboutBlockUpdate = ( blockName ) ->
         for playerName in playersWhoCanSeeBlock?[blockName] or [ ]
             player = Player.nameToPlayer playerName
-            if player
-                notifyAboutVisibility player,
-                    blocksVisibleToPlayer[playerName]
+            if player then notifyAboutVisibility player
 
 Makers have a reset command that reloads all the items in all the blocks
 near the maker.  That command calls the following function.
@@ -548,17 +550,3 @@ near the maker.  That command calls the following function.
     module.exports.resetBlocksNearPlayer = ( player ) =>
         for block in blocksVisibleToPlayer[player.name]
             module.exports.resetBlock block
-
-Other parts of the game may wish to send a message to all players who can
-see a given block.  We thus provide the following function for fetching that
-list of players, which this table maintains.
-
-    module.exports.getPlayersWhoCanSeeBlock = ( position ) =>
-        if typeof position is 'string'
-            position = ( parseInt i for i in position.split ',' )
-        blockName = @positionToBlockName position
-        results = [ ]
-        for name in playersWhoCanSeeBlock[blockName] or [ ]
-            player = Player.nameToPlayer playerName
-            if player then results.push player
-        results
