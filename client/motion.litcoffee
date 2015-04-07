@@ -110,8 +110,8 @@ communication.
                 data.motionDirection = 0
             nearbyObjects[key] = data
             setTimeout ( do ( key, data ) -> ->
-                if "#{nearbyObjects[key].position}" is "#{data.position}"
-                    nearbyObjects[key].motionDirection = 0
+                if "#{nearbyObjects[key]?.position}" is "#{data.position}"
+                    nearbyObjects[key]?.motionDirection = 0
             ), 100
         else
             delete nearbyObjects[key]
