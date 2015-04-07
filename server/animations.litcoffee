@@ -133,19 +133,21 @@ for doing so looks like the following.
                                 not include units.)'
                         ,
                             type : 'action'
-                            value : 'Change name'
+                            value : 'Change duration'
                             default : yes
                             action : ( event ) =>
                                 input = event['enter duration in seconds'] \
                                     .trim()
                                 if isFinite input \
                                    and not isNaN parseFloat input
-                                    return player.showOK 'New duration must
-                                        be only a number.  Do not include
-                                        any words or units.', again
-                                @set entry, 'duration', parseFloat input
-                                player.showOK "Duration of animation
-                                    #{entry} changed to #{input}.", again
+                                    @set entry, 'duration', parseFloat input
+                                    player.showOK "Duration of animation
+                                        #{entry} changed to #{input}.",
+                                        again
+                                else
+                                    player.showOK 'New duration must be only
+                                        a number.  Do not include any words
+                                        or units.', again
                         ,
                             type : 'action'
                             value : 'Cancel'
