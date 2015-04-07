@@ -389,12 +389,13 @@ can run multiple times on multiple objects.
         makeCodeRunnable : ( codeString, author = null, argnames = [ ] ) =>
             result = require( 'acorn' ).parse codeString,
                 { allowReturnOutsideFunction : true }
-            functions = "function showAnimation ( loc, name, paramObj ) {
+            functions =
+                "function showAnimation ( loc, name, paramObj ) {
                     require( './animations' )
                         .showAnimation( loc, name, paramObj );
                 }"
-            if author
-                functions += "function log () {
+            if author then functions +=
+                "function log () {
                     require( './logs' ).logMessage( '#{author}',
                         Array.prototype.slice.apply( arguments )
                             .join( ' ' ) );
@@ -404,8 +405,9 @@ can run multiple times on multiple objects.
             mayNotUse = [ 'require', 'setInterval', 'process' ] # more later
             for identifier in mayNotUse
                 declarations += "\nvar #{identifier} = null;"
-            prefix = "( function ( args ) { #{functions} #{declarations}\n"
+            prefix = "( function ( args ) { #{declarations}\n"
             prefixLength = prefix.split( '\n' ).length - 1
+            prefix = "#{functions}#{prefix}"
             codeString = prefix + codeString + ' } )'
             try
                 applyMe = eval codeString
