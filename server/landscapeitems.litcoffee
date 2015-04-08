@@ -21,6 +21,7 @@ compute our size based on our type, then our top-left and bottom-right
 corners as well.
 
         constructor : ( @plane, @x, @y ) ->
+            @position = [ @plane, @x, @y ]
             blockTable = require './blocks'
             @block = blockTable.positionToBlockName @plane, @x, @y
             if tableEntry = blockTable.getLandscapeItem @plane, @x, @y

@@ -311,14 +311,18 @@ indirectly, by the `drawAnimations` routine below.
             if not code = animationCache[animation.type]?.code then continue
             for own paramName of animation.parameters
                 code = "var #{paramName} = args.#{paramName};\n#{code}"
-            code = "(function(t,args,view){
+            code = "(function(t,args,view,memory){
                         view.save();\n
                         function POS ( name ) {
+                            if ( name.toLowerCase() ==
+                                 currentStatus.name.toLowerCase() )
+                                return getPlayerPosition();
                             var all = getNearbyObjects();
                             return all.hasOwnProperty( name ) ?
                                 all[name].position : null;
                         }
                         function XY ( position ) {
+                            if ( !position ) return null;
                             var mypos = getPlayerPosition();
                             if ( !mypos ) return null;
                             return ( position[0] == mypos[0] ) ?
@@ -333,7 +337,7 @@ indirectly, by the `drawAnimations` routine below.
                         }
                         var CELL =
                             #{window.gameSettings.cellSizeInPixels};\n
-                        #{code}\n
+                        with ( view ) { #{code} }
                         view.restore();
                     })"
             try
@@ -346,6 +350,8 @@ indirectly, by the `drawAnimations` routine below.
                 function : animationFunction
                 parameters : animation.parameters
                 duration : animationCache[animation.type]?.duration or 1
+                definition : animationCache[animation.type]
+                memory : { }
 
 This routine is called by `redrawCanvas`, not only to draw all active
 animations, but also to clear out those that have run their full course.
@@ -358,9 +364,14 @@ animations, but also to clear out those that have run their full course.
                 elapsed = ( now - animation.startTime ) / 1000
                 pctElapsed = elapsed / animation.duration
                 if pctElapsed < 1
-                    animation.function pctElapsed, animation.parameters,
-                        context
-                    updatedList.push animation
+                    try
+                        animation.function pctElapsed,
+                            animation.parameters, context, animation.memory
+                        updatedList.push animation
+                    catch e
+                        console.log "In animation
+                            #{animation.definition.name}
+                            with t=#{pctElapsed}: #{e.stack}"
             activeAnimations[block] = updatedList
         for own block, animations of activeAnimations
             if animations.length is 0 then delete activeAnimations[block]
