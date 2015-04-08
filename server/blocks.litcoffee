@@ -62,7 +62,7 @@ integers.
             if not key = @positionToBlockName plane, x, y then return
             if not @exists key then @set key, { }
             @set key, block
-            notifyAboutBlockUpdate key
+            module.exports.notifyAboutBlockUpdate key
 
 When getting block data, we provide our own default values rather than using
 the `@setDefault` method, because many of the default values are arrays, and

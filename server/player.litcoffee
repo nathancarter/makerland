@@ -33,11 +33,13 @@ channel to the client page used by this player.
         constructor : ( @socket ) ->
 
 Dump to the console a message about the connection, and add the player to
-the class variable `allPlayers`.
+the class variable `allPlayers`.  Initialize their save data to an empty
+object, since we have not loaded any particular player data yet.
 
             Player::allPlayers.push this
             console.log "Connected a player; there are now
                 #{Player::allPlayers.length} players."
+            @saveData = { }
 
 Set up a handler for UI events from the client.
 
@@ -360,7 +362,6 @@ so, it sends a status update message to the player.
 
 First, update player age.
 
-            @saveData or= { }
             @saveData.age or= 0
             @saveData.age += 2
 
@@ -404,7 +405,7 @@ password hash back in.
 
         save : =>
             if not @name then return
-            toSave = JSON.parse JSON.stringify ( @saveData or { } )
+            toSave = JSON.parse JSON.stringify @saveData
             toSave.password = accounts.get @name, 'password'
             accounts.set @name, toSave
 
