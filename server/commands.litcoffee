@@ -472,10 +472,14 @@ the mouse on the map itself.
                                 cell type first.', putCells
                         celltypename = ctable.get choice, 'name'
                         changeMapCell = ( x, y ) ->
-                            if not bt.canEdit player, \
-                                    bt.planeKey player.getPosition()[0]
+                            plane = player.getPosition()[0]
+                            if not bt.canEdit player, bt.planeKey plane
                                 return fail()
-                            bt.setCell player.getPosition()[0], x, y, choice
+                            bt.setCell plane, x, y, choice
+                            require( './animations' ).showAnimation \
+                                player.getPosition(), 'map edit',
+                                { player : player.name, \
+                                  location : [ plane, x, y ] }
                         player.mapClickMode "Click any cell on the map to
                             change it to be \"#{celltypename}.\"",
                             changeMapCell, putCells
@@ -511,6 +515,11 @@ the mouse on the map itself.
                                     for j in [y1..y2]
                                         bt.setCell plane, i, j, choice
                                 firstCorner()
+                                require( './animations' ).showAnimation \
+                                    player.getPosition(), 'map edit',
+                                    { player : player.name, \
+                                      location : \
+                                        [ plane, (x1+x2)/2, (y1+y2)/2 ] }
                         firstCorner()
                 ,
                     type : 'action'
@@ -547,6 +556,11 @@ the mouse on the map itself.
                                     bt.setCell plane, x1, i, choice
                                     bt.setCell plane, x2, i, choice
                                 firstCorner()
+                                require( './animations' ).showAnimation \
+                                    player.getPosition(), 'map edit',
+                                    { player : player.name, \
+                                      location : \
+                                        [ plane, (x1+x2)/2, (y1+y2)/2 ] }
                         firstCorner()
                 ,
                     type : 'action'
@@ -569,11 +583,15 @@ the mouse on the map itself.
                                 item type first.', putItems
                         itemtypename = itable.get choice, 'name'
                         addItem = ( x, y ) ->
+                            plane = player.getPosition()[0]
                             if not bt.canEdit player, \
-                                    bt.planeKey player.getPosition()[0]
+                                    bt.planeKey plane
                                 return fail()
-                            bt.addLandscapeItem player.getPosition()[0],
-                                x, y, choice
+                            bt.addLandscapeItem plane, x, y, choice
+                            require( './animations' ).showAnimation \
+                                player.getPosition(), 'map edit',
+                                { player : player.name, \
+                                  location : [ plane, x, y ] }
                         player.mapClickMode "Click anywhere on the map to
                             add an instance of the item
                             \"#{itemtypename}.\"  But you cannot place the

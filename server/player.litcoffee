@@ -92,11 +92,12 @@ When this player disconnects, tell the console, and remove the player from
             socket.on 'disconnect', =>
                 index = Player::allPlayers.indexOf this
                 Player::allPlayers.splice index, 1
-                console.log "Disconnected #{@name or 'a player'};
-                    there are now #{Player::allPlayers.length} players."
                 @stopStatusUpdates()
                 @save()
+                oldPosition = @getPosition()
                 @positionChanged null, null
+                require( './animations' ).showAnimation oldPosition,
+                    'logout', { player : @name, position : oldPosition }
 
 The client may also request data about the cell types and landscape items in
 the map.  When they do, we must provide it, so they have enough information
@@ -319,10 +320,13 @@ client before allowing this one to take over.
             @name = name
             @load()
             console.log "\tPlayer logged in as #{name}."
-            @teleport if @validPosition @getPosition() then @getPosition() \
-                else [ 0, 0, 0 ]
+            destination = if @validPosition @getPosition() then \
+                @getPosition() else [ 0, 0, 0 ]
+            @teleport destination
             @startStatusUpdates()
             @showCommandUI()
+            require( './animations' ).showAnimation destination, 'login',
+                player : name
 
 ## Player Status
 
@@ -487,12 +491,12 @@ function to tell the client to put the player back to their previous (valid)
 position.
 
         positionChanged : ( newPosition, visionDistance ) =>
-            if not @validPosition newPosition
-                @teleport @getPosition()
-                return
             oldPosition = @getPosition()
-            @setPosition newPosition
-            if newPosition?[0] isnt oldPosition?[0] then @updateStatus()
+            if @validPosition newPosition
+                @setPosition newPosition
+                if newPosition?[0] isnt oldPosition?[0] then @updateStatus()
+            else
+                @teleport @getPosition()
             require( './blocks' ).updateVisibility this, visionDistance,
                 oldPosition
 
