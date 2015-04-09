@@ -292,61 +292,68 @@ callback will be called when the player clicks Done.
                         type : 'text'
                         value : "<b>Parameters:</b><br>#{params.join ', '}"
                     ]
-                    controls.push [
-                        type : 'action'
-                        value : 'Edit'
-                        action : =>
-                            controls = [
-                                type : 'text'
-                                value : "<h3>Editing #{name}:</h3>"
-                            ]
-                            for own name, desc of type.parameters or { }
-                                if name[...8] isnt 'default '
-                                    value = behavior[name] ? \
-                                        type.parameters["default #{name}"] \
-                                        ? ''
-                                    controls.push
-                                        type : 'text'
-                                        value : "<p>#{desc}</p>"
-                                        class : 'line-above'
-                                    controls.push [
-                                        type : 'text'
-                                        value : "<b>#{name}:</b>"
-                                    ,
-                                        type : 'string input'
-                                        name : "parameter #{name}"
-                                        value : value
-                                    ]
-                            controls = controls.concat [
-                                type : 'action'
-                                value : 'Save'
-                                default : yes
-                                action : ( event ) =>
-                                    for own key, value of event
-                                        if key[...10] is 'parameter '
-                                            behavior[key[10..]] = value
-                                    object.save()
-                                    again()
-                            ,
-                                type : 'action'
-                                value : 'Cancel'
-                                cancel : yes
-                                action : again
-                            ,
-                                type : 'text'
-                                value : "<p>The behavior's description, for
-                                         reference:</p><div class='well'
-                                         >#{type.description}</div>"
-                            ]
-                            player.showUI controls
-                    ,
+                    pair = [ ]
+                    if params.length > 0
+                        pair.push
+                            type : 'action'
+                            value : 'Edit'
+                            action : =>
+                                controls = [
+                                    type : 'text'
+                                    value : "<h3>Editing #{name}:</h3>"
+                                ]
+                                for own name, desc of type.parameters or { }
+                                    if name[...8] isnt 'default '
+                                        value = behavior[name] ? \
+                                            type.parameters["default
+                                                #{name}"] ? ''
+                                        controls.push
+                                            type : 'text'
+                                            value : "<p>#{desc}</p>"
+                                            class : 'line-above'
+                                        controls.push [
+                                            type : 'text'
+                                            value : "<b>#{name}:</b>"
+                                        ,
+                                            type : 'string input'
+                                            name : "parameter #{name}"
+                                            value : value
+                                        ]
+                                controls = controls.concat [
+                                    type : 'action'
+                                    value : 'Save'
+                                    default : yes
+                                    action : ( event ) =>
+                                        for own key, value of event
+                                            if key[...10] is 'parameter '
+                                                behavior[key[10..]] = value
+                                        object.save()
+                                        again()
+                                ,
+                                    type : 'action'
+                                    value : 'Cancel'
+                                    cancel : yes
+                                    action : again
+                                ,
+                                    type : 'text'
+                                    value : "<p>The behavior's description,
+                                             for reference:</p>
+                                             <div class='well'
+                                             >#{type.description}</div>"
+                                ]
+                                player.showUI controls
+                    else
+                        pair.push
+                            type : 'text'
+                            value : ''
+                    pair.push
                         type : 'action'
                         value : 'Remove'
                         action : =>
                             object.behaviors.splice index, 1
                             object.save()
                             again()
-                    ]
+                    controls.push pair
             if object.behaviors.length is 0
                 controls.push
                     type : 'text'
@@ -432,7 +439,7 @@ at the time of attachment.
             try
                 runnable = ( @runnableCache ?= { } )[index] ?=
                     @makeCodeRunnable code, author,
-                        Object.keys @get index, 'parameters'
+                        Object.keys @get( index, 'parameters' ) or { }
                 runnable object, behaviorData
             catch e
                 e.prefixLength ?= runnable.prefixLength
