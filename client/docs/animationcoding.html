@@ -1,0 +1,399 @@
+<html>
+    <head>
+        <script src='https://code.jquery.com/jquery-1.11.2.min.js'></script>
+        <script src='https://code.jquery.com/jquery-migrate-1.2.1.min.js'>
+        </script>
+        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css'/>
+        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css'/>
+        <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js'>
+        </script>
+        <link rel="stylesheet" href="../codemirror.css">
+        <script src="../codemirror.js"></script>
+        <script src="../codemirror-javascript-mode.js"></script>
+        <title>MakerLand - Animation Coding Documentation</title>
+    </head>
+    <body style='padding-top: 50px;'>
+
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed"
+                      data-toggle="collapse" data-target="#navbar"
+                      aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">MakerLand Coder Documentation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="#">MakerLand</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+              <ul class="nav navbar-nav">
+                <li><a href="index.html">Docs Home</a></li>
+                <li><a href="foundations.html">Foundations</a></li>
+                <li class="active"><a href="#">Animations</a></li>
+                <li><a href="behaviorcoding.html">Behaviors</a></li>
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </nav>
+
+        <div class="container">
+
+            <div class="starter-template">
+                <h1>Coding Animations</h1>
+                <!--<p class="lead">Subtitle goes here</p>-->
+            </div>
+
+            <h2>What is an animation?</h2>
+            <p>An animation is a routine that is run in the player's
+                browser (not on the game server) for a certain duration
+                (usually just a second or two) and that is allowed to draw
+                whatever it likes on the game map.  Animations are always
+                drawn <i>on top of</i> all the other elements of the game
+                map.  Animations know how long they have been running, and
+                can use that time measurement to evolve what's being drawn,
+                hence the name "animation."</p>
+
+            <h2>When does animation code get run?</h2>
+            <p>The game map is redrawn many times per second, in order to
+                allow for fluid motion and animation; thus animation
+                routines are also run many times per second until their
+                duration expires.  Animations are run after all other
+                drawing of the game map has completed, so that anything the
+                animation draws will be overlaid on top of the existing game
+                map.</p>
+            <p>An animation begins running when the
+                <code>showAnimation()</code> is called on the game server,
+                which passes animation object to the browsers of all players
+                who can see the animation that's to be shown.  Two things
+                may trigger a call to <code>showAnimation()</code>.</p>
+            <ol>
+                <li><a href='behaviorcoding.html'>Behavior code that you
+                    write</a> can call <code>showAnimation()</code>.  (See
+                    the bottom of the documentation page at that link, where
+                    it discusses <code>showAnimation()</code> specifically.)
+                </li>
+                <li>The game server itself has some places in which calls to
+                    <code>showAnimation()</code> are built-in.  I list those
+                    cases later on this page.</li>
+            </ol>
+
+            <h2>Who creates animations?</h2>
+            <p>You do!  Here is an example of how to create a very simple
+                animation.  In fact, it's so simple that it doesn't do
+                anything you can actually see on screen!  (For examples of
+                more complex animations, see the end of this page.)</p>
+            <h3>How to define a new animation</h3>
+            <ol>
+                <li>Click the Database command button.</li>
+                <li>Click the Animations database.</li>
+                <li>At the bottom, click the button to add an entry to the
+                    table.</li>
+                <li>After the confirmation message, find the entry that was
+                    added, and click to edit it.</li>
+                <li>Change its name to something simple, like "first
+                    animation" or "simple test animation."</li>
+                <li>Click the button to edit its implementation, which means
+                    its code.  Paste in the following code and save.</li>
+            </ol>
+            <textarea class='code'>
+                console.log( t ); // t is a time parameter explained below
+            </textarea>
+            <p>If this animation were to be triggered by some in-game event,
+                and thus run in a player's browser, it would not actually
+                draw anything on the player's screen.  It would simply write
+                to the browser's JavaScript console the time parameter t,
+                several times per second, until the animation completes
+                (after one second, the default animation duration).</p>
+            <p>The following section discusses how to make animations that
+                actually draw something on the screen.</p>
+
+            <h2>What functions can my animation code use?</h2>
+            <p>This is a pretty comprehensive list, but it could always
+                grow in the future.</p>
+
+                <h3>All 2D context members are in scope</h3>
+                <p>MakerLand draws the game map using
+                    <a href='http://www.w3schools.com/html/html5_canvas.asp'
+                    >the HTML5 Canvas</a>.  The functions that draw on a
+                    canvas are those that appear as members of the canvas's
+                    <a href='http://www.w3schools.com/tags/ref_canvas.asp'
+                    >2D context object</a>.  (If you have never used the
+                    HTML5 Canvas before, you should at least skim those
+                    pages!)</p>
+                <p>When animation code is run, the game client has already
+                    created the 2D context object for the canvas on which
+                    the game map is being drawn.  Not only that, but all the
+                    members of that context (e.g.,
+                    <a href='http://www.w3schools.com/tags/canvas_fillstyle.asp'>fillStyle</a>,
+                    <a href='http://www.w3schools.com/tags/canvas_arc.asp'
+                    >arc</a>, etc., etc.) are already in scope.  That is,
+                    you do not need to type
+                    <code>contextObject.arc( ... );</code>.  You can just
+                    type <code>arc( ... );</code>.  Here is an example
+                    animation that, for its duration, draws a red rectangle
+                    over the top left corner of the canvas.</p>
+                <textarea class='code'>
+                    fillStyle = '#ff0000';
+                    fillRect( 0, 0, 100, 100 );
+                </textarea>
+                <p>Feel free to make modifications to the fill style,
+                    stroke style, transform, etc.  The previous state of
+                    the context is saved before animation code is run, and
+                    will be restored thereafter.  Do NOT, however, modify
+                    the actual functions themselves!  (E.g., do not write
+                    <code>fillRect = "HAHAHA";</code>.)  That could break
+                    the game client until the player is forced to reload
+                    the page.</p>
+
+                <h3>Some handy global objects</h3>
+                <p>Your code may also access a few handy global objects,
+                    most notably <code>gameview</code>, which is the canvas
+                    itself.  This allows you to, for example, extend the
+                    rectangle from the previous example to cover the entire
+                    game map.  If the rectangle were translucent, it could
+                    be a "got hit" animation.  (The entire view goes
+                    slightly red for one second.)</p>
+                <textarea class='code'>
+                    fillStyle = '#ff0000';
+                    globalAlpha = 0.7;
+                    fillRect( 0, 0, gameview.width, gameview.height );
+                </textarea>
+                <p>(Technically, this couldn't be a got-hit animation,
+                    because animations are shown to everyone who can see
+                    the location at which they take place, rather than
+                    individual players.  But let's stick with this
+                    oversimplified example for now, to learn things one
+                    small piece at a time.)
+                <p>Other useful data to which you have access:</p>
+                <ul>
+                    <li><code>currentStatus.name</code> - a string
+                        containing the name of the player</li>
+                    <li><code>currentStatus.isMaker</code> - if true, the
+                        player is a maker</li>
+                </ul>
+
+                <h3>All global JavaScript functions</h3>
+                <p>Of course, all functions defined globally in the browser
+                    are also available to your animation code.  This can be
+                    dangerous, in that you could write code that navigated
+                    the user to a new page.  Don't do that.</p>
+                <p>But some things, such as <a href='http://www.w3schools.com/jsref/jsref_obj_math.asp'
+                    >the <code>Math</code> object and its members</a>, can
+                    be very helpful.  The following example uses random
+                    numbers in the range 0.0 to 1.0 to make the red overlay
+                    from the previous example flicker.</p>
+                <textarea class='code'>
+                    fillStyle = '#ff0000';
+                    globalAlpha = Math.random();
+                    fillRect( 0, 0, gameview.width, gameview.height );
+                </textarea>
+
+                <h3>Data in the parameters object</h3>
+                <p>As described earlier on this page, animations are
+                    triggered when the <code>showAnimation()</code> function
+                    is called on the server side.  Its third parameter is an
+                    optional object of parameters to be passed to the
+                    animation code.  Any members of that object are
+                    automatically in scope for the animation code.  (They
+                    have been passed from server to client, so only
+                    JSONable data is acceptable.)</p>
+                <p>Imagine that the flickering red overlay from the previous
+                    example works well as a got-hit animation, and now you
+                    want to make a pleasantly yellow version of it to use
+                    as a got-magically-healed animation.  Rather than
+                    create a whole new animation, you might just respect a
+                    "color" parameter, if the call to
+                    <code>showAnimation()</code> provides one.</p>
+                <p>The call on the server side would then look like
+                    this, assuming your animation is called "flicker":</p>
+                <textarea class='code'>
+                    // to provide no color parameter, as before:
+                    showAnimation( location, 'flicker' );
+                    // to provide a color parameter, say, yellow:
+                    showAnimation( location, 'flicker', { color : '#ff00ff' } );
+                </textarea>
+                <p>In the animation code, we check to see if the color
+                    parameter was provided, as follows.</p>
+                <textarea class='code'>
+                    if ( typeof color == 'undefined' )
+                        fillStyle = '#ff0000';
+                    else
+                        fillStyle = color;
+                    globalAlpha = Math.random();
+                    fillRect( 0, 0, gameview.width, gameview.height );
+                </textarea>
+                <p>You could use this to show a got-hit animation for just
+                    one player.  The <code>showAnimation()</code> call could
+                    provide as parameter the name of the player who got hit;
+                    the animation could only show itself if
+                    <code>currentStatus.name == whoGotHit</code>.</p>
+
+                <h3>Game-specific global functions</h3>
+                <p>The game also provides animations with some useful
+                    functions for dealing with positions on the map and on
+                    the screen.</p>
+                <ul>
+                    <li>If <code>loc</code> is a location on the game map
+                        (i.e., a <code>[ plane, x, y ]</code> triple,
+                        <a href='foundations.html'>as documented on this
+                        page</a>) then <code>XY(loc)</code> is its position
+                        on the screen.  <code>XY()</code> returns an object
+                        with both <code>x</code> and <code>y</code> members,
+                        each of which is a number.  There is an example
+                        below.</li>
+                    <li>It is often handier to just get the x coordinate
+                        alone or the y coordinate alone, rather than the
+                        pair of them as an object.  Thus in place of
+                        <code>XY(loc)</code> you can use
+                        <code>X(loc)</code> and <code>Y(loc)</code>.
+                        Again, see the example below.</li>
+                    <li>If you have the name of a player (say, passed as a
+                        parameter to the animation) and you want to know
+                        where the player is on the map, call the
+                        <ocde>POS()</code> function on the name.  It
+                        converts player name strings to
+                        <code>[ plane, x, y ]</code> triples.</li>
+                    <li>The size of a single cell in pixels (both its width
+                        and its height, since it is square) is in the
+                        <code>CELL</code> variable.</li>
+                </ul>
+                <p>We put some of these functions to use in the following
+                    example.  Imagine that <a href='behaviorcoding.html'>you
+                    have written a behavior</a> that teleports users to a
+                    certain destination, and when they teleport out, you
+                    want to show an animation of some kind.  (For
+                    simplicity, let's just say you want to draw a wavering
+                    circle around the teleporter as the player goes through
+                    it.)</p>
+                <p>Then your behavior code should make a call like the
+                    following right when it teleports the player.</p>
+                <textarea class='code'>
+                    // Keep in mind that in behavior code,
+                    // "this" is the landscape item to which the behavior is attached.
+                    showAnimation( this.location, 'flickering circle',
+                        { location : this.location } );
+                </textarea>
+                <p>It may seem redundant to pass the location information
+                    twice.  The first parameter must always be provided, and
+                    tells the game where the animation is centered, so that
+                    the game knows which players' browsers need to be told
+                    to draw the animation.  The second use of
+                    <code>this.location</code> is only necessary when that
+                    location is also a parameter that the animation will
+                    need to know about.</p>
+                <p>(Some animations, like the simple examples above, fill
+                    the whole screen and thus don't need to know about any
+                    particular place on the game map.  Other animations just
+                    need to know the name of the player around which they're
+                    centered, and they compute the on-screen position of
+                    their drawing from that information.)</p>
+                <p>The animation code corresponding to the call shown above
+                    looks like this.</p>
+                <textarea class='code'>
+                    strokeStyle = '#0000ff';
+                    lineWidth = 5;
+                    arc( X(location), Y(location), // converts location to on-screen coordinates
+                         Math.random()*CELL, // randomly shifting radius, up to maximum of cell size
+                         0, 2*Math.PI ); // arc goes all the way around the circle, 0 to 2pi
+                </textarea>
+
+                <h3>The time variable, <code>t</code></h3>
+                <p>Each animation also has access to a variable
+                    <code>t</code>, which ranges from 0.0 at the start of
+                    the animation to 1.0 at the end, regardless of the
+                    animation's duration.  You can use this time variable
+                    to make your animations evolve in orderly ways.</p>
+                <p>For instance, we can modify the previous animation so
+                    that the circle around the teleporter doesn't just
+                    change size suddenly and randomly, but shrinks from
+                    full size to zero over the course of the animation.</p>
+                <textarea class='code'>
+                    strokeStyle = '#0000ff';
+                    lineWidth = 5;
+                    arc( X(location), Y(location),
+                         (1-t)*CELL, // at t=0 this will be full size; at t=1 it will be zero
+                         0, 2*Math.PI );
+                </textarea>
+
+                <h3>The <code>memory</code> object</h3>
+                <p>Finally, if you have some complex initialization to do at
+                    the start of your animation, you have access to a
+                    <code>memory</code> object, which is initially the
+                    empty object <code>{ }</code>, and which persists
+                    across all calls to your animation code for the entire
+                    duration of the animation.  You can store complex data
+                    in there the first time your animation is called, and
+                    just retrieve it later.</p>
+                <p>As an example, I provide the following particle system
+                    animation.  Initially, it creates the data for a shower
+                    of 200 random particles centered at a specific location
+                    provided as a parameter, <code>center</code>.  Each call
+                    to the code thereafter re-uses the same initial data, so
+                    that the animation looks sensible and runs
+                    efficiently.</p>
+                <textarea class='code'>
+                    if ( !memory.hasOwnProperty( 'particles' ) ) {
+                        memory.particles = [ ];
+                        for ( var i = 0 ; i < 200 ; i++ ) {
+                            var theta = Math.random()*Math.PI;
+                            var speed = Math.random()*2*CELL;
+                            memory.particles.push( {
+                                dx : Math.cos(theta)*speed,
+                                dy : -Math.sin(theta)*speed
+                            } );
+                        }
+                    }
+                    strokeStyle = '#0000ff';
+                    lineWidth = 2;
+                    globalAlpha = 1 - t;
+                    for ( var i = 0 ; i < memory.particles.length ; i++ ) {
+                        var p = memory.particles[i];
+                        var T = Math.sqrt(1 - t);
+                        beginPath();
+                    	arc( X(center)+T*p.dx, Y(center)+T*p.dy+T*T*0.5*CELL, 2, 0, 2*Math.PI );
+                    	stroke();
+                    }
+                </textarea>
+                <p>Note that the first call to your animation routine is
+                    <i>NOT</i> necessarily when t=0.  For instance, if you
+                    have an animation that lasts 2 seconds, and it begins,
+                    but then 1 second later a new player teleports into the
+                    area, that player will only see the second half of the
+                    animation.  (That player's browser will receive the
+                    full animation data, but will be told that the animation
+                    has already progressed to the 1-second mark.  Thus the
+                    <code>t</code> values given to each call of the
+                    animation function will begin at 0.5, for that player
+                    only.</p>
+
+            <h2>What are the built-in animations?</h2>
+            <p>The game server itself will call <code>showAnimation()</code>
+                at the following times, and with the following
+                parameters.</p>
+            <ul>
+                <li>When a player logs in<br>
+                    Animation name : "login"<br>
+                    Parameter: "player" is the player object that just
+                    logged in.  The player may not yet have teleported to an
+                    actual position on the game map, but that will happen
+                    over the course of the next few instants, depending on
+                    network traffic.</li>
+                <li>When a player logs out<br>
+                    Animation name: "logout"<br>
+                    Parameters: "player" is the player object that is
+                    logging out or disconnecting, and "position" is the
+                    position they had occupied until just an instant before
+                    the animation gets run</li>
+                <li>When a maker edits cells on the game map<br>
+                    Animation name: "map edit"<br>
+                    Parameters: "player" is the player object that edited
+                    the map, and "location" is the
+                    <code>[ plane, x, y ]</code> triple for the center of
+                    the edited region.</li>
+            </ul>
+
+        </div>
+    </body>
+    <script src='codemirror-for-textareas.js'></script>
+</html>

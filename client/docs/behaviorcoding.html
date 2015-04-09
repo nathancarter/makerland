@@ -1,0 +1,371 @@
+<html>
+    <head>
+        <script src='https://code.jquery.com/jquery-1.11.2.min.js'></script>
+        <script src='https://code.jquery.com/jquery-migrate-1.2.1.min.js'>
+        </script>
+        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css'/>
+        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css'/>
+        <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js'>
+        </script>
+        <link rel="stylesheet" href="../codemirror.css">
+        <script src="../codemirror.js"></script>
+        <script src="../codemirror-javascript-mode.js"></script>
+        <title>MakerLand - Behavior Coding Documentation</title>
+    </head>
+    <body style='padding-top: 50px;'>
+
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed"
+                      data-toggle="collapse" data-target="#navbar"
+                      aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">MakerLand Coder Documentation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="#">MakerLand</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+              <ul class="nav navbar-nav">
+                <li><a href="index.html">Docs Home</a></li>
+                <li><a href="foundations.html">Foundations</a></li>
+                <li><a href="animationcoding.html">Animations</a></li>
+                <li class="active"><a href="#">Behaviors</a></li>
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </nav>
+
+        <div class="container">
+
+            <div class="starter-template">
+                <h1>Coding Behaviors</h1>
+                <!--<p class="lead">Subtitle goes here</p>-->
+            </div>
+
+            <h2>What is a behavior?</h2>
+            <p>In MakerLand, a "behavior" is a piece of code that can be
+                attached to an item that lives in the game world, so that
+                the item can "behave" in a specific way, as defined by the
+                code.</p>
+            <p>For example, if you wanted to make a portal that teleports
+                players to a new location in the game world, you would begin
+                by placing a landscape item on the map that looks like a
+                portal.  At first, it would do nothing when players stepped
+                on it; without a behavior that defines what it means for it
+                to teleport players, it is just an image.  When the
+                teleportation behavior is attached to it, it then becomes an
+                active portal.</p>
+            <p>At present, MakerLand only supports behaviors for landscape
+                items.  Later, it will support behaviors for items players
+                can carry, and for creatures that live in the game
+                world.</p>
+
+            <h2>How do behaviors get "attached" to items?</h2>
+            <p>Makers create behaviors in the game database, then edit
+                individual landscape items on the map and attach to them
+                behaviors defined in the database.  I give explicit
+                instructions below on how to do this, but in order to follow
+                them, we first need to define a simple behavior.</p>
+            <h3>Defining a new behavior</h3>
+            <p>We will define an extremely simple piece of behavior code.
+                Follow these instructions to do so.</p>
+            <ol>
+                <li>Click the Database command button.</li>
+                <li>Click the Behaviors database.</li>
+                <li>At the bottom, click the button to add an entry to the
+                    table.</li>
+                <li>After the confirmation message, find the entry that was
+                    added, and click to edit it.</li>
+                <li>Change its name to something simple, like "first
+                    behavior" or "simple test behavior."</li>
+                <li>Change its "applies to" field and check the box next to
+                    "landscape item," so the game knows that the behavior
+                    you're about to create can be attached to landscape
+                    items.</li>
+                <li>Click the button to edit its implementation, which means
+                    its code.  Paste in the following code and save.</li>
+            </ol>
+            <textarea class='code'>
+                log( "Hello." );
+            </textarea>
+            <p>You now have a simple behavior created in the database.
+                Let's see how to attach it to an item.</p>
+            <h3>Attaching a behavior to an item</h3>
+            <p>A single behavior in the database can be attached to many
+                objects in the game world.  The process for attaching it to
+                any one item is given here.</p>
+            <ol>
+                <li>Move your avatar near the landscape item to which you
+                    wish to attach the behavior.</li>
+                <li>Click the World command button, then the "Edit landscape
+                    items on map" button.</li>
+                <li>Click the landscape item you wish to edit.
+                    (If there are many items on top of one another,
+                    it will list them all and ask you to choose the one you
+                    intended to click.)</li>
+                <li>Click the "Edit behaviors" button for that item.</li>
+                <li>Browse the list of behaviors at the bottom until you
+                    find the new one you just created.  Click its Attach
+                    button and it will appear on the list of attached
+                    behaviors, at the top.</li>
+            </ol>
+            <p>If you had given your behavior parameters, you could edit
+                them with an Edit button that would appear beneath the
+                attached behavior.  But since you have not, it should have
+                only a Remove button, which will un-attach it.</p>
+            <p>What you've done is make it so that the landscape item you
+                edited, <i>the next time it is loaded or reset,</i> will
+                run your behavior's code.  That code <i>could</i> install
+                properties or event handlers into the item itself, but the
+                simple behavior we've created just writes a single line to
+                a log.  In the next section, we'll make this happen.</p>
+
+            <h2>When does behavior code get run?</h2>
+            <p>Before reading the answer to this question, be sure you have
+                already read the foundational concept of resetting an area,
+                <a href='foundations.html'>documented on this page</a>.</p>
+            <p>The answer to the question, "When does behavior code
+                get run?" is "When the block containing the landscape item
+                is loaded, that is, shortly before any player gets close
+                enough to the landscape item to see it."  Because resetting
+                an area reloads all the blocks in it, behavior code is also
+                run when you click the Reset command button.</p>
+            <p>Do so now.  Your behavior code should have been run!</p>
+            <p>But how can we tell?  Where is the log into which the "hello"
+                message was written?  It's your personal maker error log,
+                <a href='foundations.html'>explained on this page</a>.
+                Browse it and you should see the hello message your behavior
+                just created.  Resetting your environment again should add
+                another hello message to that same log.</p>
+
+            <h2>What can behaviors do?</h2>
+            <p>Anything!  At least, the goal is that behavior code should
+                be extremely flexible and open-ended, allowing makers in the
+                game to customize the game to a very large degree, shaping
+                it according to their own imagination.</p>
+            <p>If you are a maker looking to create a behavior, the
+                following examples can give you some idea of how to do so.
+                They begin with very trivial behaviors that are mostly
+                useless, except that they function well as small examples to
+                get you started.  Building on those small examples, we
+                create larger and larger examples, until we've built the
+                teleportation behavior described earlier on this page.</p>
+
+                <h3>Example 1</h3>
+                <p>Behaviors can trigger animations by a single call to the
+                    <code>showAnimation()</code> global function.  To learn
+                    what animations are and how to build them,
+                    <a href='animationcoding.html'>see the animation
+                    documentation</a>.</p>
+                <p>A call to that function looks like the following, with
+                    the parameters explained below.</p>
+                <textarea class='code'>
+                    showAnimation( location, name, optionalParameterObj );
+                </textarea>
+                <p>The <code>location</code> parameter must be a location in
+                    the game world, <a href='foundations.html'>as documented
+                    on this page</a>.  All players that can see the location
+                    given will have their browsers notified of the
+                    animation, so that the game can draw it on their
+                    screens.</p>
+                <p>The <code>name</code> parameter must be either a string
+                    name of an animation in the animations database, or the
+                    numerical index of one.  It specifies which animation to
+                    run.</p>
+                <p>The final parameter is optional, and if given, must be an
+                    object whose key-value pairs will be copied into the
+                    scope of the animation's code before it gets run.  This
+                    is how you can transmit any data specific to the
+                    animation to the client for use during the animation.
+                    For instance, if you are triggering a shower of sparks
+                    animation, it might accept a color parameter, and you
+                    would make this final parameter
+                    <code>{ color : '#ff0000' }</code>.  Because this will
+                    be transmitted to the client, it must be JSON data; no
+                    player objects or landscape item object can be
+                    included.  (Names, however, can be.)</p>
+                <p>But if the short piece of code above were included alone
+                    in a behavior definition, it would only be run every
+                    time the landscape item were reset.  This has very
+                    limited utility.  For that reason, the following example
+                    is by far the most common type of behavior code.</p>
+
+                <h3>Example 2</h3>
+                <p>Most behaviors modify how a landscape item
+                    <i>behaves,</i> and they do so by installing in it
+                    event handlers.  They do so using the common convention
+                    shown in the following code.</p>
+                <textarea class='code'>
+                    this.on( "event name", function ( eventData ) {
+                        // write here code that handles the event
+                    } );
+                </textarea>
+                <p>In the above code, the <code>this</code> object is
+                    the object to which the behavior is attached.  That
+                    object is guaranteed to have an events system installed,
+                    and you can install handlers using the standard "on"
+                    convention common in HTML applications.</p>
+                <p>The "on" function installs an event handler that is
+                    triggered <i>on</i> each occurrence of the given event.
+                    Events are specified by name, and the available event
+                    names are given in the next section.</p>
+                <p>The second parameter is the function that should be run
+                    whenever an event of the given type takes place.  The
+                    function will be passed some data about the event, as
+                    documented in the following section, and may do whatever
+                    it likes in response.</p>
+                <p>For instance, when a player enters a landscape item, it
+                    might teleport the player to a new location.  Or while
+                    a player stays inside the landscape item, it might harm
+                    or heal the player.</p>
+
+            <h2>What events can my behaviors listen to?</h2>
+            <p>Other events are coming later, but for now, there are
+                these.</p>
+
+                <h3>"entered" for a Landscape Item</h3>
+                <p>Whenever a player steps from the outside of a landscape
+                    item's boundary rectangle to the inside, the "entered"
+                    event is triggered.  The <code>eventData</code>
+                    parameter is the player object who entered.</p>
+                <p>Example:</p>
+                <textarea class='code'>
+                    this.on( "entered", function ( player ) {
+                        log( "The player " + player.name + " stepped on your front doorstep!" );
+                    } );
+                </textarea>
+
+                <h3>"exited" for a Landscape Item</h3>
+                <p>Same as the previous, except when a player steps from
+                    the inside of the item's rectangle to its outside.</p>
+
+                <h3>No need for create/reset events</h3>
+                <p>There are not events for when landscape items are loaded
+                    or reset, because if you want to react to those events,
+                    you simply put the event handler code in the behavior
+                    directly.</p>
+
+            <h2>What functions can my behavior code
+                (or event handler code) use?</h2>
+            <p>More to come later, but these are available now.</p>
+
+                <h3>Landscape Item member functions</h3>
+                <p>Assume <code>L</code> is a landscape item.  Then it
+                    has the following member functions and variables.</p>
+                <h4>Fields in <code>L</code>:</h4>
+                <textarea class='code'>
+                    L.position // length-3 array of map coordinates of item center
+                    L.plane // first entry of L.position
+                    L.x // second entry of L.position
+                    L.y // third entry of L.position
+                    L.localX // distance from top-left corner of its block to L.x
+                    L.localY // same as previous, but for L.y
+                    L.topLeft.x // x coordinate of left side of item
+                    L.topLeft.y // y coordinate of top of item
+                    L.bottomRight.x // x coordinate of right side of item
+                    L.bottomRight.y // y coordinate of bottom of item
+
+                    L.type // integer index of its type in the landscape items database table
+                    L.behaviors // list of behaviors taken from its definition in the database
+                    L.visible // boolean: visible to non-makers?
+                    L.size // how many cells wide and high is this item? (all items are square)
+                </textarea>
+
+                <h4>Functions in <code>L</code>:</h4>
+                <textarea class='code'>
+                    // Whether the item collides with a rectangle from topLeft to bottomRight:
+                    // (topLeft must be of the form {x:number,y:number},
+                    // and bottomRight must also)
+                    L.collides( topLeft, bottomRight )
+                    // Install an event handler, as documented earlier:
+                    // (returns a unique id which can be used to uninstall
+                    // the handler later if necessary)
+                    L.on( eventName, handlerFunction );
+                    // Uninstall a handler, given its unique ID:
+                    L.remove( handlerID );
+                    // Trigger an event:
+                    // (zero or more eventData parameters are acceptable)
+                    L.emit( eventName, eventData );
+                    // Attempt an event, triggering before and after event handlers:
+                    // (not fully documented here)
+                    L.attempt( eventName, runHandler, failHandler, eventData );
+                </textarea>
+
+                <h3>Player object member functions</h3>
+                <p>Assume <code>P</code> is a player object.  Then it
+                    has the following member functions and variables.</p>
+                <h4>Fields in <code>P</code>:</h4>
+                <textarea class='code'>
+                    P.name // lower case name of the player, as a string
+                    P.saveData // large object containing all data saved in the player object, e.g.:
+                    P.saveData.age // integer
+                    P.saveData.avatar.headColor // string, e.g. '#ff0000'
+                    // ...and many other saveData contents
+                    // Note: Don't manipulate the fields in P.saveData unless you know what you're doing!
+                </textarea>
+                <p>You may also store data in the player object, in one of
+                    two ways.  You can store permanent data by writing into
+                    new (as yet unused) fields of the player's
+                    <code>saveData</code> member.  You can store temporary
+                    data by writing into other (new and unused) fields of
+                    the player object.</p>
+                <p>Here are two examples.  In both cases, we assume the
+                    maker's avatar is named Eileen and she's creating a fair
+                    within the game.</p>
+                <textarea class='code'>
+                    // When someone enters the fair, we might use code like
+                    // this to mark them as a new arrival, so that the
+                    // nearby fair workers know to greet them.
+                    playerObject.justEnteredEileensFair = true;
+                    // When someone plays one of the minigames, perhaps
+                    // Eileen wants to keep their cumulative score, and it
+                    // should be stored across logins.  She could do so like
+                    // this:
+                    playerObject.saveData.scoreAtEileensFair += 100;
+                </textarea>
+                <p>You could be more sophisticated, by keeping an object for
+                    the fair, and just manipulating its members, like in the
+                    following example, but how sophisticated you need to be
+                    depends upon the complexity of what you're bulidng.</p>
+                <textarea class='code'>
+                    if ( !playerObject.saveData.hasOwnProperty( 'EileensFair' ) )
+                        playerObject.saveData.EileensFair = { minigameScore : 0 };
+                    // then later...
+                    playerObject.saveData.EileensFair.minigameScore += 100;
+                </textarea>
+
+                <h4>Functions in <code>P</code>:</h4>
+                <p>(There are many others not listed here that are for
+                    internal use only.)</p>
+                <textarea class='code'>
+                    // Get list of commands to which the player has access:
+                    // (returns a list of lower-case strings)
+                    P.commands();
+                    // Whether the player is a maker, as a boolean:
+                    P.isMaker();
+                    // Where the player is on the game map:
+                    // (returns a [plane,x,y] triple)
+                    P.getPosition();
+                    // Move the player to a new location:
+                    // (parameter must be a [plane,x,y] triple)
+                    P.teleport( destination );
+                </textarea>
+
+                <h3>Global functions</h3>
+                <textarea class='code'>
+                    // Documented above already:
+                    showAnimation( location, name, optionalParameterObject );
+                    // Documented above already:
+                    // (arguments get concatenated into strings with a space between,
+                    // as with console.log in the browser)
+                    log( any, sequence, of, zero, or, more, things );
+                </textarea>
+
+                <p></p>
+
+        </div>
+    </body>
+    <script src='codemirror-for-textareas.js'></script>
+</html>

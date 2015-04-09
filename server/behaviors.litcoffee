@@ -220,6 +220,12 @@ for doing so looks like the following.
                         name : 'new implementation'
                         value : data.code
                     ,
+                        type : 'text'
+                        value : '<p>Not sure how to write this code?
+                            <a href="docs/behaviorcoding.html"
+                            target="_blank">Click here</a> to open some
+                            instructions (in a new tab).</p>'
+                    ,
                         type : 'action'
                         value : 'Save changes'
                         action : ( event ) =>
