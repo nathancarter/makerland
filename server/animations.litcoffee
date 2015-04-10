@@ -20,6 +20,7 @@ The constructor just sets the name of the table, then some defaults.
         constructor : () ->
             super 'animations'
             @setDefault 'duration', 1
+            @runningAnimations = { }
 
 ## Maker Database Browsing
 
@@ -130,7 +131,9 @@ for doing so looks like the following.
                         ,
                             type : 'text'
                             value : '<p>(For example, enter 1 or 6.5.  Do
-                                not include units.)'
+                                not include units.  Set the duration to 0
+                                to mean the animation continues forever
+                                until explicitly stopped.)'
                         ,
                             type : 'action'
                             value : 'Change duration'
@@ -242,7 +245,10 @@ location are stored with it.  Immediately thereafter, any players who can
 see the block in which the animation just began will have their block data
 updated, so that their clients receive the information about the animation.
 (The block table, before sending block data to players, queries this table,
-to see if any running animations need to be sent as well.)
+to see if any running animations need to be sent as well.)  This function
+returns a unique id that can be used later to delete this animation before
+its normal expiry time (or stop its running if it were a zero-length
+animation, which means one that runs forever).
 
         showAnimation : ( location, animationType, parameterObject ) =>
             if not @namesToIndices?
@@ -256,17 +262,44 @@ to see if any running animations need to be sent as well.)
             if not animation?
                 return console.log "Could not find animation type
                     \"#{animationType}\" in database -- cannot show."
-            @runningAnimations ?= { }
             if typeof location is 'string'
                 location = ( parseFloat i for i in location.split ',' )
             bt = require './blocks'
             blockName = bt.positionToBlockName location...
+            id = @getNextUniqueAnimationID()
             ( @runningAnimations[blockName] ?= [ ] ).push
                 type : animationType
                 definition : animation
                 parameters : parameterObject
                 startTime : new Date
+                id : id
             bt.notifyAboutBlockUpdate blockName
+            id
+
+This function is called by the previous to generate unique animation IDs.
+
+        getNextUniqueAnimationID : =>
+            existingIDs = [ ]
+            for own blockName, animations of @runningAnimations
+                existingIDs.push animation.id for animation in animations
+            result = 0
+            while result in existingIDs
+                result++
+            result
+
+This function deletes an animation from the list of running animations,
+given the unique ID returned from `showAnimation()`, above.  It then
+notifies the block containing the deleted animation that it needs to send
+updated animation information to players nearby.
+
+        stopAnimation : ( id ) =>
+            for own blockName, animations of @runningAnimations
+                for animation, index in animations
+                    if animation.id is id
+                        animations.splice index, 1
+                        require( './blocks' ).notifyAboutBlockUpdate \
+                            blockName
+                        return
 
 The block table, when it sends data to players about what blocks they can
 see, will want this table to be able to send animation data.  The block
@@ -279,9 +312,10 @@ of course.
 
         sendBlockAnimationsToPlayer : ( blockName, playerObject ) =>
             toSend = [ ]
-            ( @runningAnimations ?= { } )[blockName] ?= [ ]
+            @runningAnimations[blockName] ?= [ ]
             now = new Date
             stillRunning = ( anim ) =>
+                if anim.definition.duration is 0 then return yes
                 later = new Date anim.startTime.getTime() \
                       + anim.definition.duration * 1000
                 later > now

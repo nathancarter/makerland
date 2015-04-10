@@ -404,8 +404,11 @@ can run multiple times on multiple objects.
                 { allowReturnOutsideFunction : true }
             functions =
                 "function showAnimation ( loc, name, paramObj ) {
-                    require( './animations' )
+                    return require( './animations' )
                         .showAnimation( loc, name, paramObj );
+                }
+                function stopAnimation ( id ) {
+                    require( './animations' ).stopAnimation( id );
                 }"
             if author then functions +=
                 "function log () {

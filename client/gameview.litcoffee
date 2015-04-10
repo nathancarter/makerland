@@ -349,7 +349,7 @@ indirectly, by the `drawAnimations` routine below.
                 startTime : ( new Date ) - animation.elapsed
                 function : animationFunction
                 parameters : animation.parameters
-                duration : animationCache[animation.type]?.duration or 1
+                duration : animationCache[animation.type]?.duration ? 1
                 definition : animationCache[animation.type]
                 memory : { }
 
@@ -362,16 +362,18 @@ animations, but also to clear out those that have run their full course.
             updatedList = [ ]
             for animation in animations
                 elapsed = ( now - animation.startTime ) / 1000
-                pctElapsed = elapsed / animation.duration
-                if pctElapsed < 1
-                    try
-                        animation.function pctElapsed,
-                            animation.parameters, context, animation.memory
-                        updatedList.push animation
-                    catch e
-                        console.log "In animation
-                            #{animation.definition.name}
-                            with t=#{pctElapsed}: #{e.stack}"
+                if animation.duration is 0
+                    t = elapsed # 0-length animations go forever
+                else
+                    t = elapsed / animation.duration
+                    if t >= 1 then continue # >0-length ones eventually end
+                try
+                    animation.function t, animation.parameters, context,
+                        animation.memory
+                    updatedList.push animation
+                catch e
+                    console.log "In animation #{animation.definition.name}
+                        with t=#{t}: #{e.stack}"
             activeAnimations[block] = updatedList
         for own block, animations of activeAnimations
             if animations.length is 0 then delete activeAnimations[block]
