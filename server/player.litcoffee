@@ -319,6 +319,7 @@ client before allowing this one to take over.
                 otherCopy.socket.disconnect()
             @name = name
             @load()
+            @justLoggedIn = yes
             console.log "\tPlayer logged in as #{name}."
             destination = if @validPosition @getPosition() then \
                 @getPosition() else [ 0, 0, 0 ]
@@ -491,7 +492,8 @@ function to tell the client to put the player back to their previous (valid)
 position.
 
         positionChanged : ( newPosition, visionDistance ) =>
-            oldPosition = @getPosition()
+            oldPosition = if @justLoggedIn then null else @getPosition()
+            delete @justLoggedIn
             if @validPosition newPosition
                 @setPosition newPosition
                 if newPosition?[0] isnt oldPosition?[0] then @updateStatus()

@@ -498,7 +498,11 @@ player just entered it.
                 x : oldPosition[1] + 0.25, y : oldPosition[2]
         else
             previousTopLeft = previousBottomRight = null
-        for block in visibleBlocks
+        blocksToCheck = visibleBlocks.slice()
+        for block in formerlyVisibleBlocks
+            if block not in blocksToCheck
+                blocksToCheck.push block
+        for block in blocksToCheck
             for item in module.exports.landscapeItems?[block] or [ ]
                 old = previousTopLeft and previousBottomRight and \
                     item.collides previousTopLeft, previousBottomRight
