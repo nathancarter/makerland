@@ -119,8 +119,12 @@ individual row in the table that populates that command pane.
         splash = data.splash
         delete data.splash
         attrs = ''
+        knownAttrs = [
+            'name', 'value', 'id', 'class', 'choices', 'selected',
+            'default', 'help', 'shortInfo', 'checked'
+        ]
         for own key, value of data
-            if key not in [ 'name', 'value', 'id', 'class' ]
+            if key not in knownAttrs
                 attrs += " #{key}='#{value}'"
         focus = undefined
         result = switch data.type

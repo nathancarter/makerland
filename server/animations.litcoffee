@@ -253,7 +253,9 @@ to see if any running animations need to be sent as well.)
                 animationType = @namesToIndices[animationType]
             if not animationType? then return
             animation = @getWithDefaults animationType
-            if not animation? then return
+            if not animation?
+                return console.log "Could not find animation type
+                    \"#{animationType}\" in database -- cannot show."
             @runningAnimations ?= { }
             if typeof location is 'string'
                 location = ( parseFloat i for i in location.split ',' )

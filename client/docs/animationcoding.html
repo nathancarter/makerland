@@ -385,6 +385,13 @@
                     logging out or disconnecting, and "position" is the
                     position they had occupied until just an instant before
                     the animation gets run</li>
+                <li>When a player speaks<br>
+                    Animation name: "speech"<br>
+                    Parameters: "text" is the text spoken, and "speaker" is
+                    the name of the player who spoke<br>
+                    See below for an example implementation of an animation
+                    that reacts to this event by showing speech
+                    bubbles.</li>
                 <li>When a maker edits cells on the game map<br>
                     Animation name: "map edit"<br>
                     Parameters: "player" is the player object that edited
@@ -392,6 +399,61 @@
                     <code>[ plane, x, y ]</code> triple for the center of
                     the edited region.</li>
             </ul>
+
+            <h2>Ready-to-use, nontrivial examples</h2>
+            <p>The following examples are ready to use if you are building
+                from scratch a set of animations for your version of
+                MakerLand.  Many of these are common animations that you
+                will want to have in order for the game to function
+                satisfactorily.</p>
+            <h3>Speech bubbles</h3>
+            <p>As documented in the previous section, the game uses
+                animations to indicate that players have spoken.  Thus
+                players cannot even chat in the game until you have
+                implemented a speech bubble animation in your game's
+                animation database.
+                Here is an example one that looks pretty good.
+                It should have a duration of several seconds, to ensure
+                that others nearby have a chance to read the whole chat.</p>
+            <textarea class='code'>
+                // choose font so we can measure bubble size
+                fontPixelSize = 20;
+                font = fontPixelSize+'px Arial';
+                // always keep the bubble over the speaker's head as he/she walks around
+                var location = POS( speaker );
+                // some constants for size, shape, etc. of speech bubbles
+                var margin = 10;
+                var quirk = 10; // radius of curved tail below bubble
+                var minwidth = 50;
+                var bubbleWidth = Math.max( measureText( text ).width, 6*quirk );
+                // compute relative positions of corners of bubble
+                var left = X( location )-bubbleWidth/2-margin;
+                var right = left + bubbleWidth+2*margin;
+                var top = Y( location )-CELL-2*margin-fontPixelSize*1.5;
+                var bottom = top + 2*margin+fontPixelSize*1.5;
+                var center = ( left + right ) / 2;
+                var offset = 2;
+                // draw outline of bubble
+                beginPath();
+                moveTo( left, top );
+                lineTo( right, top );
+                lineTo( right, bottom );
+                lineTo( center-(offset+1)*quirk, bottom );
+                lineTo( center-(offset+1)*quirk, bottom+quirk );
+                arcTo( center-(offset+1)*quirk, bottom+2*quirk, center-offset*quirk, bottom+2*quirk, quirk );
+                arcTo( center-(offset+2)*quirk, bottom+2*quirk, center-(offset+2)*quirk, bottom, 2*quirk );
+                lineTo( left, bottom );
+                lineTo( left, top );
+                // paint it white with a black border and black text
+                fillStyle = '#ffffff';
+                fill();
+                strokeStyle = '#000000';
+                stroke();
+                fillStyle = '#000000';
+                fillText( text, left+margin, bottom-margin-fontPixelSize*0.5 );
+            </textarea>
+
+            <p></p>
 
         </div>
     </body>

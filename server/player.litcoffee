@@ -507,3 +507,7 @@ vision distance, which results in a call to `positionChanged`.
 
         teleport : ( destination ) =>
             @socket.emit 'player position', destination
+
+Mix handlers into `Player`s.
+
+    require( './handlers' ).mixIntoClass Player

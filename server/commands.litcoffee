@@ -337,6 +337,52 @@ The settings command allows players to edit their personal settings.
                         cancel : yes
                         action : -> player.showCommandUI()
 
+The talk command asks the client to show the player's inputs to all the
+other players in the immediate area (e.g., by speech bubbles).  But all it
+does is trigger the animation; the completion of the visual is dependent
+upon the contents of the animations database.
+
+        talk :
+            category : 'basic'
+            icon : 'talk.png'
+            shortInfo : 'Talk to the people nearby'
+            help : 'This command lets you type in text messages that are
+                shown to users around you through speech bubbles over your
+                avatar\'s head.'
+            run : ( player ) ->
+                player.showUI
+                    type : 'text'
+                    value : '<h3>Talking</h3>
+                             <p>Enter below what you want to say.
+                             Press enter to speak, Esc to stop talking.</p>'
+                ,
+                    type : 'string input'
+                    name : 'words to say'
+                    maxlength : 60
+                ,
+                    type : 'action'
+                    value : 'Speak'
+                    default : yes
+                    action : ( event ) ->
+                        position = player.getPosition()
+                        text = event['words to say']
+                        require( './animations' ).showAnimation position,
+                            'speak', { text : text, speaker : player.name }
+                        player.emit 'spoke', text
+                        hearers = require( './blocks' ).whoCanSeePosition \
+                            position
+                        for otherPlayer in hearers
+                            if otherPlayer isnt player
+                                otherPlayer.emit 'heard',
+                                    speech : text
+                                    speaker : player
+                        module.exports.talk.run player # reset this UI
+                ,
+                    type : 'action'
+                    value : 'Done'
+                    cancel : yes
+                    action : -> player.showCommandUI()
+
 ## Maker Commands
 
 The database command allows makers to browse the list of database tables,
