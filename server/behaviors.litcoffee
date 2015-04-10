@@ -299,7 +299,7 @@ callback will be called when the player clicks Done.
                         value : "<b>Parameters:</b><br>#{params.join ', '}"
                     ]
                     pair = [ ]
-                    if params.length > 0
+                    if Object.keys( type.parameters ).length > 0
                         pair.push
                             type : 'action'
                             value : 'Edit'
