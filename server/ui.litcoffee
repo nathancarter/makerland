@@ -279,3 +279,32 @@ whatever you feel needs explaining about what they're editing.
             action : ( event ) -> callback null
         ]
         player.showUI controls
+
+Colors used in color-picker drop-downs across the game are stored in the
+following object.  The subsequent function returns a color name given the
+color code in hex.
+
+    module.exports.colors =
+        white    : '#FFFFFF'
+        black    : '#000000'
+        dark     : '#313131'
+        gray     : '#626262'
+        tan      : '#7E715D'
+        dusty    : '#574C3C'
+        orange   : '#943E0F'
+        brown    : '#5F472F'
+        honey    : '#99761B'
+        gold     : '#C9BC0F'
+        algae    : '#769028'
+        grass    : '#397628'
+        trees    : '#246024'
+        sky      : '#28726E'
+        royal    : '#800080'
+        lavender : '#EFA9FE'
+        camo     : '#59955C'
+        russet   : '#8E2323'
+    module.exports.colorName = ( hexcode ) ->
+        hexcode = hexcode.toLowerCase()
+        for own name, code of module.exports.colors
+            return name if code.toLowerCase() is hexcode
+        null

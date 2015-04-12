@@ -6,6 +6,7 @@ This module implements a game database table for storing types of map cells
 
     { Table } = require './table'
     { Player } = require './player'
+    ui = require './ui'
 
 It does so by subclassing the main Table class and adding cell-type-specific
 functionality.
@@ -20,6 +21,7 @@ can walk on a cell type is "all."
         constructor : () ->
             super 'celltypes', 'Cell Types'
             @setDefault 'who can walk on it', 'all'
+            @setDefault 'border color', '#000000'
 
 Together with the property whose default was just set, we provide an API for
 checking if a player can walk on a cell of a certain type.  Obviously, this
@@ -128,8 +130,8 @@ The UI for editing a cell type looks like the following.
                 ,
                     type : 'action'
                     value : 'Change'
-                    action : => require( './ui' ).editAuthorsList player,
-                        this, entry, again
+                    action : => ui.editAuthorsList player, this, entry,
+                        again
                 ]
             ,
                 [
@@ -155,6 +157,57 @@ The UI for editing a cell type looks like the following.
             ,
                 [
                     type : 'text'
+                    value : 'Border size:'
+                ,
+                    type : 'text'
+                    value : @get entry, 'border size'
+                ,
+                    type : 'action'
+                    value : 'Change'
+                    action : =>
+                        ui.pickFromList player,
+                            "Choose border thickness.  Borders are only
+                            drawn between this cell type and neighboring
+                            cells of a <i>different</i> type.",
+                            {
+                                none : 0
+                                thin : 0.5
+                                medium : 1
+                                thick : 2
+                                huge : 3
+                            },
+                            @get( entry, 'border size' ),
+                            ( result ) =>
+                                if result
+                                    @set entry, 'border size', result
+                                again()
+                ]
+            ,
+                [
+                    type : 'text'
+                    value : 'Border color:'
+                ,
+                    type : 'text'
+                    value : "<font color='#{@get entry, 'border color'}'
+                             >#{ui.colorName @get entry, 'border color'}
+                             </font>"
+                ,
+                    type : 'action'
+                    value : 'Change'
+                    action : =>
+                        ui.pickFromList player,
+                            "Choose border color.  Note that borders will
+                            be drawn only if you choose a thickness other
+                            than \"none\" on the previous screen.",
+                            ui.colors, @get( entry, 'border color' ),
+                            ( result ) =>
+                                if result
+                                    @set entry, 'border color', result
+                                again()
+                ]
+            ,
+                [
+                    type : 'text'
                     value : 'Who can walk on this?'
                 ,
                     type : 'text'
@@ -163,7 +216,7 @@ The UI for editing a cell type looks like the following.
                     type : 'action'
                     value : 'Change'
                     action : =>
-                        require( './ui' ).pickFromList player,
+                        ui.pickFromList player,
                             "Choose which kind of creatures can walk on
                             cells of type \"#{data.name}.\"",
                             { all : 'all', none : 'none' },
@@ -184,7 +237,7 @@ A maker can remove a cell type if and only if that maker can edit it.
         canRemove : ( player, entry ) => @canEdit player, entry
         remove : ( player, entry, callback ) =>
             action = => player.showOK @tryToRemove( entry ), callback
-            require( './ui' ).areYouSure player,
+            ui.areYouSure player,
                 "remove the cell type #{entry} <i>permanently</i>.
                  This action <i>cannot</i> be undone!  If there are any
                  instances of this cell type in the game map, they will

@@ -117,8 +117,6 @@ that moves as the player walks.  Later, it will have an actual map in it.
             context.moveTo x1, y1
             context.lineTo x2, y2
             context.stroke()
-        context.strokeStyle = context.fillStyle = '#999999'
-        context.lineWidth = 1
         blockSize = window.gameSettings.mapBlockSizeInCells
         for own name, data of window.visibleBlocksCache
             [ plane, x, y ] = ( parseInt i for i in name.split ',' )
@@ -132,7 +130,7 @@ that moves as the player walks.  Later, it will have an actual map in it.
                         cellType = currentStatus.defaultCellType
                     if cellType > -1
                         index = cellType
-                        lookupCellType index
+                        ctdata = lookupCellType index
                         image = getCellTypeIcon index
                         if image.complete
                             try
@@ -140,8 +138,44 @@ that moves as the player walks.  Later, it will have an actual map in it.
                                     cellSize, cellSize
                                 drawn = yes
                     if not drawn
+                        context.strokeStyle = context.fillStyle = '#999999'
+                        context.lineWidth = 1
                         line screen.x, screen.y, screen.x, screen.y+cellSize
                         line screen.x, screen.y, screen.x+cellSize, screen.y
+        for own name, data of window.visibleBlocksCache
+            [ plane, x, y ] = ( parseInt i for i in name.split ',' )
+            array = data.cells
+            for i in [0...blockSize]
+                for j in [0...blockSize]
+                    screen = mapCoordsToScreenCoords x+i, y+j
+                    cellType = array[i][j]
+                    if cellType is -1
+                        cellType = currentStatus.defaultCellType
+                    if cellType > -1
+                        index = cellType
+                        ctdata = lookupCellType index
+                        if ctdata and ctdata['border size'] > 0
+                            context.strokeStyle = ctdata['border color']
+                            context.lineWidth = ctdata['border size']
+                            if getMapCell( plane, x+i-1, y+j ) isnt index
+                                line screen.x, screen.y,
+                                    screen.x, screen.y+cellSize
+                            if getMapCell( plane, x+i+1, y+j ) isnt index
+                                line screen.x+cellSize, screen.y,
+                                    screen.x+cellSize, screen.y+cellSize
+                            if getMapCell( plane, x+i, y+j-1 ) isnt index
+                                line screen.x, screen.y,
+                                    screen.x+cellSize, screen.y
+                            if getMapCell( plane, x+i, y+j+1 ) isnt index
+                                line screen.x, screen.y+cellSize,
+                                    screen.x+cellSize, screen.y+cellSize
+    getMapCell = ( plane, x, y ) ->
+        N = window.gameSettings.mapBlockSizeInCells
+        blkx = ( N * Math.floor x/N ) | 0
+        blky = ( N * Math.floor y/N ) | 0
+        blkname = "#{plane},#{blkx},#{blky}"
+        cell = window.visibleBlocksCache[blkname]?.cells[x - blkx][y - blky]
+        if cell is -1 then currentStatus.defaultCellType ? -1 else cell
     mapCoordsToScreenCoords = ( x, y ) ->
         cellSize = window.gameSettings.cellSizeInPixels
         position = getPlayerPosition()

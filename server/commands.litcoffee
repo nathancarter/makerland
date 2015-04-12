@@ -1,6 +1,10 @@
 
 # Commands Module
 
+We will need the user interface module.
+
+    ui = require './ui'
+
 This module will define all the commands available to players.  The module
 object will be a mapping from command names to objects defining the
 command's properties (description, help, code to run it, etc.).
@@ -93,25 +97,6 @@ The settings command allows players to edit their personal settings.
                         type : 'action'
                         value : 'Change appearance'
                         action : ->
-                            colors =
-                                white    : '#FFFFFF'
-                                black    : '#000000'
-                                dark     : '#313131'
-                                gray     : '#626262'
-                                tan      : '#7E715D'
-                                dusty    : '#574C3C'
-                                orange   : '#943E0F'
-                                brown    : '#5F472F'
-                                honey    : '#99761B'
-                                gold     : '#C9BC0F'
-                                algae    : '#769028'
-                                grass    : '#397628'
-                                trees    : '#246024'
-                                sky      : '#28726E'
-                                royal    : '#800080'
-                                lavender : '#EFA9FE'
-                                camo     : '#59955C'
-                                russet   : '#8E2323'
                             player.showUI
                                 type : 'text'
                                 value : '<h3>Changing appearance</h3>'
@@ -130,14 +115,14 @@ The settings command allows players to edit their personal settings.
                             ,
                                 type : 'choice'
                                 name : 'head color'
-                                choices : colors
+                                choices : ui.colors
                                 selected :
                                     player.saveData.avatar?.headColor ? \
                                     '#000000'
                             ,
                                 type : 'choice'
                                 name : 'hair color'
-                                choices : colors
+                                choices : ui.colors
                                 selected :
                                     player.saveData.avatar?.hairColor ? \
                                     '#000000'
@@ -189,7 +174,7 @@ The settings command allows players to edit their personal settings.
                             ,
                                 type : 'choice'
                                 name : 'body color'
-                                choices : colors
+                                choices : ui.colors
                                 selected :
                                     player.saveData.avatar?.bodyColor ? \
                                     '#000000'
@@ -209,14 +194,14 @@ The settings command allows players to edit their personal settings.
                             ,
                                 type : 'choice'
                                 name : 'arm color'
-                                choices : colors
+                                choices : ui.colors
                                 selected :
                                     player.saveData.avatar?.armColor ? \
                                     '#000000'
                             ,
                                 type : 'choice'
                                 name : 'leg color'
-                                choices : colors
+                                choices : ui.colors
                                 selected :
                                     player.saveData.avatar?.legColor ? \
                                     '#000000'

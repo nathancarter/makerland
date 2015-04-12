@@ -9,3 +9,4 @@ client/all.litcoffee
 lessons/
 gamedb/
 client/makerland*.*
+tmp/
