@@ -417,7 +417,8 @@ can run multiple times on multiple objects.
                             .join( ' ' ) );
                 }"
             declarations = ( "var #{identifier} = args.#{identifier};" \
-                for identifier in argnames ).join '\n'
+                for identifier in argnames \
+                when identifier[...8] isnt 'default ' ).join '\n'
             mayNotUse = [ 'require', 'setInterval', 'process' ] # more later
             for identifier in mayNotUse
                 declarations += "\nvar #{identifier} = null;"
