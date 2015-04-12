@@ -433,12 +433,18 @@ this for all players, so that in case anyone loses access to a basic
 command, or a new basic command is invented, players will automatically have
 access.
 
-            @saveData.commands ?= [ ]
-            for own key of commands
-                if commands[key].category is 'basic'
-                    if key not in @saveData.commands
-                        @saveData.commands.push key
+            @saveData.commands ?= [ 'quit' ]
             @saveData.commands
+
+Grant a player new commands by calling this routine.  It first verifies that
+the commands to be granted are ones that exist in the game.
+
+        grantCommand : ( command ) =>
+            if commands.hasOwnProperty( command ) and \
+               command not in @saveData.commands
+                @saveData.commands.push command
+                return yes
+            no
 
 We determine whether a player is a maker or not based on whether they have
 access to the "database" command.
