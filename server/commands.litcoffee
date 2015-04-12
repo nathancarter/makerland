@@ -32,11 +32,39 @@ The players command lists all players who have logged in.
             help : 'This command shows you an alphabetical list of the
                 names of all players who have logged in.'
             run : ( player ) ->
-                list = ( require './player' ).Player::allPlayers
+                { Player } = require './player'
                 names = ( p.name[0].toUpperCase() + p.name[1..] \
-                    for p in list when p.name? ).sort()
-                names.unshift '<h3>Players logged in now:</h3>'
-                player.showOK names
+                    for p in Player::allPlayers when p.name? ).sort()
+                toShow = [
+                    type : 'text'
+                    value : '<h3>Players logged in now:</h3>'
+                ]
+                for name in names
+                    if player.name is 'admin' and name isnt 'Admin'
+                        toShow.push [
+                            type : 'text'
+                            value : name
+                        ,
+                            type : 'action'
+                            value : 'Teleport player here'
+                            action : =>
+                                other = Player.nameToPlayer \
+                                    name.toLowerCase()
+                                if other
+                                    other.teleport player.getPosition()
+                                    player.showOK "Teleported #{name}
+                                        here!"
+                        ]
+                    else
+                        toShow.push
+                            type : 'text'
+                            value : name
+                toShow.push
+                    type : 'action'
+                    value : 'Done'
+                    cancel : yes
+                    action : => player.showCommandUI()
+                player.showUI toShow
 
 The settings command allows players to edit their personal settings.
 
