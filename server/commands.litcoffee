@@ -412,7 +412,13 @@ adding, removing, and changing entries.
             run : ( player ) ->
                 database = require './database'
                 do browseDB = ->
-                    buttons = for name in database.tables.sort()
+                    tableNames = database.tables
+                    strcmp = ( a, b ) ->
+                        if a < b then -1 else if a > b then 1 else 0
+                    tableNames.sort ( a, b ) ->
+                        strcmp database[a].humanReadableName,
+                               database[b].humanReadableName
+                    buttons = for name in tableNames
                         do ( name ) ->
                             table = database[name]
                             if table.browse?

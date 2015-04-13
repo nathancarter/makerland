@@ -29,7 +29,7 @@ The constructor just names the table, then ensures that the main plane of
 the game is editable only by the admin character.
 
         constructor : () ->
-            super 'blocks'
+            super 'blocks', 'Planes'
             if not @getAuthors @planeKey 0
                 @setAuthors @planeKey( 0 ), [ 'admin' ]
             @setDefault 'default cell type', -1
@@ -303,9 +303,6 @@ The UI for editing a plane looks like the following.
                     action : => require( './ui' ).editAuthorsList player,
                         this, entry, again
                 ]
-            ,
-                type : 'text'
-                value : 'Default cell type for this plane:'
             ,
                 cellTypeChooser( again )
             ,
