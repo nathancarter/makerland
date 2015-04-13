@@ -1,0 +1,103 @@
+<html>
+    <head>
+        <script src='https://code.jquery.com/jquery-1.11.2.min.js'></script>
+        <script src='https://code.jquery.com/jquery-migrate-1.2.1.min.js'>
+        </script>
+        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css'/>
+        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css'/>
+        <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js'>
+        </script>
+        <link rel="stylesheet" href="../codemirror.css">
+        <script src="../codemirror.js"></script>
+        <script src="../codemirror-javascript-mode.js"></script>
+        <title>MakerLand - Behavior Coding Documentation</title>
+    </head>
+    <body style='padding-top: 50px;'>
+
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed"
+                      data-toggle="collapse" data-target="#navbar"
+                      aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">MakerLand Coder Documentation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="index.html">MakerLand Docs</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+              <ul class="nav navbar-nav">
+                <li><a href="overview.html">Overview</a></li>
+                <li class="active"><a href="#">Teleport</a></li>
+                <li><a href="databasecommand.html">Database</a></li>
+                <li><a href="worldcommand.html">World</a></li>
+                <li><a href="resetcommand.html">Reset</a></li>
+                <li><a href="behaviorcoding.html">Behaviors</a></li>
+                <li><a href="animationcoding.html">Animations</a></li>
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </nav>
+
+        <div class="container">
+
+            <div class="starter-template">
+                <h1>The Teleport Command</h1>
+                <p class="lead">Leaping around the game world</p>
+            </div>
+
+            <h3>Memorizing a destination</h3>
+            <p>When you're standing at a location to which you'll want to
+                be able to teleport later, you should take a moment to add
+                it to your list of memorized locations.  Here's how:</p>
+            <ol>
+                <li>Click the Teleport command button.</li>
+                <li>Come up with a name for your current location.  This
+                    name needs to be meaningful only to you; no one else
+                    will see it.  Examples, "Black cave" or "by the ocean"
+                    or "hiding spot."</li>
+                <li>Type that name into the box that says "type name here."
+                </li>
+                <li>Click the Add button.</li>
+                <li>You should now see the place you just memorized listed
+                    among your memorized teleportation destinations, at the
+                    top of that same screen.</li>
+            </ol>
+            <div class="alert alert-danger" role="alert"><b>Warning!</b>
+                You can't teleport somewhere unless you've already
+                memorized that location.  So think ahead and memorize an
+                important place before you leave it!</div>
+            <div class="alert alert-warning" role="alert"><b>Tip:</b>
+                If you memorize dozens of teleportation destinations,
+                your list will get long and it will be hard to find one
+                when you're looking for it.  So choose wisely what you
+                add to your list.</div>
+            <div class="alert alert-success" role="alert"><b>Try it!</b>
+                Walk to one of your favorite locations in the game world
+                and memorize it in that way.  Then walk somewhere else,
+                and use the instructions below to teleport back.</div>
+
+            <h3>Teleporting to a destination</h3>
+            <p>When you want to teleport somewhere, you use the same
+                command.  It's very simple:</p>
+            <ol>
+                <li>Click the Teleport command button.</li>
+                <li>Locate on your list of memorized teleportation
+                    destinations the place you want to go.</li>
+                <li>Click the button next to it that says "Go here."</li>
+                <li>Your avatar will immediately be transported to that
+                    loaction.</li>
+            </ol>
+            <div class="alert alert-success" role="alert"><b>Try it!</b>
+                Walk a little distance from one of your memorized
+                teleportation destinations, then use the steps above to
+                teleport back.</div>
+            <div class="alert alert-warning" role="alert"><b>Tip:</b>
+                If you click "Go here" and nothing seems to happen, the
+                most likely reason is that you've already teleported to
+                that destination, and you're already there!</div>
+        </div>
+    </body>
+    <script src='codemirror-for-textareas.js'></script>
+</html>

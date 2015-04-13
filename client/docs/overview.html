@@ -24,14 +24,17 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
               </button>
-              <a class="navbar-brand" href="#">MakerLand</a>
+              <a class="navbar-brand" href="index.html">MakerLand Docs</a>
             </div>
             <div id="navbar" class="collapse navbar-collapse">
               <ul class="nav navbar-nav">
-                <li><a href="index.html">Docs Home</a></li>
-                <li class="active"><a href="#">Foundations</a></li>
-                <li><a href="animationcoding.html">Animations</a></li>
+                <li class="active"><a href="#">Overview</a></li>
+                <li><a href="teleportcommand.html">Teleport</a></li>
+                <li><a href="databasecommand.html">Database</a></li>
+                <li><a href="worldcommand.html">World</a></li>
+                <li><a href="resetcommand.html">Reset</a></li>
                 <li><a href="behaviorcoding.html">Behaviors</a></li>
+                <li><a href="animationcoding.html">Animations</a></li>
               </ul>
             </div><!--/.nav-collapse -->
           </div>
@@ -40,17 +43,77 @@
         <div class="container">
 
             <div class="starter-template">
-                <h1>Foundations</h1>
-                <p class="lead">First steps toward being a maker</p>
+                <h1>Overview</h1>
+                <p class="lead">Learning to be a Maker</p>
             </div>
 
-            <p>This page is a reference for several of the smaller, simpler
-                concepts that it's necessary to know before diving into
-                writing code in MakerLand.  Read this page before reading
-                the other maker documents linked to in the navigation bar
-                above.</p>
+            <h2>Learning to Teleport</h2>
+            <div class="alert alert-info" role="alert">Teleporting lets you
+                choose a set of locations in the game world that are
+                important to you, and then later instantaneously
+                move your avatar to any one of them.</div>
+            <h4><a href='teleportcommand.html'>Click here: Visit the page on
+                the Teleport command to learn its details.</a></h4>
 
-            <h2>How are locations in the game world stored?</h2>
+            <h2>Filling the Database</h2>
+            <div class="alert alert-info" role="alert">The Game Database is
+                the list of all things the game knows about, including
+                player accounts, square images that make up the map,
+                other images that sit on top of the map, sounds, animations,
+                behaviors, and more.  The Database command lets you add to
+                this big library of information, so that you can put new
+                things into the game.</div>
+            <div class="alert alert-danger" role="alert"><b>Warning!</b>
+                The Database command does not allow you to edit the world
+                around you.  The Game Database is just the collection of
+                things that <i>could</i> be added to the game world.  After
+                you learn how to add things to the database, we'll look at
+                the World command, which lets you then place copies of them
+                all around the game world.  (That's the section after this
+                one.)</div>
+            <h4><a href='databasecommand.html'>Click here: Visit the page on
+                the Database command to learn its details.</a></h4>
+
+            <h2>Changing the world</h2>
+            <div class="alert alert-info" role="alert">So far you've
+                learned how to add new things to the game's database (its
+                library of known objects, pictures, and so on) but not how
+                to place those things into the game world.  It's time to
+                learn that!  The "World" command is what you need...</div>
+            <h4><a href='worldcommand.html'>Click here: Visit the page on
+                the World command to learn its details.</a></h4>
+
+            <h2>Adding interactivity</h2>
+            <div class="alert alert-danger" role="alert">I would like to
+                eventually put here a tutorial on how to attach behaviors
+                that other people have written, such as for signs,
+                teleporters, etc., but I do not yet have time to do
+                so.</div>
+
+            <h2>Advanced Making</h2>
+            <div class="alert alert-info" role="alert">Advanced making
+                includes creating and attaching behaviors and animations to
+                various in-game objects and events.  There are two tutorials
+                written that teach this material.</div>
+            <h4><a href='behaviorcoding.html'>Click here: Visit the page on
+                Behavior Coding to learn how to build behaviors.</a></h4>
+            <h4><a href='animationcoding.html'>Click here: Visit the page on
+                Animation Coding to learn how to build animations.</a></h4>
+
+            <h2>Miscellaneous references</h2>
+
+            <div class="alert alert-info" role="alert">This final section of
+                this Maker tutorial is just a collection of helpful concepts
+                that other documents can reference.  It's something of a
+                FAQ.</div>
+
+            <div class="alert alert-danger" role="alert"><b>Warning!</b>
+                The concepts taught here are only relevant to makers who
+                have begun working with behaviors or animations.  If you
+                have not yet done so, don't bother reading further.</div>
+
+            <h3><a name="locations"></a>How are locations in the game world
+                stored?</h3>
             <p>The game map is made up of many "planes," each of which is a
                 flat surface that extends arbitrarily far in all
                 directions.  The first plane in the game is numbered 0, and
@@ -96,7 +159,7 @@
                 plane, where no one else can interfere, nor be harmed by any
                 mistakes the maker might make during experimentation.</p>
 
-            <h2>How do I edit code?</h2>
+            <h3><a name="editingcode"></a>How do I edit code?</h3>
             <p>There are a few places as a maker where you will find
                 yourself viewing a code editor.  One is when you are
                 <a href='animationcoding.html'>editing the implementation of
@@ -133,35 +196,8 @@
                 write, follow one of the links above to learn about coding
                 animations or behaviors.</p>
 
-            <h2>How do I reset an area and what does that mean?</h2>
-            <p>The game map is split up into rectangular blocks of cells.
-                As players walk onto new areas of the map, the blocks of
-                cells for those new areas are loaded from disk so that
-                they are ready to be shown to the player.  Similarly, the
-                blocks that the player can no longer see are dropped from
-                the game's memory, since no player needs them.</p>
-            <p>Each block contains not only cells (the square images that
-                make the map look how it does), but also the landscape
-                items that sit on top of the cells (e.g., trees, rocks,
-                pillars, signs, etc.).  When a block of cells is loaded from
-                disk into memory, all its landscape items are also loaded,
-                and the behavior code for each is run.</p>
-            <p>If you've just edited an item in your environment and need it
-                to get reloaded (for example, for
-                <a href="behaviorcoding.html">an attached behavior</a> to
-                get installed or updated), you can force the game to reload
-                all the blocks you can see from scratch.</p>
-            <p>(Although it's possible to accomplish this by walking
-                very far away from your current location, then walking back,
-                that's a waste of time, and it only works if no one else is
-                around.)</p>
-            <p>To reset the area you can see, click the Reset command
-                button.  You will not necessarily see anything happen on
-                the game map, but if you edited anything about landscape
-                items (such as their behaviors) your changes have now been
-                applied.</p>
-
-            <h2>What is my maker error log and where can I find it?</h2>
+            <h3><a name="errorlog"></a>What is my maker error log and where
+                can I find it?</h3>
             <p>Each maker has a personal error log.  It will contain any
                 messages logged when code you write executes the
                 <code>log()</code> command.  It will also contain a record

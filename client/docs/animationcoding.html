@@ -24,14 +24,17 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
               </button>
-              <a class="navbar-brand" href="#">MakerLand</a>
+              <a class="navbar-brand" href="index.html">MakerLand Docs</a>
             </div>
             <div id="navbar" class="collapse navbar-collapse">
               <ul class="nav navbar-nav">
-                <li><a href="index.html">Docs Home</a></li>
-                <li><a href="foundations.html">Foundations</a></li>
-                <li class="active"><a href="#">Animations</a></li>
+                <li><a href="overview.html">Overview</a></li>
+                <li><a href="teleportcommand.html">Teleport</a></li>
+                <li><a href="databasecommand.html">Database</a></li>
+                <li><a href="worldcommand.html">World</a></li>
+                <li><a href="resetcommand.html">Reset</a></li>
                 <li><a href="behaviorcoding.html">Behaviors</a></li>
+                <li class="active"><a href="#">Animations</a></li>
               </ul>
             </div><!--/.nav-collapse -->
           </div>
@@ -41,8 +44,15 @@
 
             <div class="starter-template">
                 <h1>Coding Animations</h1>
-                <!--<p class="lead">Subtitle goes here</p>-->
+                <p class="lead">Adding your own new, animated, graphical
+                    events</p>
             </div>
+
+            <div class="alert alert-danger" role="alert"><b>Warning!</b>
+                This page assumes that you know how to program in
+                JavaScript.  If you do not, you will need someone to help
+                you learn to code in that language before you will be able
+                to understand and/or complete this tutorial.</div>
 
             <h2>What is an animation?</h2>
             <p>An animation is a routine that is run in the player's
@@ -406,6 +416,7 @@
                 MakerLand.  Many of these are common animations that you
                 will want to have in order for the game to function
                 satisfactorily.</p>
+
             <h3>Speech bubbles</h3>
             <p>As documented in the previous section, the game uses
                 animations to indicate that players have spoken.  Thus
@@ -451,6 +462,56 @@
                 stroke();
                 fillStyle = '#000000';
                 fillText( text, left+margin, bottom-margin-fontPixelSize*0.5 );
+            </textarea>
+
+            <h3>Signs</h3>
+            <p>As documented at the end of <a href='behaviorcoding.html'>the
+                behaviors tutorial</a>, the game uses animations to show the
+                text on a sign.
+                Here is an example animation that draws text above a
+                given location.  It takes two parameters, the location at
+                which to show the text, and the text itself (with optional
+                newline escape codes to split lines).
+                Its duration is indenfinite; it must be canceled by a call
+                to <code>stopAnimation()</code>.</p>
+            <textarea class='code'>
+                // only show the text to the player whose name is in the player parameter
+                if ( currentStatus.name != player ) return;
+                // set constants for sizes and styles
+                var fontSizeInPixels = 15;
+                var lineHeight = fontSizeInPixels*1.5;
+                var margin = 10;
+                var arrow = 10;
+                // do computations based on those sizes and styles
+                // break text into lines where the user put "\n" as a line break code
+                font = fontSizeInPixels+'px Arial';
+                var lines = text.split( '\\n' );
+                var width = 0;
+                for ( var i = 0 ; i < lines.length ; i++ )
+                    width = Math.max( width, measureText( lines[i] ).width );
+                var x = X(location);
+                var y = Y(location);
+                var left = x + arrow + margin;
+                var top = y - ( lines.length * lineHeight ) / 2;
+                var bottom = y + ( lines.length * lineHeight ) / 2;
+                // draw shape in which text will sit, a box pointing to the location
+                beginPath();
+                moveTo( x, y );
+                lineTo( x+arrow, y+arrow );
+                lineTo( x+arrow, bottom );
+                lineTo( x+arrow+2*margin+width, bottom );
+                lineTo( x+arrow+2*margin+width, top );
+                lineTo( x+arrow, top );
+                lineTo( x+arrow, y-arrow );
+                lineTo( x, y );
+                fillStyle = '#ddccbb';
+                fill();
+                strokeStyle = '#221100';
+                stroke();
+                // write each line of text separately
+                fillStyle = '#221100';
+                for ( var i = 0 ; i < lines.length ; i++ )
+                    fillText( lines[i], left, top + i*lineHeight + 1.1*fontSizeInPixels );
             </textarea>
 
             <p></p>

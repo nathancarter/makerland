@@ -1,0 +1,90 @@
+<html>
+    <head>
+        <script src='https://code.jquery.com/jquery-1.11.2.min.js'></script>
+        <script src='https://code.jquery.com/jquery-migrate-1.2.1.min.js'>
+        </script>
+        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css'/>
+        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css'/>
+        <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js'>
+        </script>
+        <link rel="stylesheet" href="../codemirror.css">
+        <script src="../codemirror.js"></script>
+        <script src="../codemirror-javascript-mode.js"></script>
+        <title>MakerLand - Behavior Coding Documentation</title>
+    </head>
+    <body style='padding-top: 50px;'>
+
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed"
+                      data-toggle="collapse" data-target="#navbar"
+                      aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">MakerLand Coder Documentation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="index.html">MakerLand Docs</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+              <ul class="nav navbar-nav">
+                <li><a href="overview.html">Overview</a></li>
+                <li><a href="teleportcommand.html">Teleport</a></li>
+                <li><a href="databasecommand.html">Database</a></li>
+                <li><a href="worldcommand.html">World</a></li>
+                <li class="active"><a href="#">Reset</a></li>
+                <li><a href="behaviorcoding.html">Behaviors</a></li>
+                <li><a href="animationcoding.html">Animations</a></li>
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </nav>
+
+        <div class="container">
+
+            <div class="starter-template">
+                <h1>The Reset Command</h1>
+                <p class="lead">Refreshing code in objects you can see</p>
+            </div>
+
+            <div class="alert alert-danger" role="alert"><b>Warning!</b>
+                The Reset command only makes sense after you've learned how
+                to code a behavior or an animation.  If you haven't learned
+                those things yet, then you don't need the Reset command.
+                </div>
+
+            <p>The game map is split up into rectangular blocks of cells.
+                As players walk onto new areas of the map, the blocks of
+                cells for those new areas are loaded from disk so that
+                they are ready to be shown to the player.  Similarly, the
+                blocks that the player can no longer see are dropped from
+                the game's memory, since no player needs them.</p>
+            <p>Each block contains not only cells (the square images that
+                make the map look how it does), but also the landscape
+                items that sit on top of the cells (e.g., trees, rocks,
+                pillars, signs, etc.).  When a block of cells is loaded from
+                disk into memory, all its landscape items are also loaded,
+                and the behavior code for each is run.</p>
+            <p>If you've just edited an item in your environment and need it
+                to get reloaded (for example, for
+                <a href="behaviorcoding.html">an attached behavior</a> to
+                get installed or updated), you can force the game to reload
+                all the blocks you can see from scratch.</p>
+
+            <div class="alert alert-warning" role="alert"><b>Tip:</b>
+                Although it's possible to accomplish this by walking
+                very far away from your current location, then walking back,
+                that's a waste of time, and it only works if no one else is
+                around.</div>
+
+            <div class="alert alert-success" role="alert"><b>Try it!</b>
+                To reset the area you can see, click the Reset command
+                button.  You will not necessarily see anything happen on
+                the game map, but if you edited anything about landscape
+                items (such as their behaviors) your changes have now been
+                applied.</div>
+
+        </div>
+    </body>
+    <script src='codemirror-for-textareas.js'></script>
+</html>

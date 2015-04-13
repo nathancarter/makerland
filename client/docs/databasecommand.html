@@ -1,0 +1,295 @@
+<html>
+    <head>
+        <script src='https://code.jquery.com/jquery-1.11.2.min.js'></script>
+        <script src='https://code.jquery.com/jquery-migrate-1.2.1.min.js'>
+        </script>
+        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css'/>
+        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css'/>
+        <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js'>
+        </script>
+        <link rel="stylesheet" href="../codemirror.css">
+        <script src="../codemirror.js"></script>
+        <script src="../codemirror-javascript-mode.js"></script>
+        <title>MakerLand - Behavior Coding Documentation</title>
+    </head>
+    <body style='padding-top: 50px;'>
+
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed"
+                      data-toggle="collapse" data-target="#navbar"
+                      aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">MakerLand Coder Documentation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="index.html">MakerLand Docs</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+              <ul class="nav navbar-nav">
+                <li><a href="overview.html">Overview</a></li>
+                <li><a href="teleportcommand.html">Teleport</a></li>
+                <li class="active"><a href="#">Database</a></li>
+                <li><a href="worldcommand.html">World</a></li>
+                <li><a href="resetcommand.html">Reset</a></li>
+                <li><a href="behaviorcoding.html">Behaviors</a></li>
+                <li><a href="animationcoding.html">Animations</a></li>
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </nav>
+
+        <div class="container">
+
+            <div class="starter-template">
+                <h1>The Database Command</h1>
+                <p class="lead">Managing the pictures, sounds, behaviors,
+                    and more that exist in the game</p>
+            </div>
+
+            <h2>Database Tables</h2>
+            <p>If you click the Database command button, you'll see a list
+                of "tables" in the database.  Each contains a different kind
+                of information.  Here are explanations of each of them,
+                in the order that's easiest to learn (not the order they
+                appear in the game).</p>
+            <ul>
+                <li>Accounts - player accounts, which includes players'
+                    names, passwords, and the commands they can use</li>
+                <li>Planes - each wide, flat area in the game is called a
+                    "plane," and makers can create and edit new ones</li>
+                <li>Cell types - each square on the game map is called a
+                    "cell," and this table contains the pictures and other
+                    data for all the different types of cells there are</li>
+                <li>Landscape items - objects that sit on top of the map
+                    cells (like trees, rocks, walls, furniture, and so on)
+                    are landscape items, and this table contains the
+                    pictures and other data for all the different types
+                    of landscape items there are</li>
+                <li>Behaviors - names, descriptions, and code for behaviors
+                    that can be added to items in the world</li>
+                <li>Animations - names, durations, and code for visible
+                    animations</li>
+                <li>Maker error logs - once you start writing code in the
+                    game, any errors in it will be stored here for you to
+                    browse and fix</li>
+            </ul>
+            <p>Let's look at each of these tables in turn and see what we
+                can learn to do with them right now.</p>
+            <h2>Accounts Table</h2>
+            <p>Only the Admin character can change player accounts, so all
+                other makers do not need to bother with this table.</p>
+            <h2>Planes Table</h2>
+            <p>As a maker, you can create as many new planes in the game as
+                you like, and customize each to your heart's content.  For
+                example, you might make one plane that is your own home, and
+                which no one else can visit.  Then you might make yet
+                another plane that you want to eventually be an area where
+                players will do a quest to retrieve stolen gold from an evil
+                dragon.  You can fill that plane with the map, items, and
+                creatures necessary for that adventure, and when it's all
+                perfect, create a way for (non-maker) players to get there
+                (maybe by boat, or by portal, or through a secret cave).</p>
+            <div class="alert alert-success" role="alert"><b>Try it!</b>
+                To create a new plane, follow the instructions below.</div>
+            <ol>
+                <li>Click the Database command button.</li>
+                <li>Click the Planes table button.</li>
+                <li>There may be many planes listed, and most of them will
+                    just have a "copy" button.  You can always create a new
+                    plane by copying an old one, but that's not how we will
+                    proceed now.  Scroll to the bottom of the list and click
+                    "Add entry."</li>
+                <li>A message will tell you that a new plane has been
+                    created.  Click OK and scroll to the bottom of the list
+                    to find it.</li>
+                <li>Unlike the other planes on the list, this one will have
+                    not only a copy button, but also "remove" and "edit."
+                    You could delete it with "remove" if you don't need it
+                    any more, but we want this plane, so don't do that.
+                    Instead, click "edit."</li>
+                <li>Before editing any of the plane's details, click the
+                    "Teleport to this plane" button near the bottom.  Your
+                    avatar will immediately appear on an empty surface that
+                    looks like graph paper, because it has no cells in it
+                    yet.  We'll fix that soon.</li>
+                <li>Click the "Change" button next to your new plane's name.
+                    Fill in your own name for it, and click "Change name."
+                </li>
+                <li>Your name should be the only author listed.  No one can
+                    edit or remove this plane except you.  If you ever want
+                    to share authorship, edit that list and add another
+                    maker's name.  Similarly, if someone shares one of their
+                    planes with you, then it will have edit/remove/copy
+                    buttons associated with it, rather than just the copy
+                    button.</li>
+                <li>There will be no default cell type for the plane, which
+                    is why it looks like graph paper at present.  Click the
+                    "Change" button for default cell type, and pick a
+                    type.  If you want a grassy area, choose grass.  If you
+                    want a desert area, choose sand, and so on.
+                    <div class="alert alert-warning"
+                         role="alert"><b>Tip:</b>
+                        Below you will see how to extend this list of cell
+                        types with new ones, but for now, choose something
+                        already in the database.</div>
+                    <div class="alert alert-danger"
+                         role="alert"><b>Warning!</b>
+                        Be sure to choose a cell type that isn't a wall, or
+                        water, or something impossible to walk on!  You're
+                        about to fill your whole plane with this cell type.
+                        If you make it something you can't stand on, the
+                        game will immediately teleport you out of the plane,
+                        until you fix the mistake and teleport back.</div>
+            </ol>
+            <p>That's it!  You've created a plane!</p>
+            <p>Unfortunately, it's all the same repeated pattern everywhere.
+                If you want to make it more interesting, by shaping the
+                land around you with many different cell types and other
+                decorations, move on to the "Changing the world" section,
+                later in this tutorial.</p>
+
+            <h2>Cell Types Table</h2>
+            <p>This table contains the pictures and other data related to
+                the cells you place on the ground to give a plane its
+                background, as well as dictate where players can walk and
+                where they cannot.</p>
+            <p>If you click the Cell Types table button in the Database
+                table list, you will see a list of all cell types in the
+                game, with their icons shown.  Just as with planes (and
+                most of the database tables) you will see "copy" buttons
+                under most of the cell types, but ones for which you are an
+                author will also have "remove" and "edit" links.</p>
+            <div class="alert alert-success" role="alert"><b>Try it!</b>
+                To create a new cell type, follow the instructions
+                below.</div>
+            <ol>
+                <li>Click the Database command button, then the Cell Types
+                    table button.</li>
+                <li>Just as in the Planes table, above, you may see existing
+                    cell types for which you are not the author.  Scroll to
+                    the bottom and click "Add entry," then find that new
+                    entry on the list and click its "edit" button.</li>
+                <li>The first thing you'll notice is that your new cell type
+                    has no icon, which is essential to using it on the map.
+                    You will need to upload an image to use as your cell's
+                    icon.  You can create your own image using an image
+                    editing program on your computer, or browse the web for
+                    an image that looks the way you want it to.  (Just be
+                    sure not to take an image unless you have it's author's
+                    permission to do so.)  When you have an image file you
+                    want to use as the icon, proceed to the next step.</li>
+                <li>Click the Change button next to the icon.  Click the
+                    Browse button and find on your computer the image file
+                    you want to use.
+                    <div class="alert alert-danger"
+                         role="alert"><b>Warning!</b>
+                        Using very large image files will slow down the
+                        game by creating too much network traffic and too
+                        much drawing time in the user's browser.  Note the
+                        suggested size given to you by the game on the image
+                        upload screen, and if your image is too big, first
+                        resize it on your computer before uploading it into
+                        the game.</div>
+                    Click Start upload, then click OK, and you should see
+                    your uploaded icon.</li>
+                <li>Use the various Change buttons to specify the cell
+                    type's name and optionally its border size and color.
+                    <div class="alert alert-warning"
+                         role="alert"><b>Tip:</b>
+                        Borders are absent by default (size zero) but if you
+                        use them, they can help make one particular cell
+                        type stand out from its surroundings.  Adjacent
+                        cell types that both have borders aren't a good
+                        idea.  You will not see the border until you put
+                        some cells onto the game map, as taught below.</div>
+                </li>
+                <li>If you want the cell type to be walkable, leave the
+                    "Who can walk on this?" field set to "all."  If you want
+                    the cell type to be non-walkable (like a wall, or an
+                    ocean) then Change that field and set it to "none."</li>
+            </ol>
+
+            <h2>Landscape Items Table</h2>
+            <p>This table contains the pictures and other data related to
+                the items you place on top of the map to give an area its
+                foreground.  Such objects have no impact on where players
+                can walk, but they may have behaviors attached to them that
+                take effect when players are nearby.</p>
+            <p>For example, all the trees, rocks, and potted plants you see
+                around the game world are landscape items.  If you've ever
+                stepped on a portal to be transported to a new area, the
+                portal was a landscape item with a teleportation behavior
+                attached to it.  And every sign in the game that you can
+                read is a landscape item with a behavior attached to show
+                text when you stand on it.</p>
+            <p>If you click the Landscape Items table button in the Database
+                table list, you will see a list of all landscape items in
+                the game, with their icons shown.  As before, you will see
+                "copy" buttons under most of the entries, but ones for which
+                you are an author will also have "remove" and "edit"
+                links.</p>
+            <div class="alert alert-success" role="alert"><b>Try it!</b>
+                To create a new landscape item, follow the instructions
+                below.</div>
+            <ol>
+                <li>Click the Database command button, then the Landscape
+                    Items table button.</li>
+                <li>Proceed exactly as in the previous two sections to
+                    create a new entry and begin editing it.  (Scroll down,
+                    click "Add entry", click OK, find the entry, click
+                    "edit.")</li>
+                <li>Choose its size (in cells).  Most landscape items are
+                    the same size as a cell (size 1).  All landscape items
+                    are square.</li>
+                <li>Change its icon in exactly the same way that you did for
+                    a cell type.
+                    <div class="alert alert-warning"
+                         role="alert"><b>Tip:</b>
+                        As with cell types, please use only small files.
+                        However, landscape items can have different sizes,
+                        so small ones should have small files, and larger
+                        ones larger files.  The game itself will suggest
+                        specific sizes when you choose to upload an
+                        icon.</div>
+                    </li>
+                <li>Give the landscape item a name.</li>
+                <li>Last, you can choose whether the item is visible to
+                    players.  If you choose "no," then it will be visible
+                    only to makers.  This is useful for making areas where,
+                    if a player steps there, some specific behavior is
+                    triggered, but you do not want any visible evidence of
+                    this fact.  (E.g., some areas do something when you
+                    enter them, such as play a sound or bring a greeter;
+                    other places you may wish to position a trap.)</li>
+            </ol>
+            <p>You have created a new landscape item, but not yet placed any
+                copies of it in the game world.  See the section below on
+                the "World" command to learn how!</p>
+
+            <h2>Behaviors Table</h2>
+            <p>Because creating a new behavior requires coding, this is a
+                more advanced topic.  We won't start your life as a maker
+                learning this.  Later on, you can visit
+                <a href='behaviorcoding.html'>the page that teaches all
+                about coding behaviors</a> and learn as much as you like.
+            </p>
+
+            <h2>Animations Table</h2>
+            <p>Just as with behaviors, creating a new animation requires
+                coding, so it, too, is a more advanced topic.  Later, visit
+                <a href='animationcoding.html'>the page that teaches all
+                about coding animations</a> to learn more.</p>
+
+            <h2>Maker Error Logs Table</h2>
+            <p>Once you start coding, any errors produced by code you've
+                written will be saved into this log table.  You can browse
+                it to learn how to fix bugs.  This is an advanced topic,
+                but later when you need this information, check out
+                <a href='overview.html#errorlog'>the brief description of
+                how to use it</a> at the end of the overview page.</p>
+        </div>
+    </body>
+    <script src='codemirror-for-textareas.js'></script>
+</html>

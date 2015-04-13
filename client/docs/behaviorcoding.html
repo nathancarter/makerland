@@ -24,14 +24,17 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
               </button>
-              <a class="navbar-brand" href="#">MakerLand</a>
+              <a class="navbar-brand" href="index.html">MakerLand Docs</a>
             </div>
             <div id="navbar" class="collapse navbar-collapse">
               <ul class="nav navbar-nav">
-                <li><a href="index.html">Docs Home</a></li>
-                <li><a href="foundations.html">Foundations</a></li>
-                <li><a href="animationcoding.html">Animations</a></li>
+                <li><a href="overview.html">Overview</a></li>
+                <li><a href="teleportcommand.html">Teleport</a></li>
+                <li><a href="databasecommand.html">Database</a></li>
+                <li><a href="worldcommand.html">World</a></li>
+                <li><a href="resetcommand.html">Reset</a></li>
                 <li class="active"><a href="#">Behaviors</a></li>
+                <li><a href="animationcoding.html">Animations</a></li>
               </ul>
             </div><!--/.nav-collapse -->
           </div>
@@ -41,8 +44,15 @@
 
             <div class="starter-template">
                 <h1>Coding Behaviors</h1>
-                <!--<p class="lead">Subtitle goes here</p>-->
+                <p class="lead">Making the objects in the game world do new
+                    things</p>
             </div>
+
+            <div class="alert alert-danger" role="alert"><b>Warning!</b>
+                This page assumes that you know how to program in
+                JavaScript.  If you do not, you will need someone to help
+                you learn to code in that language before you will be able
+                to understand and/or complete this tutorial.</div>
 
             <h2>What is a behavior?</h2>
             <p>In MakerLand, a "behavior" is a piece of code that can be
@@ -364,6 +374,82 @@
                 </textarea>
 
                 <p></p>
+
+            <h2>Ready-to-use, nontrivial examples</h2>
+            <p>The following examples are ready to use if you are building
+                from scratch a set of behaviors for your version of
+                MakerLand.  Many of these are common behaviors that you
+                will want to have in order for the game to function
+                satisfactorily.</p>
+            <h3>Signs</h3>
+            <p>The game uses behaviors to make landscape items show text
+                when the player steps on them.  This is useful for making
+                players able to read things that have writing on them,
+                such as signs, billboards, tombstones, notes, etc.</p>
+            <p>Here is an implementation of a "show text" behavior, which is
+                useful for all the situations just described.  It uses one
+                parameter, "text," the string of text to show.  It just
+                calls <code>showAnimation()</code> to display the text.
+                See the end of <a href='animationcoding.html'>the animation
+                coding page</a> for an example animation that can show the
+                text, as prompted by this behavior.</p>
+            <textarea class='code'>
+                // When a player steps on the landscape item, show the text written on it,
+                // as given in the text parameter to this behavior.  Store the unique ID
+                // for that animation in the player object itself, since that animation
+                // does not expire, and we thus must be able to cancel it later.
+                this.on( 'entered', function ( player ) {
+                    player.showTextAnimationID = showAnimation( this.position, 'show text', {
+                        text : text,
+                        player : player.name,
+                        location : this.position
+                    } );
+                } );
+                // When a player steps off the landscape item, cancel the animation you
+                // started in the previous function, thus hiding the text written on the item.
+                this.on( 'exited', function ( player ) {
+                    stopAnimation( player.showTextAnimationID );
+                } );
+            </textarea>
+
+            <h3>Portals</h3>
+            <p>The game uses behaviors to make landscape items teleport
+                a player when the player steps on them.  This is useful for
+                making portals, caves, stairs, and other things that move a
+                player from one place to another (including between
+                different planes).</p>
+            <p>Here is an implementation of a "teleport" behavior, which is
+                useful for all the situations just described.  It uses one
+                parameter, "destination," a comma-separated triple of
+                numbers that indicate plane, x, and y coordinates of the
+                destination (e.g., "0,-1.5,2").</p>
+            <textarea class='code'>
+                // format destination parameter as a triple of 3 floats, if possible
+                if ( !destination ) return;
+                var triple = destination.split( ',' );
+                if ( triple.length != 3 ) return;
+                for ( var i = 0 ; i < 3 ; i++ ) triple[i] = parseFloat( triple[i].trim() );
+
+                // when the player enters, if they didn't just teleport here, teleport them away, while marking them as having just teleported:
+                this.on( 'entered', function ( player ) {
+                    if ( !player.justTeleported ) {
+                      	player.justTeleported = true;
+                        showAnimation( this.position, 'teleport out', { center : this.position } );
+                        player.teleport( triple );
+                        showAnimation( triple, 'teleport in', { center : triple } );
+                        // but in case this teleportation destination was not another teleporter, clear the status after 1 second:
+                        setTimeout( function () { player.justTeleported = false; }, 1000 );
+                    }
+                } );
+
+                // when the player exits, mark them as having not just teleported, unless their exit was by teleportation!
+                this.on( 'exited', function ( player ) {
+                    var newpos = player.getPosition();
+                    if ( ''+newpos != ''+triple ) player.justTeleported = false;
+                } );
+            </textarea>
+
+            <p></p>
 
         </div>
     </body>

@@ -24,14 +24,17 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
               </button>
-              <a class="navbar-brand" href="#">MakerLand</a>
+              <a class="navbar-brand" href="index.html">MakerLand Docs</a>
             </div>
             <div id="navbar" class="collapse navbar-collapse">
               <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Docs Home</a></li>
-                <li><a href="foundations.html">Foundations</a></li>
-                <li><a href="animationcoding.html">Animations</a></li>
+                <li><a href="overview.html">Overview</a></li>
+                <li><a href="teleportcommand.html">Teleport</a></li>
+                <li><a href="databasecommand.html">Database</a></li>
+                <li><a href="worldcommand.html">World</a></li>
+                <li><a href="resetcommand.html">Reset</a></li>
                 <li><a href="behaviorcoding.html">Behaviors</a></li>
+                <li><a href="animationcoding.html">Animations</a></li>
               </ul>
             </div><!--/.nav-collapse -->
           </div>
@@ -40,40 +43,95 @@
         <div class="container">
 
             <div class="starter-template">
-                <h1>Coding in MakerLand</h1>
-                <!--<p class="lead">Subtitle goes here</p>-->
+                <h1>Being a Maker</h1>
+                <p class="lead">Making MakerLand what you want it to be</p>
             </div>
 
-            <p>There are only three documentation pages written so far.
-                Click one to read it.</p>
+            <p>There are many documentation pages you can read to help you
+                learn to be a maker.  They are organized roughly in the
+                order in which it makes sense to read them.
+                Click one to read it, or use the navigation bar at the top
+                of each page.</p>
 
             <div class="list-group">
-                <a href="foundations.html" class="list-group-item">
-                    <h4 class="list-group-item-heading">Foundations</h4>
+                <a href="overview.html"
+                   class="list-group-item list-group-item-info">
+                    <h4 class="list-group-item-heading">Overview</h4>
                     <p class="list-group-item-text">READ THIS FIRST.
-                        It contains the most important concepts to know if
-                        you plan to write any code as a maker.  For example,
-                        how are locations in the game world stored?  How do
-                        I edit code?  How do I reset an area and what does
-                        that mean?</p>
+                        It is a thorough tutorial on all things related to
+                        being a MakerLand Maker.  When it needs to go into
+                        detail on a specific subject, it links to one of the
+                        other documents, listed below.</p>
                 </a>
-                <a href="animationcoding.html" class="list-group-item">
-                    <h4 class="list-group-item-heading">Coding
-                        Animations</h4>
-                    <p class="list-group-item-text">What is an animation?
-                        When does animation code get run?
-                        What functions can my animation code use?</p>
+                <a href="teleportcommand.html"
+                   class="list-group-item list-group-item-success">
+                    <h4 class="list-group-item-heading">Teleport
+                        Command</h4>
+                    <p class="list-group-item-text">The Teleport command
+                        lets you memorize locations in the game, then later,
+                        immediately teleport back to a location that you
+                        have memorized.  This page is the
+                        complete reference on how to use the Telport
+                        command.</p>
                 </a>
-                <a href="behaviorcoding.html" class="list-group-item">
+                <a href="databasecommand.html"
+                   class="list-group-item list-group-item-success">
+                    <h4 class="list-group-item-heading">Database
+                        Command</h4>
+                    <p class="list-group-item-text">The Database command
+                        lets you add new pictures, sounds, and code to the
+                        game's library of data (called a "database").  It
+                        does not let you place these types of things in the
+                        game world; that's what the World command (below)
+                        does.  This page is the
+                        complete reference on how to use the Database
+                        command.</p>
+                </a>
+                <a href="worldcommand.html"
+                   class="list-group-item list-group-item-success">
+                    <h4 class="list-group-item-heading">World
+                        Command</h4>
+                    <p class="list-group-item-text">The World command lets
+                        you take items from the game database (pictures,
+                        sounds, animations, behaviors, etc.) and place them
+                        into the game world.  You can only do so in an area
+                        that you have created.  This page is the complete
+                        reference on how to use the World command.</p>
+                </a>
+                <a href="resetcommand.html"
+                   class="list-group-item list-group-item-success">
+                    <h4 class="list-group-item-heading">Reset
+                        Command</h4>
+                    <p class="list-group-item-text">The Reset command lets
+                        you update all the objects near you.  This is only
+                        useful if you have changed some of the code loaded
+                        into those objects, and need them to reload it.
+                        This page is the complete reference on how to use
+                        the Reset command.</p>
+                </a>
+                <a href="behaviorcoding.html"
+                   class="list-group-item list-group-item-warning">
                     <h4 class="list-group-item-heading">Coding
                         Behaviors</h4>
-                    <p class="list-group-item-text">What is a behavior?
+                    <p class="list-group-item-text">This page answers
+                        questions about how to write behavior code,
+                        such as these:  What is a behavior?
                         How do behaviors get "attached" to items?
                         When does behavior code get run?
                         What can behaviors do?
                         What events can they listen to?
                         What functions can my behavior code
                         (or event handler code) use?</p>
+                </a>
+                <a href="animationcoding.html"
+                   class="list-group-item list-group-item-warning">
+                    <h4 class="list-group-item-heading">Coding
+                        Animations</h4>
+                    <p class="list-group-item-text">This page answers
+                        questions about how to write animation code,
+                        such as these:  What is an animation?
+                        When does animation code get run?
+                        What functions can my animation code use?</p>
                 </a>
             </div>
 

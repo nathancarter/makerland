@@ -495,7 +495,11 @@ adding, removing, and changing entries.
                     buttons.unshift
                         type : 'text'
                         value : '<h3>Tables in Database:</h3>
-                            <p>(Click one to view its contents.)</p>'
+                            <p>(Click one to view its contents.)</p>
+                            <p>Need help?
+                            <a href="docs/databasecommand.html"
+                            target="_blank">Read this command\'s
+                            full documentation.</a></p>'
                     buttons.push
                         type : 'action'
                         value : 'Done'
@@ -731,7 +735,11 @@ the mouse on the map itself.
                         , -> mainMenu()
                 do mainMenu = -> player.showUI
                     type : 'text'
-                    value : '<h3>Editing game world</h3>'
+                    value : '<h3>Editing game world</h3>
+                            <p>Need help?
+                            <a href="docs/worldcommand.html"
+                            target="_blank">Read this command\'s
+                            full documentation.</a></p>'
                 ,
                     type : 'action'
                     value : 'Change cells in map'
@@ -765,7 +773,11 @@ remember, then jump back to those locations later.
                 tp = player.saveData.teleport ?= { }
                 controls = [
                     type : 'text'
-                    value : '<h3>Teleportation Destinations</h3>'
+                    value : '<h3>Teleportation Destinations</h3>
+                            <p>Need help?
+                            <a href="docs/teleportcommand.html"
+                            target="_blank">Read this command\'s
+                            full documentation.</a></p>'
                 ]
                 if Object.keys( tp ).length > 0
                     for own key, value of tp
@@ -847,5 +859,9 @@ versions.
                 items that sit on top of the map.'
             run : ( player ) ->
                 require( './blocks' ).resetBlocksNearPlayer player
-                player.showOK 'The objects near you have been reset.',
+                player.showOK '<p>The objects near you have been reset.</p>
+                    <p>Not sure what that means?
+                    <a href="docs/resetcommand.html"
+                    target="_blank">Read this command\'s
+                    full documentation.</a></p>',
                     => player.showCommandUI()
