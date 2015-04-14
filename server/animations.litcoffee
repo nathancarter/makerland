@@ -239,6 +239,8 @@ A maker can remove an animation if and only if that maker can edit it.
                  events in the game that trigger this animation, it will
                  stop working!", action, callback
 
+## Playing Animations
+
 The following function stores in this table's temporary memory the fact that
 an animation of the given type has just started; the given parameters and
 location are stored with it.  Immediately thereafter, any players who can

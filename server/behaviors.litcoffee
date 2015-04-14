@@ -409,6 +409,9 @@ can run multiple times on multiple objects.
                 }
                 function stopAnimation ( id ) {
                     require( './animations' ).stopAnimation( id );
+                }
+                function playSound ( name, target ) {
+                    require( './sounds' ).playSound( name, target );
                 }"
             if author then functions +=
                 "function log () {

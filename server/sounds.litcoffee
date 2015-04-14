@@ -161,6 +161,29 @@ A maker can remove a sound if and only if that maker can edit it.
                  places or events in the game that use this sound,
                  they will go silent!", action, callback
 
+## Playing Sounds
+
+The function clients can use to play sounds takes a sound parameter (as an
+index in this table or a name of an entry in this table) and a second
+parameter of who should hear the sound. It can be a player object, in which
+case just one player will hear the sound.  That player object is sent a
+message so that its client will ask for the sound file and begin playing it.
+Or instead the second parameter can be a location in the game world, in
+which case all players who can see that location will hear the sound.
+
+        playSound : ( entry, target ) =>
+            if not @namesToIndices?
+                @namesToIndices = { }
+                for index in @entries()
+                    @namesToIndices[@get index, 'name'] = index
+            if @namesToIndices.hasOwnProperty entry
+                entry = @namesToIndices[entry]
+            if not @exists entry then return
+            targets = if target instanceof Player then [ target ] else \
+                require( './blocks' ).whoCanSeePosition target
+            for target in targets
+                target.socket.emit 'play sound', entry
+
 ## Exporting
 
 The module then exports a single instance of the `SoundsTable` class.
