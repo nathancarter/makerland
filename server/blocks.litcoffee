@@ -486,15 +486,17 @@ player just entered it.
         if p
             playerTopLeft = x : p[1] - 0.25, y : p[2] - 0.75
             playerBottomRight = x : p[1] + 0.25, y : p[2]
+            playerPlane = p[0]
         else
-            playerTopLeft = playerBottomRight = null
+            playerTopLeft = playerBottomRight = playerPlane = null
         if oldPosition
             previousTopLeft =
                 x : oldPosition[1] - 0.25, y : oldPosition[2] - 0.75
             previousBottomRight =
                 x : oldPosition[1] + 0.25, y : oldPosition[2]
+            previousPlane = oldPosition[0]
         else
-            previousTopLeft = previousBottomRight = null
+            previousTopLeft = previousBottomRight = previousPlane = null
         blocksToCheck = visibleBlocks.slice()
         for block in formerlyVisibleBlocks
             if block not in blocksToCheck
@@ -502,11 +504,13 @@ player just entered it.
         for block in blocksToCheck
             for item in module.exports.landscapeItems?[block] or [ ]
                 old = previousTopLeft and previousBottomRight and \
+                    item.plane is previousPlane and \
                     item.collides previousTopLeft, previousBottomRight
                 now = playerTopLeft and playerBottomRight and \
+                    item.plane is playerPlane and \
                     item.collides playerTopLeft, playerBottomRight
-                if now and not old then item.emit 'entered', player
                 if old and not now then item.emit 'exited', player
+                if now and not old then item.emit 'entered', player
 
 The following function notifies players about their set of visible blocks.
 Each block is shallow-copied, so that manipulations to it can be made if
