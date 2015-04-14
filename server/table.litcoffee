@@ -213,6 +213,18 @@ not exist.
                 else
                     throw e
 
+We can also ask how large a certain file-type value is on disk.  A size of
+-1 means that there was an error attempting to read the file, e.g., there is
+no file-type value for that entry and key.
+
+        fileSize : ( entryName, key ) =>
+            key = key.replace( /_/g, '_und_' ).replace /\./g, '_dot_'
+            filename = @filename( entryName ).replace /json$/, key
+            try
+                fs.statSync( filename ).size
+            catch e
+                -1
+
 And since we can get and set file values on entries, it's good to also be
 able to get a list of such entries, and to remove one.
 
