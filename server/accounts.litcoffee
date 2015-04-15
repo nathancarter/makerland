@@ -100,32 +100,21 @@ doing so looks like the following.
                     type : 'action'
                     value : 'Change'
                     action : =>
-                        player.showUI
-                            type : 'text'
-                            value : "<h3>Changing commands for
-                                     \"#{entry}\":</h3>
-                                     <p>Current list of commands:</p>
-                                     <p>#{@get( entry, 'commands' ) \
-                                          .join ', '}</p>
-                                     <p>Type the new list separated by
-                                     commas, as shown above.</p>"
-                        ,
-                            type : 'string input'
-                            name : 'new command list'
-                        ,
-                            type : 'action'
-                            value : 'Change'
-                            default : yes
-                            action : ( event ) =>
-                                @set entry, 'commands', \
-                                    ( i.trim() for i in \
-                                      event['new command list'].split ',' )
-                                again()
-                        ,
-                            type : 'action'
-                            value : 'Cancel'
-                            cancel : yes
-                            action : again
+                        check = ( newCommand ) ->
+                            newCommand = newCommand.toLowerCase()
+                            if not require( './commands' ).hasOwnProperty \
+                                    newCommand
+                                "The command \"#{newCommand}\" does not
+                                exist."
+                            else
+                                yes
+                        save = ( newCommandsList ) =>
+                            @set entry, 'commands', newCommandsList
+                            again()
+                        require( './ui' ).editListUI player,
+                            @get( entry, 'commands' ),
+                            "Editing commands for player \"#{entry}\"",
+                            check, save, again
                 ]
             ,
                 type : 'action'
