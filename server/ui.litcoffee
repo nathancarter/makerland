@@ -62,12 +62,13 @@ parameters.  Both callbacks default to showing the main command UI.
             type : 'action'
             value : 'Add'
             action : ( event ) ->
-                if check event['new entry']
+                okay = check event['new entry']
+                if okay is yes
                     list.push event['new entry']
                     return again()
                 player.showOK "The entry \"#{event['new entry']}\" is not
                     valid for this list.
-                    #{if typeof okay is 'string' then okay}", again
+                    #{if typeof okay is 'string' then okay else ''}", again
         ]
         controls.push
             type : 'action'
