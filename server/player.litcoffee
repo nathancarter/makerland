@@ -98,6 +98,7 @@ When this player disconnects, tell the console, and remove the player from
                 @positionChanged null, null
                 require( './animations' ).showAnimation oldPosition,
                     'logout', { player : @name, position : oldPosition }
+                require( './sounds' ).playSound 'teleport', oldPosition
 
 The client may also request data about the cell types and landscape items in
 the map.  When they do, we must provide it, so they have enough information
@@ -328,6 +329,7 @@ client before allowing this one to take over.
             @showCommandUI()
             require( './animations' ).showAnimation destination, 'login',
                 player : name
+            require( './sounds' ).playSound 'teleport', destination
 
 ## Player Status
 
@@ -514,6 +516,7 @@ client, in turn, tells the server not only the new position, but also the
 vision distance, which results in a call to `positionChanged`.
 
         teleport : ( destination ) =>
+            @positionChanged destination, 10
             @socket.emit 'player position', destination
 
 Mix handlers into `Player`s.

@@ -51,7 +51,19 @@ The players command lists all players who have logged in.
                                 other = Player.nameToPlayer \
                                     name.toLowerCase()
                                 if other
+                                    require( './animations' ) \
+                                        .showAnimation \
+                                        other.getPosition(), 'teleport out',
+                                        center : other.getPosition()
+                                    require( './sounds' ).playSound \
+                                        'teleport', other.getPosition()
                                     other.teleport player.getPosition()
+                                    require( './animations' ) \
+                                        .showAnimation \
+                                        player.getPosition(), 'teleport in',
+                                        center : player.getPosition()
+                                    require( './sounds' ).playSound \
+                                        'teleport', player.getPosition()
                                     player.showOK "Teleported #{name}
                                         here!"
                         ]
@@ -381,6 +393,8 @@ upon the contents of the animations database.
                         text = event['words to say']
                         require( './animations' ).showAnimation position,
                             'speak', { text : text, speaker : player.name }
+                        require( './sounds' ).playSound 'speech bling',
+                            position
                         player.emit 'spoke', text
                         hearers = require( './blocks' ).whoCanSeePosition \
                             position
@@ -789,7 +803,19 @@ remember, then jump back to those locations later.
                                 type : 'action'
                                 value : 'Go here'
                                 action : ->
+                                    require( './animations' ) \
+                                        .showAnimation \
+                                        player.getPosition(),
+                                        'teleport out',
+                                        center : player.getPosition()
+                                    require( './sounds' ).playSound \
+                                        'teleport', player.getPosition()
                                     player.teleport value
+                                    require( './animations' ) \
+                                        .showAnimation value, 'teleport in',
+                                        center : value
+                                    require( './sounds' ).playSound \
+                                        'teleport', value
                                     showList()
                             ,
                                 type : 'action'
@@ -834,7 +860,18 @@ remember, then jump back to those locations later.
                 ,
                     type : 'action'
                     value : 'Teleport to origin'
-                    action : => player.teleport [ 0, 0, 0 ] ; showList()
+                    action : =>
+                        require( './animations' ).showAnimation \
+                            player.getPosition(), 'teleport out',
+                            center : player.getPosition()
+                        require( './sounds' ).playSound 'teleport',
+                            player.getPosition()
+                        player.teleport [ 0, 0, 0 ]
+                        require( './animations' ).showAnimation [ 0, 0, 0 ],
+                            'teleport in', center : [ 0, 0, 0 ]
+                        require( './sounds' ).playSound 'teleport',
+                            [ 0, 0, 0 ]
+                        showList()
                 ,
                     type : 'action'
                     value : 'Done'

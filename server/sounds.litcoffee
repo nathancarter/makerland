@@ -27,7 +27,7 @@ Implement custom show method.
         show : ( entry ) =>
             size = @fileSize entry, 'soundfile'
             size = if size is -1 then '[no file]' else "#{(size/1024)|0}kB"
-            "<p>#{entry}. #{@get( entry ).name} #{size}</p>"
+            "<p>#{entry}. #{@get( entry ).name} (#{size})</p>"
 
 Ensure entries are returned sorted in numerical order.
 
