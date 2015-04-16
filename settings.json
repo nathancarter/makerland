@@ -8,5 +8,6 @@
     "privateGame" : false,
     "gameTitle" : "<h3>Log in or sign up</h3>",
     "gameTitleImage" : "makerlandlogo.png",
-    "port" : 9999
+    "port" : 9999,
+    "movableItemLifespanInSeconds" : 600
 }

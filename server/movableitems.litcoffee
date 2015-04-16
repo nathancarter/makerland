@@ -17,6 +17,15 @@ players' inventories, or in blocks of the map that are currently loaded.
 
     class MovableItem
 
+All instances of the class will be kept in a global array, whose indices
+give them a unique ID.
+
+        allItems : [ ]
+
+We can therefore look up an instance based on its ID.
+
+        itemForID : ( id ) -> MovableItems::allItems[id]
+
 At construction time, we must be told which type of movable item we are, and
 we must also know our location, which must either be a player or creature
 carrying us, or a position on the map as a plane,x,y triple.
@@ -25,6 +34,51 @@ carrying us, or a position on the map as a plane,x,y triple.
             @typeName = module.exports.get @type, 'name'
             for behavior in @behaviors ?= [ ]
                 require( './behaviors' ).installBehavior behavior, this
+
+Now place the item into the global instances array and store within the item
+its index in that array as its unique ID.
+
+            for item, index in MovableItem::allItems
+                if item is null
+                    @ID = index
+                    MovableItems::allItems[index] = this
+            if not @ID?
+                @ID = MovableItems::allItems.length
+                MovableItems::allItems.push this
+
+We therefore create a corresponding "destructor" which should be called to
+prepare this object for garbage collection.  This function moves the item
+out of its current environment and out of the global instances array, thus
+removing the two most important pointers to the object.  Assuming no one
+else retains a pointer to this object, it will be garbage collected
+hereafter.
+
+        destroy : =>
+            move null
+            if @ID
+                MovableItems::allItems[@ID] = null
+                @ID = null
+
+This function moves items to a new location.  It not only updates this
+item's own internal `@location` field, but also notifies the former/next
+locations, if any, to update their own contents, to stay consistent with
+this item's location.  This is the official way to move an item while
+keeping all data consistent throughout the game.  If the new location is
+invalid, then `null` will be used instead.
+
+        move : ( newLocation ) =>
+            { Player } = require './player'
+            if @location instanceof Player
+                @location.removeItemFromInventory this
+            else if @location instanceof Array
+                require( './blocks' ).removeMovableItemFromMap this
+            @location = newLocation
+            if @location instanceof Player
+                @location.addItemToInventory this
+            else if @location instanceof Array
+                require( './blocks' ).addMovableItemToMap this, @location
+            else
+                @location = null
 
 Mix handlers into `MovableItem`s.
 

@@ -376,7 +376,7 @@ Export a singleton of the class as the module.
 
     module.exports = new BlocksTable
 
-## Non-table Functions
+## Movement and Visibility
 
 Here is a function that computes, for a given point on the map, the name of
 the block containing that point.  A block name is the point at the top-left
@@ -562,7 +562,59 @@ map?  This will be useful for sending events such as "heard someone speak."
     module.exports.whoCanSeePosition = ( position ) =>
         bname = module.exports.positionToBlockName position...
         results = [ ]
-        for playerName in playersWhoCanSeeBlock[bname] or [ ]
+        for playerName in playersWhoCanSeeBlock[bname] ? [ ]
             player = Player.nameToPlayer playerName
             if player then results.push player
         results
+
+## Movable Items
+
+One global data structure stores the set of movable items in a given block.
+This is stored separate from the blocks themselves, because it should not be
+stored across runs of the game.  It will, however, persist even while blocks
+are loaded and unloaded -- which is nice!
+
+    movableItemsInBlock = { }
+    movableItemData = { }
+
+This function adds a movable item to the map, categorizing them by block.
+It does not update the item's internal data structure; see the item's own
+`move()` function for that.  In fact, `move()` calls this function, so do
+not call this function yourself; call `move()` instead.
+
+    module.exports.addMovableItemToMap = ( item, location ) ->
+        if bname = module.exports.positionToBlockName location...
+            movableItemsInBlock[bname] ?= { }
+            movableItemsInBlock[bname][item.ID] = item
+            movableItemData[item.ID] =
+                block : bname
+                lastTouched : new Date
+
+This function removes a movable item from the map.  Again, it does not alter
+the item's own data; use the item's `move()` function for that.  In fact,
+`move()` calls this function, so do not call this function yourself; call
+`move()` instead.  The item parameter can be an object or a unique ID.
+
+    module.exports.removeMovableItemFromMap = ( item ) ->
+        if typeof item isnt 'number' then item = item.ID
+        if bname = movableItemData[item]?.bname
+            delete movableItemsInBlock[bname][item]
+            delete movableItemData[item]
+
+In order that items may disappear after sitting in the world for a certain
+period of time, we have the following function, which clears the above data
+structures of stale items.
+
+    cleanUpOldMovableItems = ->
+        now = new Date
+        lifespan = settings.movableItemLifespanInSeconds * 1000
+        toCleanUp = [ ]
+        for id, data in movableItemData
+            if now - data.lastTouched > lifespan
+                toRemove.push movableItemsInBlock[data.bname][id]
+        item.destroy() for item in toCleanUp
+
+Call the above cleanup function 10 times per item lifespan.
+
+    setInterval cleanUpOldMovableItems,
+        settings.movableItemLifespanInSeconds * 100

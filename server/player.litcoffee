@@ -40,6 +40,7 @@ object, since we have not loaded any particular player data yet.
             console.log "Connected a player; there are now
                 #{Player::allPlayers.length} players."
             @saveData = { }
+            @inventory = [ ]
 
 Set up a handler for UI events from the client.
 
@@ -524,6 +525,20 @@ vision distance, which results in a call to `positionChanged`.
         teleport : ( destination ) =>
             @positionChanged destination, 10
             @socket.emit 'player position', destination
+
+## Player Inventory
+
+These functions put items into the player's inventory, or take them out.
+Neither function manipulates the inner data of the item itself.  Thus you
+should not call these functions yourself, because they will mess up data
+consistency.  Rather, you should call the item's `move()` function, which
+will call these functions in turn.
+
+        addItemToInventory : ( item ) =>
+            if item not in @inventory then @inventory.push item
+        removeItemFromInventory : ( item ) =>
+            if ( index = @inventory.indexOf item ) > -1
+                @inventory.splice index, 1
 
 Mix handlers into `Player`s.
 
