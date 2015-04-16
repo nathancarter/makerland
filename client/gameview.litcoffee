@@ -54,6 +54,29 @@ from the server.
         delete landscapeItemData[data]
         delete landscapeItemData["#{data} icon"]
 
+And we also create very similar functions for getting data on movable items
+from the server.
+
+    movableItemData = { }
+    lookupMovableItemType = ( index ) ->
+        if not movableItemData.hasOwnProperty index
+            movableItemData[index] = { }
+            socket.emit 'get movable item data', index
+        movableItemData[index]
+    socket.on 'movable item data', ( data ) ->
+        movableItemData[data.index] = data
+    getMovableItemIcon = ( index ) ->
+        key = "#{index} icon"
+        if not movableItemData.hasOwnProperty key
+            movableItemData[key] = new Image
+            timestamp = encodeURIComponent new Date
+            movableItemData[key].src =
+                "db/movableitems/#{index}/icon?#{timestamp}"
+        movableItemData[key]
+    socket.on 'movable item changed', ( data ) ->
+        delete movableItemData[data]
+        delete movableItemData["#{data} icon"]
+
 ## Drawing
 
 Set up redrawing of the canvas about 30 times per second.

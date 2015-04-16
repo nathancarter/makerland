@@ -28,7 +28,7 @@ corners as well.
                 @type = tableEntry.type
                 @behaviors = tableEntry.behaviors or [ ]
                 @visible = tableEntry.visible ? yes
-            @typeName = require( './landscapeitems' ).get @type, 'name'
+            @typeName = module.exports.get @type, 'name'
             N = require( './settings' ).mapBlockSizeInCells
             @localX = @x - N * Math.floor @x/N
             @localY = @y - N * Math.floor @y/N

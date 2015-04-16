@@ -100,9 +100,9 @@ When this player disconnects, tell the console, and remove the player from
                     'logout', { player : @name, position : oldPosition }
                 require( './sounds' ).playSound 'teleport', oldPosition
 
-The client may also request data about the cell types and landscape items in
-the map.  When they do, we must provide it, so they have enough information
-to draw the map.
+The client may also request data about the cell types, landscape items, and
+movable items in the map.  When they do, we must provide it, so they have
+enough information to draw the map.
 
             socket.on 'get cell type data', ( cellTypeIndex ) =>
                 result =
@@ -116,6 +116,12 @@ to draw the map.
                 if result
                     result.index = itemIndex
                     socket.emit 'landscape item data', result
+            socket.on 'get movable item data', ( itemIndex ) =>
+                result =
+                    require( './movableitems' ).getWithDefaults itemIndex
+                if result
+                    result.index = itemIndex
+                    socket.emit 'movable item data', result
 
 Now that the player object is set up, tell the client all the main game
 settings and show the login screen.

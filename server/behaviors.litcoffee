@@ -13,6 +13,7 @@ for objects of that type, so we can test `instanceof` later.
 
     behaviorTypes =
         'landscape item' : require( './landscapeitems' ).LandscapeItem
+        'movable item' : require( './movableitems' ).MovableItem
 
 It does so by subclassing the main Table class and adding behavior-specific
 functionality.
