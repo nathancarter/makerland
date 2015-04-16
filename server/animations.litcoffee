@@ -141,7 +141,7 @@ for doing so looks like the following.
                             action : ( event ) =>
                                 input = event['enter duration in seconds'] \
                                     .trim()
-                                if isFinite input \
+                                if isFinite( input ) \
                                    and not isNaN parseFloat input
                                     @set entry, 'duration', parseFloat input
                                     player.showOK "Duration of animation

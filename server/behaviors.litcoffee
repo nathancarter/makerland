@@ -372,7 +372,7 @@ callback will be called when the player clicks Done.
             for index in @entries()
                 do ( index ) =>
                     behavior = @get index
-                    if typeName in behavior.targets or [ ]
+                    if typeName in behavior.targets ? [ ]
                         controls.push [
                             type : 'text'
                             value : behavior.name

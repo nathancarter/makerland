@@ -190,7 +190,7 @@ the key-value-pair editing function defined further below.
         if input in [ 'true', 'yes', 'on' ] then return true
         if input in [ 'false', 'no', 'off' ] then return false
         finput = parseFloat input
-        if not isNaN finput and isFinite input then return finput
+        if not isNaN( finput ) and isFinite input then return finput
         try return JSON.parse input
         input
 
