@@ -24,7 +24,7 @@ give them a unique ID.
 
 We can therefore look up an instance based on its ID.
 
-        itemForID : ( id ) -> MovableItems::allItems[id]
+        itemForID : ( id ) -> MovableItem::allItems[id]
 
 At construction time, we must be told which type of movable item we are, and
 we must also know our location, which must either be a player or creature
@@ -41,10 +41,10 @@ its index in that array as its unique ID.
             for item, index in MovableItem::allItems
                 if item is null
                     @ID = index
-                    MovableItems::allItems[index] = this
+                    MovableItem::allItems[index] = this
             if not @ID?
-                @ID = MovableItems::allItems.length
-                MovableItems::allItems.push this
+                @ID = MovableItem::allItems.length
+                MovableItem::allItems.push this
 
 We therefore create a corresponding "destructor" which should be called to
 prepare this object for garbage collection.  This function moves the item
@@ -56,7 +56,7 @@ hereafter.
         destroy : =>
             move null
             if @ID
-                MovableItems::allItems[@ID] = null
+                MovableItem::allItems[@ID] = null
                 @ID = null
 
 This function moves items to a new location.  It not only updates this
