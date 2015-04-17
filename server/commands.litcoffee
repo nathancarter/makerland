@@ -410,6 +410,96 @@ upon the contents of the animations database.
                     cancel : yes
                     action : -> player.showCommandUI()
 
+The inventory command shows you everything in your inventory.  It is smart
+enough to check once per second whether the inventory has changed, and if
+so, to refresh the view.
+
+        inventory :
+            category : 'basic'
+            icon : 'inventory.png'
+            shortInfo : 'See what you are carrying'
+            help : 'This command lists all the items you are carrying, and
+                lets you pick up or drop items on the ground nearby.  It
+                also allows you to use items you are carrying.'
+            run : ( player ) ->
+                stuffNearby = ->
+                    require( './blocks' ).movableItemsNearPosition \
+                        player.getPosition(), 1
+                player.inventoryBeingDisplayed =
+                    player.inventory.slice().concat stuffNearby()
+                refreshView = -> module.exports.inventory.run player
+                maybeRefreshView = ->
+                    if player.socket.connected and \
+                       player.inventoryBeingDisplayed?
+                        compare = player.inventory.slice().concat \
+                            stuffNearby()
+                        if player.inventoryBeingDisplayed.length isnt \
+                           compare.length then return refreshView()
+                        for i in [0...compare.length]
+                            if player.inventoryBeingDisplayed[i] isnt \
+                               compare[i] then return refreshView()
+                        setTimeout maybeRefreshView, 500
+                maybeRefreshView()
+                contents = [
+                    type : 'text'
+                    value : '<h3>Your inventory:</h3>'
+                ]
+                for item in player.inventory
+                    do ( item ) ->
+                        contents.push [
+                            type : 'text'
+                            value : require( './movableitems' ).normalIcon \
+                                item.index
+                        ,
+                            type : 'text'
+                            value : item.typeName
+                        ,
+                            type : 'action'
+                            value : 'drop'
+                            action : ->
+                                item.move player.getPosition()
+                                refreshView()
+                        ]
+                if contents.length is 1
+                    contents.push { type : 'text', value : '(no items)' }
+                contents.push
+                    type : 'text'
+                    value : '<h3>Items near you:</h3>'
+                lastLength = contents.length
+                for item in stuffNearby()
+                    contents.push [
+                        type : 'text'
+                        value : require( './movableitems' ).normalIcon \
+                            item.index
+                    ,
+                        type : 'text'
+                        value : item.typeName
+                    ,
+                        type : 'action'
+                        value : 'pick up'
+                        action : ->
+                            carrying = 0
+                            for heldItem in player.inventory
+                                carrying += heldItem.space
+                            carrying += item.space
+                            if carrying > player.saveData.capacity
+                                player.showOK 'You cannot carry that much.',
+                                    refreshView
+                                return
+                            item.move player
+                            refreshView()
+                    ]
+                if contents.length is lastLength
+                    contents.push { type : 'text', value : '(none)' }
+                contents.push
+                    type : 'action'
+                    value : 'Done'
+                    cancel : yes
+                    action : ->
+                        delete player.inventoryBeingDisplayed
+                        player.showCommandUI()
+                player.showUI contents
+
 ## Maker Commands
 
 The database command allows makers to browse the list of database tables,

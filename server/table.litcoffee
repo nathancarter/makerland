@@ -249,13 +249,18 @@ this more specific to be more user-friendly.
         show : ( entry ) -> "<p>#{entry}</p>"
 
 The `show` functions of subclasses may like to fetch an icon from the
-database, if the item has one.  We provide the following tool for doing so
-conveniently.
+database, if the item has one.  Other situations may use this as well, such
+as the player's inventory command.  We provide the following tools for doing
+so conveniently.
 
         smallIcon : ( entry, keyName = 'icon', size = 100 ) =>
             db = require './database'
             "<img width=#{size}
                   src='#{db.createDatabaseURL @tableName, entry, keyName}'
+                  onerror='this.style.display=\"none\"'/>"
+        normalIcon : ( entry, keyName = 'icon' ) =>
+            db = require './database'
+            "<img src='#{db.createDatabaseURL @tableName, entry, keyName}'
                   onerror='this.style.display=\"none\"'/>"
 
 These functions determine whether a maker can edit or remove a given entry

@@ -618,3 +618,29 @@ Call the above cleanup function 10 times per item lifespan.
 
     setInterval cleanUpOldMovableItems,
         settings.movableItemLifespanInSeconds * 100
+
+And a public API for getting the list of items near a specific point on the
+map.  How near is given in the second argument, and is measured in units of
+map cells.
+
+    module.exports.movableItemsNearPosition = ( position, radius ) ->
+        extremes = [
+            position
+            [ position[0], position[1]-1, position[2] ]
+            [ position[0], position[1]+1, position[2] ]
+            [ position[0], position[1], position[2]-1 ]
+            [ position[0], position[1], position[2]+1 ]
+        ]
+        distance = ( x1, y1, x2, y2 ) ->
+            Math.sqrt ( x1 - x2 ) * ( x1 - x2 ) + ( y1 - y2 ) + ( y1 - y2 )
+        blocks = [ ]
+        for point in extremes
+            bname = module.exports.positionToBlockName point...
+            if bname not in blocks then blocks.push bname
+        results = [ ]
+        for bname in blocks
+            for own id, item of movableItemsInBlock[bname] ? { }
+                if distance( item.location[1], item.location[2],
+                             position[1], position[2] ) < radius
+                    results.push item
+        results

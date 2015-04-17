@@ -87,10 +87,13 @@ for position changes.
             socket.on 'player position', ( data ) =>
                 @positionChanged data.position, data.visionDistance
 
-When this player disconnects, tell the console, and remove the player from
-`allPlayers`.  Also, end the player's periodic status updates.
+When this player disconnects, drop all their possessions, tell the console,
+and remove the player from `allPlayers`.  Also, end the player's periodic
+status updates.
 
             socket.on 'disconnect', =>
+                for item in @inventory
+                    item.move @getPosition()
                 index = Player::allPlayers.indexOf this
                 Player::allPlayers.splice index, 1
                 @stopStatusUpdates()
@@ -411,7 +414,8 @@ the accounts table by messing with its original copy.
 
         load : =>
             @saveData = { }
-            @saveData[key] = value for own key, value of accounts.get @name
+            for own key, value of accounts.getWithDefaults @name
+                @saveData[key] = value
             delete @saveData.password
 
 This function saves the player data to disk, after first putting the

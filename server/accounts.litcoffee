@@ -13,11 +13,13 @@ functionality.
 
 ## Constructor
 
-The constructor ensures that an admin account exists in the table.
+The constructor ensures that an admin account exists in the table.  It also
+creates default values for some key player stats.
 
         constructor : () ->
             super 'accounts'
             if not @exists 'admin' then @createAccount 'admin', 'admin'
+            @setDefault 'capacity', 10
 
 ## Overriding `set`
 

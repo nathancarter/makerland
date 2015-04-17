@@ -30,8 +30,11 @@ At construction time, we must be told which type of movable item we are, and
 we must also know our location, which must either be a player or creature
 carrying us, or a position on the map as a plane,x,y triple.
 
-        constructor : ( @type, @location ) ->
-            @typeName = module.exports.get @type, 'name'
+        constructor : ( @index, @location ) ->
+            if @type = module.exports.getWithDefaults @index
+                @typeName = @type.name
+                @space = @type.space
+                @behaviors = @type.behaviors
             for behavior in @behaviors ?= [ ]
                 require( './behaviors' ).installBehavior behavior, this
 
@@ -113,7 +116,7 @@ First, give the table its name and set default values for keys.
 Implement custom show method.
 
         show : ( entry ) =>
-            "<p>#{entry}. #{@smallIcon entry} #{@get( entry ).name}</p>"
+            "<p>#{entry}. #{@normalIcon entry} #{@get( entry ).name}</p>"
 
 Ensure entries are returned sorted in numerical order.
 
@@ -211,7 +214,7 @@ The UI for editing a movable item looks like the following.
                     value : 'Icon:'
                 ,
                     type : 'text'
-                    value : @smallIcon entry
+                    value : @normalIcon entry
                 ,
                     type : 'action'
                     value : 'Change'
@@ -276,6 +279,15 @@ The UI for editing a movable item looks like the following.
                     require( './behaviors' ).editAttachments player, item,
                         again
                     @set entry, 'behaviors', item.behaviors
+            ,
+                type : 'action'
+                value : 'Add one to my inventory'
+                action : =>
+                    item = new MovableItem entry
+                    item.move player
+                    player.showOK "An instance of movable item #{entry},
+                        \"#{@get entry, 'name'},\" has been added to your
+                        inventory.", again
             ,
                 type : 'action'
                 value : 'Done'
