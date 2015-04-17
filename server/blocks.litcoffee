@@ -528,14 +528,16 @@ any landscape items visible only to makers get filtered out.
                 data[block][key] = value
             if not notifyThisPlayer.isMaker()
                 itemtypes = [ ]
-                for item in data[block]['landscape items'] or [ ]
+                for item in data[block]['landscape items'] ? [ ]
                     itemtypes.push item.type if item.type not in itemtypes
                 visibleItems = [ ]
                 for type in itemtypes
                     if require( './landscapeitems' ).get type, 'visible'
-                        for item in data[block]['landscape items'] or [ ]
+                        for item in data[block]['landscape items'] ? [ ]
                             visibleItems.push item if item.type is type
                 data[block]['landscape items'] = visibleItems
+            data[block]['movable items'] =
+                module.exports.getMovableItemsInBlock block
         notifyThisPlayer.socket.emit 'visible blocks', data
         for block in blockSet
             require( './animations' ).sendBlockAnimationsToPlayer block,
@@ -555,6 +557,8 @@ near the maker.  That command calls the following function.
     module.exports.resetBlocksNearPlayer = ( player ) =>
         for block in blocksVisibleToPlayer[player.name]
             module.exports.resetBlock block
+            for item in module.exports.getMovableItemsInBlock block
+                item.destroy()
 
 Which players (and later creatures) can see a certain position on the game
 map?  This will be useful for sending events such as "heard someone speak."
@@ -589,6 +593,7 @@ not call this function yourself; call `move()` instead.
             movableItemData[item.ID] =
                 block : bname
                 lastTouched : new Date
+            module.exports.notifyAboutBlockUpdate bname
 
 This function removes a movable item from the map.  Again, it does not alter
 the item's own data; use the item's `move()` function for that.  In fact,
@@ -597,9 +602,18 @@ the item's own data; use the item's `move()` function for that.  In fact,
 
     module.exports.removeMovableItemFromMap = ( item ) ->
         if typeof item isnt 'number' then item = item.ID
-        if bname = movableItemData[item]?.bname
+        if bname = movableItemData[item]?.block
             delete movableItemsInBlock[bname][item]
             delete movableItemData[item]
+            module.exports.notifyAboutBlockUpdate bname
+
+This function fetches the contents of a block as an array for use in sending
+to players who can see the block.
+
+    module.exports.getMovableItemsInBlock = ( bname ) ->
+        result = [ ]
+        result.push item for own id, item of movableItemsInBlock[bname] ? []
+        result
 
 In order that items may disappear after sitting in the world for a certain
 period of time, we have the following function, which clears the above data

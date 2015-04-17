@@ -219,7 +219,8 @@ them.
 
 This function includes players' avatars among the landscape items, because
 they are z-ordered in among them, so that players can, f.ex., hide behind a
-tree.
+tree.  It also includes movable items among the landscape items, for the
+same reason.
 
     drawLandscapeItems = ( context ) ->
         orderedItems = { }
@@ -243,7 +244,7 @@ tree.
         blockSize = window.gameSettings.mapBlockSizeInCells
         for own name, data of window.visibleBlocksCache
             [ plane, x, y ] = ( parseInt i for i in name.split ',' )
-            for item in data['landscape items'] or [ ]
+            for item in data['landscape items'] ? [ ]
                 [ itemx, itemy ] = item.position
                 screenpos = mapCoordsToScreenCoords itemx+x, itemy+y
                 if typeinfo = lookupLandscapeItemType item.type
@@ -256,6 +257,20 @@ tree.
                             y : screenpos.y
                             width : cellSize*typeinfo.size
                             height : cellSize*typeinfo.size
+            for item in data['movable items'] ? [ ]
+                console.log item
+                [ plane, itemx, itemy ] = item.location
+                screenpos = mapCoordsToScreenCoords itemx, itemy
+                if typeinfo = lookupMovableItemType item.index
+                    image = getMovableItemIcon item.index
+                    if image.complete
+                        add
+                            type : 'item'
+                            image : image
+                            x : screenpos.x
+                            y : screenpos.y
+                            width : image.width
+                            height : image.height
         add
             type : 'player'
             name : currentStatus.name[0].toUpperCase() + \

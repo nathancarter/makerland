@@ -57,7 +57,7 @@ else retains a pointer to this object, it will be garbage collected
 hereafter.
 
         destroy : =>
-            move null
+            @move null
             if @ID
                 MovableItem::allItems[@ID] = null
                 @ID = null
