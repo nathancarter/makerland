@@ -300,7 +300,7 @@ callback will be called when the player clicks Done.
                         value : "<b>Parameters:</b><br>#{params.join ', '}"
                     ]
                     pair = [ ]
-                    if Object.keys( type.parameters ).length > 0
+                    if Object.keys( type.parameters ? { } ).length > 0
                         pair.push
                             type : 'action'
                             value : 'Edit'
@@ -334,7 +334,7 @@ callback will be called when the player clicks Done.
                                         for own key, value of event
                                             if key[...10] is 'parameter '
                                                 behavior[key[10..]] = value
-                                        object.save()
+                                        object.save?()
                                         again()
                                 ,
                                     type : 'action'
@@ -358,7 +358,7 @@ callback will be called when the player clicks Done.
                         value : 'Remove'
                         action : =>
                             object.behaviors.splice index, 1
-                            object.save()
+                            object.save?()
                             again()
                     controls.push pair
             if object.behaviors.length is 0
@@ -383,7 +383,7 @@ callback will be called when the player clicks Done.
                             action : =>
                                 object.behaviors.push \
                                     'behavior type' : index
-                                object.save()
+                                object.save?()
                                 again()
                         ]
             if controls.length is before
