@@ -96,6 +96,8 @@ status updates.
                     item.move @getPosition()
                 index = Player::allPlayers.indexOf this
                 Player::allPlayers.splice index, 1
+                console.log "Disconnected #{@name or 'a player'};
+                    there are now #{Player::allPlayers.length} players."
                 @stopStatusUpdates()
                 @save()
                 oldPosition = @getPosition()
