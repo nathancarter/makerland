@@ -422,7 +422,7 @@ can run multiple times on multiple objects.
                 }"
             declarations = ( "var #{identifier} = args.#{identifier};" \
                 for identifier in argnames \
-                when identifier[...8] isnt 'default ' ).join '\n'
+                when ' ' not in identifier ).join '\n'
             mayNotUse = [ 'require', 'setInterval', 'process' ] # more later
             for identifier in mayNotUse
                 declarations += "\nvar #{identifier} = null;"
