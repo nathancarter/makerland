@@ -50,8 +50,8 @@ If the event is an "action taken" event or a "map click" event, then we see
 if the player object has within it a handler installed for that event.
 
                 if event.type in [ 'action taken', 'map click' ]
-                    if @handlers?[event.id]
-                        @handlers[event.id] event
+                    if @uihandlers?[event.id]
+                        @uihandlers[event.id] event
                     else
                         console.log 'ERROR: No action handler installed
                             for', event
@@ -60,8 +60,8 @@ If the event handler is a "contents changed" event, then we see if the
 player object has within it a handler installed for watching changes.
 
                 else if event.type is 'contents changed'
-                    if @handlers?.__watcher
-                        @handlers.__watcher event
+                    if @uihandlers?.__watcher
+                        @uihandlers.__watcher event
                     else
                         console.log 'ERROR: No handler installed to watch
                             changes.'
@@ -153,8 +153,8 @@ parameters, flatten it out.
 Clear out any action handlers installed before, then move any handlers in
 the given data into this player.
 
-            @handlers = if @handlers?.__uploaded
-                __uploaded : @handlers.__uploaded
+            @uihandlers = if @uihandlers?.__uploaded
+                __uploaded : @uihandlers.__uploaded
             else
                 { }
             count = 0
@@ -166,13 +166,13 @@ the given data into this player.
                             a function."
                         return
                     piece.id = count
-                    @handlers[count] = piece.action
+                    @uihandlers[count] = piece.action
                     delete piece.action
                     count++
                 if piece.type is 'watcher'
-                    @handlers.__watcher = piece.action
+                    @uihandlers.__watcher = piece.action
                 if piece.type is 'upload file'
-                    @handlers.__uploaded = piece.action
+                    @uihandlers.__uploaded = piece.action
             for piece in pieces
                 if piece instanceof Array
                     installHandlers entry for entry in piece
