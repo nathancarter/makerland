@@ -58,7 +58,7 @@ client's chosen handler for all this.
         bb.on 'file', ( fieldname, file, others... ) ->
             file.on 'data', ( data ) -> buffers.push data
         bb.on 'finish', ->
-            handler = Player.nameToPlayer( name )?.handlers?.__uploaded
+            handler = Player.nameToPlayer( name )?.uihandlers?.__uploaded
             if handler instanceof Function
                 buffer = Buffer.concat buffers
                 handler buffer
