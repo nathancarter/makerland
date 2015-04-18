@@ -367,12 +367,15 @@ commands.
                     'default cell type'
             else
                 defaultCellType = -1
-            name : @name
-            appearance : @saveData.avatar
-            shortcuts : shortcuts
-            HUD : hudshorts
-            isMaker : @isMaker()
-            defaultCellType : defaultCellType
+            result =
+                name : @name
+                appearance : @saveData.avatar
+                shortcuts : shortcuts
+                HUD : hudshorts
+                isMaker : @isMaker()
+                defaultCellType : defaultCellType
+            @addHealthToStatus result
+            result
 
 This function checks the status periodically to see if it has changed.  If
 so, it sends a status update message to the player.
@@ -395,6 +398,7 @@ the latter at disconnection.
             @statusUpdateInterval = setInterval =>
                 @saveData.age ?= 0
                 @saveData.age += 2
+                @heartBeat()
                 @updateStatus()
             , 2000
         stopStatusUpdates : =>
@@ -418,6 +422,7 @@ the accounts table by messing with its original copy.
             for own key, value of accounts.getWithDefaults @name
                 @saveData[key] = value
             delete @saveData.password
+            @initHealth()
 
 This function saves the player data to disk, after first putting the
 password hash back in.
@@ -545,6 +550,7 @@ will call these functions in turn.
             if ( index = @inventory.indexOf item ) > -1
                 @inventory.splice index, 1
 
-Mix handlers into `Player`s.
+Mix handlers and health into `Player`s.
 
     require( './handlers' ).mixIntoClass Player
+    require( './living' ).mixIntoClass Player

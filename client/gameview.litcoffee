@@ -308,14 +308,22 @@ just the player's name (after login only).
         context.fillStyle = '#000000'
         name = currentStatus.name[0].toUpperCase() + currentStatus.name[1..]
         size = context.measureText name
-        context.fillText name, gameview.width - size.width - 40, 30
+        context.fillText name, gameview.width - size.width - 40, 45
         if currentStatus.isMaker
             [ plane, x, y ] = getPlayerPosition()
             x = "#{x}".substring 0, "#{x|0}".length+3
             y = "#{y}".substring 0, "#{y|0}".length+3
             position = "#{plane},#{x},#{y}"
             size = context.measureText position
-            context.fillText position, gameview.width - size.width - 40, 60
+            context.fillText position, gameview.width - size.width - 40, 70
+        pctHP = currentStatus.hitPoints / currentStatus.maximumHitPoints
+        context.fillRect gameview.width - 142, 10, 102, 12
+        hexpct = Math.floor pctHP * 30
+        greenletter = '0123456789abcdefffffffffffffffff'[hexpct]
+        redletter = 'fffffffffffffffffedcba9876543210'[hexpct]
+        context.fillStyle =
+            "##{redletter}#{redletter}#{greenletter}#{greenletter}00"
+        context.fillRect gameview.width - 141, 11, 100*pctHP, 10
         i = 0 ; edge = 80 ; margin = 20
         HUDZones = { }
         for own command, icon of currentStatus.HUD

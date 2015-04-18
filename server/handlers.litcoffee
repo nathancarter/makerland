@@ -15,8 +15,7 @@ Call one of the following functions to mix the handler functionality into
 any object, class, or prototype.
 
     module.exports.mixIntoObject = ( object ) ->
-        for own name, method of module.exports.methods
-            object[name] = method
+        object[name] = method for own name, method of module.exports.methods
         object
     module.exports.mixIntoClass = ( klass ) ->
         module.exports.mixIntoObject klass.prototype
