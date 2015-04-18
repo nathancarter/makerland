@@ -278,8 +278,7 @@ The UI for editing a movable item looks like the following.
                 action : =>
                     item = new MovableItem entry, null
                     require( './behaviors' ).editAttachments player, item,
-                        again
-                    @set entry, 'behaviors', item.behaviors
+                        => @set entry, 'behaviors', item.behaviors ; again()
             ,
                 type : 'action'
                 value : 'Add one to my inventory'
