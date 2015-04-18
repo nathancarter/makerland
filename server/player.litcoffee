@@ -41,6 +41,7 @@ object, since we have not loaded any particular player data yet.
                 #{Player::allPlayers.length} players."
             @saveData = { }
             @inventory = [ ]
+            @statusConditions = [ ]
 
 Set up a handler for UI events from the client.
 
@@ -392,6 +393,7 @@ commands.
                 HUD : hudshorts
                 isMaker : @isMaker()
                 defaultCellType : defaultCellType
+                conditions : ( c.text for c in @statusConditions )
             @addHealthToStatus result
             result
 
@@ -418,9 +420,28 @@ the latter at disconnection.
                 @saveData.age += 2
                 @heartBeat()
                 @updateStatus()
+                now = new Date
+                @statusConditions = ( c for c in @statusConditions \
+                    when c.expires > now )
             , 2000
         stopStatusUpdates : =>
             clearInterval @statusUpdateInterval if @statusUpdateInterval?
+
+Players can also have "status conditions."  These are very short bits of
+text that are added to the player status, and come with a predetermined time
+until expiration.  These can be anything from a simple alert message that's
+too brief to require the command pane, up to a special status earned as part
+of a quest that will last 10 minutes, and is needed for the next step in the
+quest.  Examples: "You feel poisoned," a brief warning lasting 10 seconds,
+for the player's information only.  "The priest has blessed you," a status
+needed by a quest, which lasts 10 minutes.  The duration parameter is
+measured in seconds.  All status conditions disappear on logout.
+
+        addStatusCondition : ( text, duration ) =>
+            @statusConditions.push
+                text : text
+                expires : new Date ( new Date ).getTime() + duration*1000
+            @updateStatus()
 
 ## Loading and Saving Data
 

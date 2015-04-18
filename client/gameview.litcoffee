@@ -317,8 +317,10 @@ just the player's name (after login only).
         fontsize = 20
         context.font = "#{fontsize}px serif"
         context.fillStyle = '#000000'
+        context.strokeStyle = '#ffffff'
         name = currentStatus.name[0].toUpperCase() + currentStatus.name[1..]
         size = context.measureText name
+        context.strokeText name, gameview.width - size.width - 40, 45
         context.fillText name, gameview.width - size.width - 40, 45
         if currentStatus.isMaker
             [ plane, x, y ] = getPlayerPosition()
@@ -326,7 +328,15 @@ just the player's name (after login only).
             y = "#{y}".substring 0, "#{y|0}".length+3
             position = "#{plane},#{x},#{y}"
             size = context.measureText position
+            context.strokeText position, gameview.width - size.width - 40,
+                70
             context.fillText position, gameview.width - size.width - 40, 70
+        for condition, index in currentStatus.conditions
+            size = context.measureText condition
+            context.strokeText condition, gameview.width - size.width - 40,
+                70 + fontsize*(index+1)
+            context.fillText condition, gameview.width - size.width - 40,
+                70 + fontsize*(index+1)
         pctHP = currentStatus.hitPoints / currentStatus.maximumHitPoints
         context.fillRect gameview.width - 142, 10, 102, 12
         hexpct = Math.floor pctHP * 30
