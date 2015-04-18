@@ -35,6 +35,7 @@ carrying us, or a position on the map as a plane,x,y triple.
                 @typeName = @type.name
                 @space = @type.space
                 @behaviors = @type.behaviors
+            @uses = { }
             for behavior in @behaviors ?= [ ]
                 require( './behaviors' ).installBehavior behavior, this
 
@@ -285,6 +286,7 @@ The UI for editing a movable item looks like the following.
                 action : =>
                     item = new MovableItem entry
                     item.move player
+                    item.emit 'after get', player
                     player.showOK "An instance of movable item #{entry},
                         \"#{@get entry, 'name'},\" has been added to your
                         inventory.", again

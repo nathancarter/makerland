@@ -389,21 +389,30 @@ upon the contents of the animations database.
                     value : 'Speak'
                     default : yes
                     action : ( event ) ->
+                        again = -> module.exports.talk.run player
                         position = player.getPosition()
                         text = event['words to say']
-                        require( './animations' ).showAnimation position,
-                            'speak', { text : text, speaker : player.name }
-                        require( './sounds' ).playSound 'speech bling',
-                            position
-                        player.emit 'spoke', text
-                        hearers = require( './blocks' ).whoCanSeePosition \
-                            position
-                        for otherPlayer in hearers
-                            if otherPlayer isnt player
-                                otherPlayer.emit 'heard',
-                                    speech : text
-                                    speaker : player
-                        module.exports.talk.run player # reset this UI
+                        player.attempt 'speak', ->
+                            require( './animations' ).showAnimation \
+                                position, 'speak',
+                                { text : text, speaker : player.name }
+                            require( './sounds' ).playSound 'speech bling',
+                                position
+                            player.emit 'spoke', text
+                            hearers = require( './blocks' ) \
+                                .whoCanSeePosition position
+                            for otherPlayer in hearers
+                                if otherPlayer isnt player
+                                    otherPlayer.emit 'heard',
+                                        speech : text
+                                        speaker : player
+                            again()
+                        , ( failReason ) ->
+                            if typeof failReason isnt 'string'
+                                failReason = 'You cannot speak!'
+                            player.showOK failReason, again
+                        ,
+                            text
                 ,
                     type : 'action'
                     value : 'Done'
@@ -422,6 +431,7 @@ so, to refresh the view.
                 lets you pick up or drop items on the ground nearby.  It
                 also allows you to use items you are carrying.'
             run : ( player ) ->
+                mi = require './movableitems'
                 stuffNearby = ->
                     require( './blocks' ).movableItemsNearPosition \
                         player.getPosition(), 1
@@ -448,8 +458,7 @@ so, to refresh the view.
                     do ( item ) ->
                         contents.push [
                             type : 'text'
-                            value : require( './movableitems' ).normalIcon \
-                                item.index
+                            value : mi.normalIcon item.index
                         ,
                             type : 'text'
                             value : item.typeName
@@ -457,9 +466,35 @@ so, to refresh the view.
                             type : 'action'
                             value : 'drop'
                             action : ->
-                                item.move player.getPosition()
-                                refreshView()
+                                item.attempt 'drop', ->
+                                    item.move player.getPosition()
+                                    refreshView()
+                                , ( failReason ) ->
+                                    if typeof failReason isnt 'string'
+                                        failReason = 'You cannot drop it!'
+                                    player.showOK failReason, refreshView
+                                , player
                         ]
+                        for own name, func of item.uses
+                            if typeof func is 'function'
+                                contents.push [
+                                    type : 'text'
+                                    value : ''
+                                ,
+                                    type : 'action'
+                                    value : name
+                                    action : ->
+                                        try
+                                            func.apply item
+                                        catch e
+                                            author = mi.getAuthors(
+                                                item.index )[0]
+                                            e.prefixLength = 4 # no idea why
+                                            require( './logs' ).logError \
+                                                author, "doing \"#{name}\"
+                                                to \"#{item.typeName}\"",
+                                                "#{func}", e
+                                ]
                 if contents.length is 1
                     contents.push { type : 'text', value : '(no items)' }
                 contents.push
@@ -486,8 +521,14 @@ so, to refresh the view.
                                 player.showOK 'You cannot carry that much.',
                                     refreshView
                                 return
-                            item.move player
-                            refreshView()
+                            item.attempt 'get', ->
+                                item.move player
+                                refreshView()
+                            , ( failReason ) ->
+                                if typeof failReason isnt 'string'
+                                    failReason = 'You cannot pick it up!'
+                                player.showOK failReason, refreshView
+                            , player
                     ]
                 if contents.length is lastLength
                     contents.push { type : 'text', value : '(none)' }

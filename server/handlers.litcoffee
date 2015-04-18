@@ -55,7 +55,7 @@ them returns a value, thus stopping further execution.  The value of the
 last-run handler is returned (or undefined if none returns a value).
 
     module.exports.methods.emit = ( eventName, args... ) ->
-        for handler in @handlers?[eventName] or [ ]
+        for handler in @handlers?[eventName] ? [ ]
             if result = handler.apply this, args then return result
         undefined
 
@@ -72,8 +72,11 @@ name]" event.
 
 However, if the "before [event name]" handler returned a true value, then
 the handlers intend to block the event, so we should execute the `fail`
-function instead, passing the same arguments as we would have to `run`.  We
-do not emit the "after [event name]" event in this case.
+function instead, passing the same arguments as we would have to `run`.  The
+one exception is that we prepend that list of arguments with the return
+value from the "before" handlers, in case it was a useful error message,
+such as a reason for why the attempt failed, which we may want to show to
+the player.  We do not emit the "after [event name]" event in this case.
 
 This is a convenience function that can be called when any code is about to
 be executed, but we want to provide event handlers the ability to react to
@@ -81,8 +84,8 @@ it and possibly even block it.
 
     module.exports.methods.attempt = ( eventName, run, fail, args... ) ->
         try
-            if @emit "before #{eventName}", args...
-                fail args...
+            if failReason = @emit "before #{eventName}", args...
+                fail failReason, args...
             else
                 run args...
                 @emit "after #{eventName}", args...
