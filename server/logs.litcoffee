@@ -79,27 +79,38 @@ error, and the error object itself.
         logError : ( makerName, codeDescription, code, errorObject ) =>
             lines = code.split '\n'
             stack = errorObject.stack.split '\n'
+            errorText = stack[0]
             re = /[:(](\d+):(\d+)[)]/.exec stack[0]
-            if not re then re = /[:(](\d+):(\d+)[)]/.exec stack[1]
-            [ whole, line, column ] = re
-            line = parseInt line ; column = parseInt column
-            line -= errorObject.prefixLength ? 0
-            start = Math.max 1, line - 3
-            end = Math.min lines.length, line + 3
-            lineNo = ( n ) -> "    #{n}. "[-5..]
-            indent = ( n ) -> if n <= 0 then '' else ' ' + indent n-1
-            lines = ( "#{lineNo start+i}#{L}" \
-                for L, i in lines[start-1..end-1] )
-            if 0 <= line-start and line-start < lines.length
-                newline = lines[line-start][...column+4] + \
-                    '<span style="background-color: red">'
-                lines[line-start] = lines[line-start][...column+4] + \
-                    '<span style="background-color: red">' + \
-                    ( lines[line-start][column+4] ? '(HERE)' ) + '</span>' \
-                    + lines[line-start][column+5..]
+            if not re
+                re = /[:(](\d+):(\d+)[)]/.exec stack[1]
+                errorText += '\n' + stack[1]
+            if re
+                [ whole, line, column ] = re
+                line = parseInt line ; column = parseInt column
+                line -= errorObject.prefixLength ? 0
+                start = Math.max 1, line - 3
+                end = Math.min lines.length, line + 3
+                lineNo = ( n ) -> "    #{n}. "[-5..]
+                indent = ( n ) -> if n <= 0 then '' else ' ' + indent n-1
+                lines = ( "#{lineNo start+i}#{L}" \
+                    for L, i in lines[start-1..end-1] )
+                if 0 <= line-start and line-start < lines.length
+                    newline = lines[line-start][...column+4] + \
+                        '<span style="background-color: red">'
+                    lines[line-start] = lines[line-start][...column+4] + \
+                        '<span style="background-color: red">' + \
+                        ( lines[line-start][column+4] ? '(HERE)' ) + \
+                        '</span>' + lines[line-start][column+5..]
+            else if stack.length <= 10
+                errorText = stack.join( '\n' ) + '\n...'
+            else
+                errorText = stack[..5].join( '\n' ) + '\n...\n' + \
+                    stack[-5..].join( '\n' )
+                console.log 'Error too large to log fully:',
+                    stack.join '\n'
             @logMessage makerName,
                 "<b><u>Error in: #{codeDescription}</u></b>
-                \n<font color=red>#{stack[0]}</font>
+                \n<font color=red>#{errorText}</font>
                 \n#{lines.join '\n'}"
             console.log "Logged error for maker \"#{makerName}.\""
 
