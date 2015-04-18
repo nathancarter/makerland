@@ -379,11 +379,6 @@ so, it sends a status update message to the player.
 
         updateStatus : =>
 
-First, update player age.
-
-            @saveData.age or= 0
-            @saveData.age += 2
-
 Now track player status.
 
             currentStatus = JSON.stringify @getStatus()
@@ -397,7 +392,11 @@ the latter at disconnection.
 
         startStatusUpdates : =>
             @updateStatus()
-            @statusUpdateInterval = setInterval ( => @updateStatus() ), 2000
+            @statusUpdateInterval = setInterval =>
+                @saveData.age ?= 0
+                @saveData.age += 2
+                @updateStatus()
+            , 2000
         stopStatusUpdates : =>
             clearInterval @statusUpdateInterval if @statusUpdateInterval?
 
