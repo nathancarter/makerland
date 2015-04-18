@@ -65,6 +65,7 @@ long.
 
         logMessage : ( makerName, message ) =>
             message = message[...@lineSizeLimit]
+            message = "#{new Date}\n#{message}"
             ( log = ( @get makerName, 'entries' ) ? [ ] ).unshift message
             if log.length > @logSizeLimit then log.pop()
             @set makerName, 'entries', log
