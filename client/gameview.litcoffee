@@ -129,6 +129,17 @@ Last, draw the player's status as a HUD.
 
         drawPlayerStatus context
 
+First, if the player is dead, we make everything fade away.
+
+        if currentStatus.dead
+            currentStatus.timeOfDeath ?= new Date
+            howLongDead = ( new Date ) - currentStatus.timeOfDeath
+            context.save();
+            context.globalAlpha = Math.min 1, howLongDead/3000
+            context.fillStyle = '#550000'
+            context.fillRect 0, 0, gameview.width, gameview.height
+            context.restore();
+
 The following function draws the game map.  For now, this just makes a grid
 that moves as the player walks.  Later, it will have an actual map in it.
 
@@ -258,7 +269,6 @@ same reason.
                             width : cellSize*typeinfo.size
                             height : cellSize*typeinfo.size
             for item in data['movable items'] ? [ ]
-                console.log item
                 [ plane, itemx, itemy ] = item.location
                 screenpos = mapCoordsToScreenCoords itemx, itemy
                 if typeinfo = lookupMovableItemType item.index
@@ -303,6 +313,7 @@ just the player's name (after login only).
 
     HUDZones = { }
     drawPlayerStatus = ( context ) ->
+        if currentStatus.dead then return
         fontsize = 20
         context.font = "#{fontsize}px serif"
         context.fillStyle = '#000000'
@@ -364,12 +375,6 @@ It uses the following routine, which caches command icons.
             commandIconCache[name] = new Image
             commandIconCache[name].src = "icons/#{name}"
         commandIconCache[name]
-
-Later we will also draw text over the map, but for now, we just dump info
-about the text to the console, for testing purposes.
-
-    socket.on 'show text', ( data ) ->
-        console.log 'Would show this text data:', data
 
 ## Animations
 
@@ -437,6 +442,7 @@ This routine is called by `redrawCanvas`, not only to draw all active
 animations, but also to clear out those that have run their full course.
 
     drawAnimations = ( context ) ->
+        if currentStatus.dead then return
         now = new Date
         for own block, animations of activeAnimations
             updatedList = [ ]
@@ -489,6 +495,7 @@ by the view-redrawing event, so that the key rate and frame rate are in
 sync.  Feel free to make computations herein depend on `frameRate`.
 
     handleKeysPressed = ->
+        if currentStatus.dead then return
         dx = dy = 0
         speed = 2 * frameRate/1000
         if keysDown[keyCodes.left] or keysDown[keyCodes.right] or \
@@ -546,6 +553,7 @@ the avatar attempt to walk there over time.
     getWhereIWantToGo = -> whereIWantToGo
     setWhereIWantToGo = ( destination ) -> whereIWantToGo = destination
     ( $ '#gameview' ).on 'click', ( event ) ->
+        if currentStatus.dead then return
         screencoords =
             x : event.pageX - this.offsetLeft
             y : event.pageY - this.offsetTop

@@ -198,7 +198,7 @@ Now the routine itself.  This is the main API for this file, and is called
 from the `gameview` file.
 
     drawAvatar = ( context, name, position, motion, appearance ) ->
-        if not motion
+        if not motion or currentStatus.dead
             drawAvatarInPose context, name, position, standing, yes,
                 appearance
             cyclePoint[name] = 0

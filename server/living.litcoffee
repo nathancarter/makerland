@@ -50,13 +50,15 @@ object before it's transmitted to the client for displaying.
         scope = @saveData ? this
         status.hitPoints = scope.hitPoints
         status.maximumHitPoints = scope.maximumHitPoints
+        if scope.hitPoints < 0 then status.dead = yes
 
 All changes to a living's hit points should go through this function.  It
 takes care of notifying clients about hit point changes, which are very
 important.  The method is called `changeHealth` because it can be used to
 increase or decrease; simply pass positive (or negative) changes,
 respectively.  Show a healing animation if the change was a large enough
-increase, or a harming animation if it was a large enough decrease.
+increase, or a harming animation if it was a large enough decrease.  If the
+living dies, trigger the death routine.
 
     module.exports.methods.changeHealth = ( delta ) ->
         if typeof delta isnt 'number' then return
@@ -73,9 +75,33 @@ increase, or a harming animation if it was a large enough decrease.
             require( './animations' ).showAnimation @getPosition(),
                 'sparkle', { target : this.name, color : '#cc0000' }
             require( './sounds' ).playSound 'bone crack', @getPosition()
-        @updateStatus?()
+        if scope.hitPoints < 0 then @death() else @updateStatus?()
 
 Livings have a heart beat, which heals them slowly.
 
     module.exports.methods.heartBeat = ->
         @changeHealth 1
+
+When a living dies, handle it as follows.  First, move all their possessions
+out onto the ground nearby.  Then, if the object is a player instead of a
+creature, do three things: update their status, mark their time of death,
+and disconnect the socket.
+
+    module.exports.methods.death = ->
+        for item in ( @inventory ? [ ] ).slice()
+            destination = @getPosition()
+            destination[1] += Math.random()
+            destination[2] += Math.random()
+            item.move destination
+        @updateStatus?()
+        @saveData?.timeOfDeath = new Date
+        @socket?.disconnect()
+
+This function is called when the game re-awakens a player from death.  It
+gives them a small amount of hit points from which they will be able to
+slowly heal.
+
+    module.exports.methods.awakenFromDeath = ->
+        scope = @saveData ? this
+        delete scope.timeOfDeath
+        scope.hitPoints = Math.min scope.maximumHitPoints, 50

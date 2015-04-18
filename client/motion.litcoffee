@@ -90,6 +90,7 @@ communication.
     nearbyObjects = { }
     getNearbyObjects = -> nearbyObjects
     socket.on 'movement nearby', ( data ) ->
+        if currentStatus.dead then return
         key = switch data.type
             when 'player' then key = data.name
             else null # can't handle any other type yet
@@ -123,4 +124,5 @@ message of the following form.
 
     window.visibleBlocksCache = { }
     socket.on 'visible blocks', ( data ) ->
+        if currentStatus.dead then return
         window.visibleBlocksCache = data

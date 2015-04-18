@@ -327,11 +327,29 @@ logging in.  Note the first two lines, which check to see if the player is
 already logged in elsewhere in the game, and if so, disconnects that other
 client before allowing this one to take over.
 
+This function behaves differently if the player is just logging back in,
+versus logging back in for the first time since they died.
+
         loggedIn : ( name ) =>
             if otherCopy = Player.nameToPlayer name
                 otherCopy.socket.disconnect()
             @name = name
             @load()
+            if @saveData.timeOfDeath?
+                elapsed = ( new Date ) - ( new Date @saveData.timeOfDeath )
+                if elapsed > settings.timePlayersStayDeadInSeconds * 1000
+                    @awakenFromDeath()
+                    @saveData.position =
+                        settings.locationPlayersAwakeAfterDeath ? \
+                        [ 0, 0, 0 ]
+                else
+                    delete @name
+                    @saveData = { }
+                    @showOK "You cannot log back in again yet as
+                        #{name[0].toUpperCase() + name[1..]}.  That
+                        character is still deep in death.",
+                        => @socket.disconnect()
+                    return
             @justLoggedIn = yes
             console.log "\tPlayer logged in as #{name}."
             destination = if @validPosition @getPosition() then \

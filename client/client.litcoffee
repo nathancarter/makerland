@@ -42,16 +42,27 @@ data.
 
     socket = io.connect document.URL, reconnection : false
     socket.on 'disconnect', ( event ) ->
-        clearStatus()
+        if currentStatus.dead
+            name = currentStatus.name
+            name = name[0].toUpperCase() + name[1..]
+            uimessage = "<h3><font color='red'>You have died!</font></h3>
+                         <p>You have been disconnected from the game, and
+                         it will be a minute or two before you will be able
+                         to reconnect as #{name}.  After that time, click
+                         the button below to log in again.</p>"
+            buttonType = ''
+        else
+            clearStatus()
+            uimessage = ''
+            buttonType = 'btn-success'
         rightpane.get( 0 ).innerHTML = "
             <div class='container' id='commandui'><form>
             <div class='space-above-below col-xs-12'>
             <p align='center'>Game closed.</p></div>
-            <div class='space-above-below col-xs-12'>
+            <div class='space-above-below col-xs-12'>#{uimessage}
             <input type='button' value='Reload Game' style='width: 100%'
-                   class='btn btn-success' onclick='location.reload()'>
-            </input></form></div>
-            "
+                   class='btn #{buttonType}'
+                   onclick='location.reload()'></input></form></div>"
         expandCommandPane()
 
 If the server sends us a "show ui" message, we pass it off to a function
