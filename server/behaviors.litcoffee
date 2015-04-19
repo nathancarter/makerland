@@ -413,6 +413,16 @@ can run multiple times on multiple objects.
                 }
                 function playSound ( name, target ) {
                     require( './sounds' ).playSound( name, target );
+                }
+                function Creature ( index ) {
+                    var ctor = require( './creatures' ).Creature;
+                    var result = new ctor( index );
+                    return result.typeName ? result : null;
+                }
+                function Item ( index ) {
+                    var ctor = require( './movableitems' ).MovableItem;
+                    var result = new ctor( index, null );
+                    return result.typeName ? result : null;
                 }"
             if author then functions +=
                 "function log () {
@@ -423,7 +433,7 @@ can run multiple times on multiple objects.
             declarations = ( "var #{identifier} = args.#{identifier};" \
                 for identifier in argnames \
                 when ' ' not in identifier ).join '\n'
-            mayNotUse = [ 'require', 'setInterval', 'process' ] # more later
+            mayNotUse = [ 'require', 'process' ] # more later
             for identifier in mayNotUse
                 declarations += "\nvar #{identifier} = null;"
             prefix = "( function ( args ) { #{declarations}\n"
