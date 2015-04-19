@@ -304,9 +304,6 @@ items, for the same reason.
                             width : image.width
                             height : image.height
             for creature in data['creatures'] ? [ ]
-                if not window.haveDebuggedItDude?
-                    console.log JSON.stringify creature
-                    window.haveDebuggedItDude = yes
                 [ plane, itemx, itemy ] = creature.location
                 screenpos = mapCoordsToScreenCoords itemx, itemy
                 if typeinfo = lookupCreatureType creature.index
