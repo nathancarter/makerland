@@ -98,7 +98,7 @@ plus some others.
     fs = require 'fs'
     path = require 'path'
 
-It subclasses the main Table class and adding landscape-item-specific
+It subclasses the main Table class and adding movable-item-specific
 functionality.
 
     class MovableItemsTable extends Table

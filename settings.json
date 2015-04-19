@@ -10,6 +10,7 @@
     "gameTitleImage" : "makerlandlogo.png",
     "port" : 9999,
     "movableItemLifespanInSeconds" : 600,
+    "creatureLifespanInSeconds" : 600,
     "timePlayersStayDeadInSeconds" : 10,
     "locationPlayersAwakeAfterDeath" : [ 9, 0, 0 ]
 }

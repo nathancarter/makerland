@@ -538,6 +538,8 @@ any landscape items visible only to makers get filtered out.
                 data[block]['landscape items'] = visibleItems
             data[block]['movable items'] =
                 module.exports.getMovableItemsInBlock block
+            data[block]['creatures'] =
+                module.exports.getCreaturesInBlock block
         notifyThisPlayer.socket.emit 'visible blocks', data
         for block in blockSet
             require( './animations' ).sendBlockAnimationsToPlayer block,
@@ -551,14 +553,16 @@ every player who can see the block.
             player = Player.nameToPlayer playerName
             if player then notifyAboutVisibility player
 
-Makers have a reset command that reloads all the items in all the blocks
-near the maker.  That command calls the following function.
+Makers have a reset command that reloads all the blocks near the maker.
+That command calls the following function.
 
     module.exports.resetBlocksNearPlayer = ( player ) =>
         for block in blocksVisibleToPlayer[player.name]
             module.exports.resetBlock block
             for item in module.exports.getMovableItemsInBlock block
                 item.destroy()
+            for creature in module.exports.getCreaturesInBlock block
+                creature.destroy()
 
 Which players (and later creatures) can see a certain position on the game
 map?  This will be useful for sending events such as "heard someone speak."
@@ -575,8 +579,8 @@ map?  This will be useful for sending events such as "heard someone speak."
 
 One global data structure stores the set of movable items in a given block.
 This is stored separate from the blocks themselves, because it should not be
-stored across runs of the game.  It will, however, persist even while blocks
-are loaded and unloaded -- which is nice!
+preserved across runs of the game.  It will, however, persist even while
+blocks are loaded and unloaded -- which is nice!
 
     movableItemsInBlock = { }
     movableItemData = { }
@@ -657,4 +661,97 @@ map cells.
                 if distance( item.location[1], item.location[2],
                              position[1], position[2] ) < radius
                     results.push item
+        results
+
+## Creatures
+
+Just as with movable items, we have one global data structure that tracks
+the set of creatures each block.  This is stored separate from the blocks
+themselves, because it should not be preserved across runs of the game.  It
+will, however, persist even while blocks are loaded and unloaded -- which is
+nice!
+
+    creaturesInBlock = { }
+    creatureData = { }
+
+This function adds a creature to the map, categorizing them by block.  It
+does not update the creature's internal data structure; see the creature's
+own `move()` function for that.  In fact, `move()` calls this function, so
+do not call this function yourself; call `move()` instead.
+
+    module.exports.moveCreature = ( creature, newLocation ) ->
+        if typeof creature isnt 'number' then creature = creature.ID
+        lastSeen = new Date
+        if bname = creatureData[creature]?.block
+            delete creaturesInBlock[bname][creature]
+            lastSeen = creatureData[creature].lastSeen
+            delete creatureData[creature]
+            module.exports.notifyAboutBlockUpdate bname
+        if bname = module.exports.positionToBlockName newLocation...
+            creaturesInBlock[bname] ?= { }
+            creaturesInBlock[bname][creature] =
+                require( './creatures' ).Creature::creatureForID creature
+            if ( playersWhoCanSeeBlock[bname] ? [ ] ).length > 0
+                lastSeen = new Date
+            creatureData[creature] =
+                block : bname
+                lastSeen : lastSeen
+            module.exports.notifyAboutBlockUpdate bname
+            yes
+        else
+            no
+
+This function fetches the contents of a block as an array for use in sending
+to players who can see the block.
+
+    module.exports.getCreaturesInBlock = ( bname ) ->
+        result = [ ]
+        for own id, creature of creaturesInBlock[bname] ? []
+            result.push creature
+        result
+
+In order that creatures may disappear after being unseen for a certain
+period of time, we have the following function, which clears the above data
+structures of stale items.
+
+    cleanUpOldCreatures = ->
+        now = new Date
+        lifespan = settings.creatureLifespanInSeconds * 1000
+        toCleanUp = [ ]
+        for id, data in creatureData
+            if ( playersWhoCanSeeBlock[data.block] ? [ ] ).length > 0
+                data.lastSeen = now
+            else if now - data.lastSeen > lifespan
+                toRemove.push creaturesInBlock[data.bname][id]
+        creature.destroy() for creature in toCleanUp
+
+Call the above cleanup function 10 times per creature lifespan.
+
+    setInterval cleanUpOldCreatures,
+        settings.creatureLifespanInSeconds * 100
+
+And a public API for getting the list of creatures near a specific point on
+the map.  How near is given in the second argument, and is measured in units
+of map cells.
+
+    module.exports.creaturesNearPosition = ( position, radius ) ->
+        extremes = [
+            position
+            [ position[0], position[1]-1, position[2] ]
+            [ position[0], position[1]+1, position[2] ]
+            [ position[0], position[1], position[2]-1 ]
+            [ position[0], position[1], position[2]+1 ]
+        ]
+        distance = ( x1, y1, x2, y2 ) ->
+            Math.sqrt ( x1 - x2 ) * ( x1 - x2 ) + ( y1 - y2 ) + ( y1 - y2 )
+        blocks = [ ]
+        for point in extremes
+            bname = module.exports.positionToBlockName point...
+            if bname not in blocks then blocks.push bname
+        results = [ ]
+        for bname in blocks
+            for own id, creature of creaturesInBlock[bname] ? { }
+                if distance( creature.location[1], creature.location[2],
+                             position[1], position[2] ) < radius
+                    results.push creature
         results

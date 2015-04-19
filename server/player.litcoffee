@@ -111,24 +111,26 @@ The client may also request data about the cell types, landscape items, and
 movable items in the map.  When they do, we must provide it, so they have
 enough information to draw the map.
 
-            socket.on 'get cell type data', ( cellTypeIndex ) =>
-                result =
-                    require( './celltypes' ).getWithDefaults cellTypeIndex
+            socket.on 'get cell type data', ( index ) =>
+                result = require( './celltypes' ).getWithDefaults index
                 if result
-                    result.index = cellTypeIndex
+                    result.index = index
                     socket.emit 'cell type data', result
-            socket.on 'get landscape item data', ( itemIndex ) =>
-                result =
-                    require( './landscapeitems' ).getWithDefaults itemIndex
+            socket.on 'get landscape item data', ( index ) =>
+                result = require( './landscapeitems' ).getWithDefaults index
                 if result
-                    result.index = itemIndex
+                    result.index = index
                     socket.emit 'landscape item data', result
-            socket.on 'get movable item data', ( itemIndex ) =>
-                result =
-                    require( './movableitems' ).getWithDefaults itemIndex
+            socket.on 'get movable item data', ( index ) =>
+                result = require( './movableitems' ).getWithDefaults index
                 if result
-                    result.index = itemIndex
+                    result.index = index
                     socket.emit 'movable item data', result
+            socket.on 'get creature data', ( index ) =>
+                result = require( './creatures' ).getWithDefaults index
+                if result
+                    result.index = index
+                    socket.emit 'creature data', result
 
 Now that the player object is set up, tell the client all the main game
 settings and show the login screen.

@@ -77,6 +77,28 @@ from the server.
         delete movableItemData[data]
         delete movableItemData["#{data} icon"]
 
+And very similar functions for getting data on creatures from the server.
+
+    creatureData = { }
+    lookupCreatureType = ( index ) ->
+        if not creatureData.hasOwnProperty index
+            creatureData[index] = { }
+            socket.emit 'get creature data', index
+        creatureData[index]
+    socket.on 'creature data', ( data ) ->
+        creatureData[data.index] = data
+    getCreatureIcon = ( index ) ->
+        key = "#{index} icon"
+        if not creatureData.hasOwnProperty key
+            creatureData[key] = new Image
+            timestamp = encodeURIComponent new Date
+            creatureData[key].src =
+                "db/creatures/#{index}/icon?#{timestamp}"
+        creatureData[key]
+    socket.on 'creature changed', ( data ) ->
+        delete creatureData[data]
+        delete creatureData["#{data} icon"]
+
 ## Drawing
 
 Set up redrawing of the canvas about 30 times per second.
@@ -230,8 +252,8 @@ them.
 
 This function includes players' avatars among the landscape items, because
 they are z-ordered in among them, so that players can, f.ex., hide behind a
-tree.  It also includes movable items among the landscape items, for the
-same reason.
+tree.  It also includes movable items and creatures among the landscape
+items, for the same reason.
 
     drawLandscapeItems = ( context ) ->
         orderedItems = { }
@@ -241,12 +263,12 @@ same reason.
                     item.position[2]
                 item.x = screencoords.x
                 item.y = screencoords.y
-            if item.type is 'item'
+            if item.type is 'item' or item.type is 'creature'
                 item.x -= item.width/2
                 item.y -= item.height/2
             bottomy = switch item.type
                 when 'player' then item.y
-                when 'item' then item.y + item.height
+                when 'item', 'creature' then item.y + item.height
                 else undefined
             orderedItems[bottomy] ?= [ ]
             orderedItems[bottomy].push item
@@ -281,6 +303,22 @@ same reason.
                             y : screenpos.y
                             width : image.width
                             height : image.height
+            for creature in data['creatures'] ? [ ]
+                if not window.haveDebuggedItDude?
+                    console.log JSON.stringify creature
+                    window.haveDebuggedItDude = yes
+                [ plane, itemx, itemy ] = creature.location
+                screenpos = mapCoordsToScreenCoords itemx, itemy
+                if typeinfo = lookupCreatureType creature.index
+                    image = getCreatureIcon creature.index
+                    if image.complete
+                        add
+                            type : 'creature'
+                            image : image
+                            x : screenpos.x
+                            y : screenpos.y
+                            width : image.width
+                            height : image.height
         add
             type : 'player'
             name : currentStatus.name[0].toUpperCase() + \
@@ -300,7 +338,7 @@ same reason.
         keys.sort ( a, b ) -> parseFloat( a ) - parseFloat( b )
         for key in keys
             for item in orderedItems[key]
-                if item.type is 'item'
+                if item.type is 'item' or item.type is 'creature'
                     try
                         context.drawImage item.image, item.x, item.y,
                             item.width, item.height

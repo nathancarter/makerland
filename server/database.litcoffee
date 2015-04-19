@@ -6,7 +6,7 @@ Thus clients can just import this module and get all the rest for free.
 
     module.exports.tables = tables = [
         'accounts', 'celltypes', 'blocks', 'landscapeitems', 'behaviors',
-        'logs', 'animations', 'sounds', 'movableitems'
+        'logs', 'animations', 'sounds', 'movableitems', 'creatures'
     ]
 
     for table in tables
