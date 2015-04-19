@@ -460,10 +460,14 @@ at the time of attachment.
             return unless index = behaviorData['behavior type']
             return unless code = @get index, 'code'
             author = @getAuthors( index )[0]
+            behaviorParameters = @get index, 'parameters'
+            for own key, value of behaviorParameters
+                if key[...8] is 'default ' and key[8..] not of behaviorData
+                    behaviorData[key[8..]] = value
             try
                 runnable = ( @runnableCache ?= { } )[index] ?=
                     @makeCodeRunnable code, author,
-                        Object.keys @get( index, 'parameters' ) or { }
+                        Object.keys behaviorParameters ? { }
                 runnable object, behaviorData
             catch e
                 e.prefixLength ?= runnable.prefixLength
