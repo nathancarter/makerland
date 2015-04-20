@@ -57,11 +57,17 @@ removing the two most important pointers to the object.  Assuming no one
 else retains a pointer to this object, it will be garbage collected
 hereafter.
 
+Also, if any behaviors were attached to this object, and they made calls to
+`setInterval()`, it is necessary for us to clear those intervals when this
+object is destroyed.
+
         destroy : =>
             @move null
-            if @ID
+            if @ID?
                 MovableItem::allItems[@ID] = null
                 @ID = null
+            require( './behaviors' ).clearIntervalSet @intervalSetIndex
+        wasDestroyed : => not @ID?
 
 This function moves items to a new location.  It not only updates this
 item's own internal `@location` field, but also notifies the former/next
@@ -71,13 +77,12 @@ keeping all data consistent throughout the game.  If the new location is
 invalid, then `null` will be used instead.
 
         move : ( newLocation ) =>
-            { Player } = require './player'
-            if @location instanceof Player
+            if @location.hasOwnProperty 'removeItemFromInventory'
                 @location.removeItemFromInventory this
             else if @location instanceof Array
                 require( './blocks' ).removeMovableItemFromMap this
             @location = newLocation
-            if @location instanceof Player
+            if @location.hasOwnProperty 'addItemToInventory'
                 @location.addItemToInventory this
             else if @location instanceof Array
                 require( './blocks' ).addMovableItemToMap this, @location
@@ -278,7 +283,10 @@ The UI for editing a movable item looks like the following.
                 action : =>
                     item = new MovableItem entry, null
                     require( './behaviors' ).editAttachments player, item,
-                        => @set entry, 'behaviors', item.behaviors ; again()
+                        =>
+                            @set entry, 'behaviors', item.behaviors
+                            item.destroy()
+                            again()
             ,
                 type : 'action'
                 value : 'Add one to my inventory'

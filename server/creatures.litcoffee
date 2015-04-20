@@ -28,10 +28,11 @@ We can therefore look up an instance based on its ID.
 
 At construction time, we must be told which type of creature we are.  Our
 location will initially be null.  Later, we can be moved to a map point by
-calling our `move()` method.
+calling our `moveTo()` method.
 
         constructor : ( @index ) ->
             @location = null
+            @inventory = [ ]
             if @type = module.exports.getWithDefaults @index
                 @typeName = @type.name
                 @behaviors = @type.behaviors
@@ -45,6 +46,7 @@ creature its index in that array as its unique ID.
                 if creature is null
                     @ID = index
                     Creature::allCreatures[index] = this
+                    break
             if not @ID?
                 @ID = Creature::allCreatures.length
                 Creature::allCreatures.push this
@@ -56,11 +58,18 @@ thus removing the most important pointer to the object.  Assuming no
 one else retains a pointer to this object, it will be garbage collected
 hereafter.
 
+Also, if any behaviors were attached to this object, and they made calls to
+`setInterval()`, it is necessary for us to clear those intervals when this
+object is destroyed.
+
         destroy : =>
-            @move null
-            if @ID
+            @moveTo null
+            if @ID?
                 Creature::allCreatures[@ID] = null
                 @ID = null
+            require( './behaviors' ).clearIntervalSet @intervalSetIndex
+            if @walkInterval? then clearInterval @walkInterval
+        wasDestroyed : => not @ID?
 
 This function moves creatures to a new location.  It not only updates this
 object's own internal `@location` field, but also notifies the former/next
@@ -69,10 +78,95 @@ this creature's location.  This is the official way to move a creature while
 keeping all data consistent throughout the game.  If the new location is
 invalid, then `null` will be used instead.
 
-        move : ( newLocation ) =>
+        moveTo : ( newLocation ) =>
+            if @wasDestroyed() then throw 'Creature has been destroyed.'
+            oldLocation = @location ? null
             @location = newLocation
             if not require( './blocks' ).moveCreature this, newLocation
-                @location = null
+                @location = oldLocation
+
+This function is a convenience function that accesses the previous.  It just
+takes the current location, if any, and adds the deltas to its x and y
+components, then passes the new absolute position to `moveTo()`.
+
+If the optional third parameter is provided, then this step is not taken all
+at once, but slowly over the course of the given duration in seconds, with
+multiple tiny steps chained together to simulate smooth motion.
+
+        moveBy : ( dx, dy, duration = 0 ) =>
+            if @location not instanceof Array then return
+            [ plane, x, y ] = @location
+            if duration is 0 then return @moveTo [ plane, x + dx, y + dy ]
+            whenWalkStarted = new Date
+            if @walkInterval? then clearInterval @walkInterval
+            @walkInterval = setInterval =>
+                if @wasDestroyed()
+                    percent = 1
+                else
+                    now = new Date
+                    elapsed = now - whenWalkStarted
+                    percent = Math.min 1, elapsed / ( duration * 1000 )
+                    @moveTo [ plane, x + percent*dx, y + percent*dy ]
+                if percent is 1 then clearInterval @walkInterval
+            , 30
+
+Creatures are able to speak.  Simply call this method in one, and it will
+make the requisite calls to the animations, sounds, and handlers that go
+with a speech event.  This assumes that you have defined an animation for
+speaking, as required by the "talk" command in the commands module, and that
+it is flexible enough to handle creature speakers.  The maximum text size is
+60; longer texts will be truncated.
+
+        say : ( text ) =>
+            if text.length > 60 then text = text[...60]
+            @attempt 'speak', =>
+                require( './animations' ).showAnimation @location, 'speak',
+                    { text : text, speaker : @ID }
+                require( './sounds' ).playSound 'speech bling', @location
+                @emit 'spoke', text
+                hearers = require( './blocks' ).whoCanSeePosition @location
+                for otherThing in hearers
+                    if otherThing isnt player
+                        otherThing.emit 'heard',
+                            speech : text
+                            speaker : player
+
+Creatures are able to carry things.  Use these methods to have the creature
+attempt to pick things up or put them down.  Note that the `get` method
+does not check to be sure the item is near the creature; this way you can
+have creatures take objects you just constructed, but didn't put into the
+game map, for instance.  The `get` method does, however, return false if the
+item could not be gotten, either due to some blocking behavior or simply the
+creature's already holding too much.
+
+        get : ( item ) =>
+            carrying = 0
+            carrying += heldItem.space for heldItem in @inventory
+            carrying += item.space
+            if carrying > ( @capacity ? 10 ) then return no
+            item.attempt 'get', => item.move this
+        drop : ( item ) => item.attempt 'drop', => item.move @location
+
+To support those functions, we provide methods for managing the creature's
+inventory.  These are copied directly from the Player class.
+
+        addItemToInventory : ( item ) =>
+            if item not in @inventory then @inventory.push item
+        removeItemFromInventory : ( item ) =>
+            if ( index = @inventory.indexOf item ) > -1
+                @inventory.splice index, 1
+
+When creature objects need to be transmitted to the client, we do not want
+to fill up the network traffic with superfluous data (e.g., behavior
+definitions) nor include inventory items that may create circular
+structures.  Thus we create the following method that makes a simplified
+clone of this object for serialization and sending to the client.
+
+        forClient : =>
+            @__forClient ?= { }
+            for key in [ 'ID', 'type', 'typeName', 'index', 'location' ]
+                @__forClient[key] = this[key]
+            @__forClient
 
 Mix handlers into `Creature`s.
 
@@ -211,14 +305,21 @@ The UI for editing a movable item looks like the following.
                     action : =>
                         N = require( './settings' ).cellSizeInPixels
                         player.getFileUpload "#{@get entry, 'name'} icon",
-                            "A single map cell is an image of size
+                            "<p>A single map cell is an image of size
                             #{N}x#{N}.  Creatures will be shown at their
                             full resolution, so do not upload large images
                             if you do not intend the creatures themselves
                             to be correspondingly large.  Before uploading
                             an icon, consider resizing it on your computer,
                             to save bandwidth and keep the game server
-                            responsive.",
+                            responsive.</p>
+                            <p><b><u>IMPORTANT:</u></b> Ensure that the
+                            creature in the icon you upload is facing to
+                            the left, or straight toward the camera.  When
+                            creatures move left, their icons are shown
+                            normally; when they move right, the icons are
+                            flipped.  Orient your creature icon
+                            accordingly.</p>",
                             again, ( contents ) =>
                                 @setFile entry, 'icon', contents
                 ]
@@ -227,16 +328,17 @@ The UI for editing a movable item looks like the following.
                 value : 'Edit behaviors'
                 action : =>
                     creature = new Creature entry, null
-                    require( './behaviors' ).editAttachments player, item,
-                        =>
+                    require( './behaviors' ).editAttachments player,
+                        creature, =>
                             @set entry, 'behaviors', creature.behaviors
+                            creature.destroy()
                             again()
             ,
                 type : 'action'
                 value : 'Spawn one at my location'
                 action : =>
                     creature = new Creature entry
-                    creature.move player.getPosition()
+                    creature.moveTo player.getPosition()
                     player.showOK "An instance of creature #{entry},
                         \"#{@get entry, 'name'},\" has been spawned at your
                         location.", again

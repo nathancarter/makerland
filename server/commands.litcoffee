@@ -401,9 +401,9 @@ upon the contents of the animations database.
                             player.emit 'spoke', text
                             hearers = require( './blocks' ) \
                                 .whoCanSeePosition position
-                            for otherPlayer in hearers
-                                if otherPlayer isnt player
-                                    otherPlayer.emit 'heard',
+                            for otherThing in hearers
+                                if otherThing isnt player
+                                    otherThing.emit 'heard',
                                         speech : text
                                         speaker : player
                             again()

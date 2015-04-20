@@ -106,6 +106,9 @@ status updates.
                 require( './animations' ).showAnimation oldPosition,
                     'logout', { player : @name, position : oldPosition }
                 require( './sounds' ).playSound 'teleport', oldPosition
+                if @intervalSetIndex?
+                    require( './behaviors' ).clearIntervalSet \
+                        @intervalSetIndex
 
 The client may also request data about the cell types, landscape items, and
 movable items in the map.  When they do, we must provide it, so they have
@@ -355,8 +358,11 @@ versus logging back in for the first time since they died.
                     return
             @justLoggedIn = yes
             console.log "\tPlayer logged in as #{name}."
-            destination = if @validPosition @getPosition() then \
-                @getPosition() else [ 0, 0, 0 ]
+            destination =
+                if require( './blocks' ).validPosition @getPosition(), this
+                    @getPosition()
+                else
+                    [ 0, 0, 0 ]
             @teleport destination
             @startStatusUpdates()
             @showCommandUI()
@@ -538,19 +544,6 @@ needing to address the `saveData` member directly.
         getPosition : => @saveData.position?.slice()
         setPosition : ( newposition ) => @saveData.position = newposition
 
-And now, a function that checks to see if a player is permitted to be in a
-given position, based on the cell type at that position.
-
-        validPosition : ( position ) =>
-            if not position then return yes
-            [ plane, x, y ] = position
-            btable = require './blocks'
-            celltype = btable.getCell plane, x, y
-            if celltype is -1
-                celltype = btable.get btable.planeKey( plane ),
-                    'default cell type'
-            require( './celltypes' ).canWalkOn this, celltype
-
 The following function updates player position data and asks the blocks
 module to recompute visibility based on the given maximum vision distance.
 If the player's new position isn't valid, then we use the `teleport`
@@ -560,7 +553,7 @@ position.
         positionChanged : ( newPosition, visionDistance ) =>
             oldPosition = if @justLoggedIn then null else @getPosition()
             delete @justLoggedIn
-            if @validPosition newPosition
+            if require( './blocks' ).validPosition newPosition, this
                 @setPosition newPosition
                 if newPosition?[0] isnt oldPosition?[0] then @updateStatus()
             else

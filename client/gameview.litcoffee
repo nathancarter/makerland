@@ -316,6 +316,7 @@ items, for the same reason.
                             y : screenpos.y
                             width : image.width
                             height : image.height
+                            direction : creature.motionDirection
         add
             type : 'player'
             name : currentStatus.name[0].toUpperCase() + \
@@ -335,10 +336,22 @@ items, for the same reason.
         keys.sort ( a, b ) -> parseFloat( a ) - parseFloat( b )
         for key in keys
             for item in orderedItems[key]
-                if item.type is 'item' or item.type is 'creature'
+                if item.type is 'item'
                     try
                         context.drawImage item.image, item.x, item.y,
                             item.width, item.height
+                if item.type is 'creature'
+                    try
+                        context.save()
+                        if item.direction > 0
+                            ctrx = item.x + item.width / 2
+                            ctry = item.y + item.height / 2
+                            context.translate ctrx, ctry
+                            context.scale -1, 1
+                            context.translate -ctrx, -ctry
+                        context.drawImage item.image, item.x, item.y,
+                            item.width, item.height
+                        context.restore()
                 if item.type is 'player'
                     drawAvatar context, item.name, item.position,
                         item.direction, item.appearance
@@ -444,12 +457,13 @@ indirectly, by the `drawAnimations` routine below.
             code = "(function(t,args,view,memory){
                         view.save();\n
                         function POS ( name ) {
-                            if ( name.toLowerCase() ==
+                            if ( (name+'').toLowerCase() ==
                                  currentStatus.name.toLowerCase() )
                                 return getPlayerPosition();
                             var all = getNearbyObjects();
                             return all.hasOwnProperty( name ) ?
-                                all[name].position : null;
+                                ( all[name].position || all[name].location )
+                                : null;
                         }
                         function XY ( position ) {
                             if ( !position ) return null;

@@ -89,12 +89,16 @@ communication.
 
     nearbyObjects = { }
     getNearbyObjects = -> nearbyObjects
-    socket.on 'movement nearby', ( data ) ->
+    storeNearbyObject = ( data ) ->
         if currentStatus.dead then return
-        key = switch data.type
-            when 'player' then key = data.name
-            else null # can't handle any other type yet
-        if not key then return
+        if data.type is 'player'
+            key = data.name
+        else if data.hasOwnProperty( 'index' ) and data.hasOwnProperty 'ID'
+            key = data.ID
+        else
+            key = null
+        if not key? then return
+        data.position ?= data.location
         if data.position
             if nearbyObjects[key]?.position[0] is data.position[0]
                 dx = data.position[1] - nearbyObjects[key].position[1]
@@ -103,26 +107,54 @@ communication.
                     if dx > 0
                         1
                     else if dx is 0
-                        if dy is 0 then 0 else \
-                            nearbyObjects[key].motionDirection or 1
+                        if dy is 0 and data.type is 'player' then 0 else \
+                            nearbyObjects[key].motionDirection ? 1
                     else
                         -1
             else
                 data.motionDirection = 0
             nearbyObjects[key] = data
-            setTimeout ( do ( key, data ) -> ->
-                if "#{nearbyObjects[key]?.position}" is "#{data.position}"
-                    nearbyObjects[key]?.motionDirection = 0
-            ), 100
+            if data.type is 'player'
+                setTimeout ( do ( key, data ) -> ->
+                    if "#{nearbyObjects[key]?.position}" is \
+                            "#{data.position}"
+                        nearbyObjects[key]?.motionDirection = 0
+                ), 100
         else
             delete nearbyObjects[key]
+    socket.on 'movement nearby', storeNearbyObject
 
 ## Tracking Visible Map Blocks
 
-When the set of blocks I can see changes, the game notifies me with a socket
-message of the following form.
+When the set of blocks I can see changes, the server notifies me with a
+socket message of the following form.  I store it in
+`window.visibleBlocksCache`, but then also extract all creature information
+and store it in `nearbyObjects`, by calling the storage function given
+above.
 
     window.visibleBlocksCache = { }
     socket.on 'visible blocks', ( data ) ->
         if currentStatus.dead then return
         window.visibleBlocksCache = data
+        for id in Object.keys nearbyObjects
+            if /^[0-9]+$/.test id then delete nearbyObjects[id]
+        for own bname, block of data
+            for creature in block.creatures
+                storeNearbyObject creature
+
+When just a single item or creature with a unique ID changes, the server
+notifies me with a socket message of one of the following forms.
+
+    socket.on 'creature instance update', ( data ) ->
+        storeNearbyObject data.creature
+        array = window.visibleBlocksCache[data.block]['creatures'] ? [ ]
+        for creature, index in array
+            if creature.ID is data.creature.ID
+                array[index] = data.creature
+                break
+    socket.on 'movable item instance update', ( data ) ->
+        array = window.visibleBlocksCache[data.block]['movable items'] ? [ ]
+        for item, index in array
+            if item.ID is data.item.ID
+                array[index] = data.item
+                break

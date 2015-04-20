@@ -139,7 +139,7 @@ individual row in the table that populates that command pane.
                     "<input type='text' id='input_#{data.name}'
                             class='form-control' placeholder='#{data.name}'
                             style='width: 100%'#{attrs}
-                            value='#{data.value or ''}'></input>"
+                            value='#{data.value ? ''}'></input>"
                 ]
             when 'password input'
                 focus = "input_#{data.name}"

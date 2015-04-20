@@ -14,6 +14,7 @@ for objects of that type, so we can test `instanceof` later.
     behaviorTypes =
         'landscape item' : require( './landscapeitems' ).LandscapeItem
         'movable item' : require( './movableitems' ).MovableItem
+        'creature' : require( './creatures' ).Creature
 
 It does so by subclassing the main Table class and adding behavior-specific
 functionality.
@@ -373,7 +374,7 @@ callback will be called when the player clicks Done.
             for index in @entries()
                 do ( index ) =>
                     behavior = @get index
-                    if typeName in behavior.targets ? [ ]
+                    if typeName in ( behavior.targets ? [ ] )
                         controls.push [
                             type : 'text'
                             value : behavior.name
@@ -397,10 +398,30 @@ callback will be called when the player clicks Done.
                 action : callback
             player.showUI controls
 
+Installing behaviors may run code that calls `setInterval()`.  When the
+objects on which the behaviors were installed are destroyed, we will want
+the `setInterval()` calls to stop recurring.  Thus we create the following
+API for creating, filling, and clearing lists of intervals.  They are used
+by the behavior-installing functions, below.
+
+        createIntervalSet : =>
+            @intervalSets ?= { }
+            i = 0
+            while @intervalSets.hasOwnProperty i then i++
+            @intervalSets[i] = [ ]
+            i
+        addToIntervalSet : ( index, interval ) =>
+            @intervalSets?[index]?.push interval
+        clearIntervalSet : ( index ) =>
+            if not @intervalSets?[index]? then return
+            clearInterval i for i in @intervalSets[index]
+            delete @intervalSets[index]
+
 The following function takes a code string and turns it into a function we
 can run multiple times on multiple objects.
 
-        makeCodeRunnable : ( codeString, author = null, argnames = [ ] ) =>
+        makeCodeRunnable : ( codeString, author = null, argnames = [ ],
+                intervalSetIndex = null ) =>
             result = require( 'acorn' ).parse codeString,
                 { allowReturnOutsideFunction : true }
             functions =
@@ -423,19 +444,40 @@ can run multiple times on multiple objects.
                     var ctor = require( './movableitems' ).MovableItem;
                     var result = new ctor( index, null );
                     return result.typeName ? result : null;
-                }"
-            if author then functions +=
-                "function log () {
-                    require( './logs' ).logMessage( '#{author}',
-                        Array.prototype.slice.apply( arguments )
-                            .join( ' ' ) );
-                }"
+                }
+                var loggedSetInterval = null;"
+            if author
+                functions +=
+                    "function log () {
+                        require( './logs' ).logMessage( '#{author}',
+                            Array.prototype.slice.apply( arguments )
+                                .join( ' ' ) );
+                    }"
+                if intervalSetIndex? then functions +=
+                    "loggedSetInterval = function () {
+                        var func = arguments[0];
+                        var clearCode;
+                        arguments[0] = function () {
+                            try {
+                                func.apply( this, arguments );
+                            } catch ( e ) {
+                                clearInterval( clearCode );
+                                require( './logs' ).logError( '#{author}',
+                                    'code called by setInterval()', func+'',
+                                    e );
+                            }
+                        };
+                        clearCode = setInterval.apply( null, arguments );
+                        require( './behaviors' ).addToIntervalSet(
+                            #{intervalSetIndex}, clearCode );
+                    };"
             declarations = ( "var #{identifier} = args.#{identifier};" \
                 for identifier in argnames \
                 when ' ' not in identifier ).join '\n'
             mayNotUse = [ 'require', 'process' ] # more later
             for identifier in mayNotUse
                 declarations += "\nvar #{identifier} = null;"
+            declarations += "\nvar setInterval = loggedSetInterval;"
             prefix = "( function ( args ) { #{declarations}\n"
             prefixLength = prefix.split( '\n' ).length - 1
             prefix = "#{functions}#{prefix}"
@@ -465,22 +507,15 @@ at the time of attachment.
                 if key[...8] is 'default ' and key[8..] not of behaviorData
                     behaviorData[key[8..]] = value
             try
-                runnable = ( @runnableCache ?= { } )[index] ?=
-                    @makeCodeRunnable code, author,
-                        Object.keys behaviorParameters ? { }
+                object.intervalSetIndex ?= @createIntervalSet()
+                runnable = @makeCodeRunnable code, author,
+                    Object.keys( behaviorParameters ? { } ),
+                    object.intervalSetIndex
                 runnable object, behaviorData
             catch e
                 e.prefixLength ?= runnable.prefixLength
                 require( './logs' ).logError author,
                     "behavior #{@get index, 'name'}", code, e
-
-If the behavior is updated, we need to clear out the cached version of its
-former state, so that the next request for the behavior gets the updated
-version.
-
-        set : ( entryName, others... ) =>
-            super entryName, others...
-            delete @runnableCache[entryName]
 
 ## Exporting
 

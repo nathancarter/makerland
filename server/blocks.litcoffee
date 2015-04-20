@@ -363,6 +363,9 @@ instances that go with it.
 
         removeFromCache : ( entryName ) =>
             super entryName
+            for item in ( @landscapeItems ?= { } )[entryName] ? [ ]
+                require( './behaviors' ).clearIntervalSet \
+                    item.intervalSetIndex
             delete ( @landscapeItems ?= { } )[entryName]
 
 To reset a block to its initial state (reloading all landscape items and
@@ -377,6 +380,19 @@ Export a singleton of the class as the module.
     module.exports = new BlocksTable
 
 ## Movement and Visibility
+
+Is a given map location a valid place for a player or creature to stand?
+This function answers that question.  The position must be a plane,x,y
+triple, and the second parameter a player or creature object.
+
+    module.exports.validPosition = ( position, who ) ->
+        if not position then return yes
+        [ plane, x, y ] = position
+        celltype = module.exports.getCell plane, x, y
+        if celltype is -1
+            celltype = module.exports.get module.exports.planeKey( plane ),
+                'default cell type'
+        require( './celltypes' ).canWalkOn who, celltype
 
 Here is a function that computes, for a given point on the map, the name of
 the block containing that point.  A block name is the point at the top-left
@@ -538,8 +554,8 @@ any landscape items visible only to makers get filtered out.
                 data[block]['landscape items'] = visibleItems
             data[block]['movable items'] =
                 module.exports.getMovableItemsInBlock block
-            data[block]['creatures'] =
-                module.exports.getCreaturesInBlock block
+            data[block]['creatures'] = ( creature.forClient() \
+                for creature in module.exports.getCreaturesInBlock block )
         notifyThisPlayer.socket.emit 'visible blocks', data
         for block in blockSet
             require( './animations' ).sendBlockAnimationsToPlayer block,
@@ -549,9 +565,35 @@ And when a block is edited by a maker, we want to call the above function on
 every player who can see the block.
 
     module.exports.notifyAboutBlockUpdate = ( blockName ) ->
-        for playerName in playersWhoCanSeeBlock?[blockName] or [ ]
+        for playerName in playersWhoCanSeeBlock?[blockName] ? [ ]
             player = Player.nameToPlayer playerName
             if player then notifyAboutVisibility player
+
+For a creature or movable item that was updated, we do not always need to
+re-send the data of all blocks, a waste of bandwidth.  For instance, if a
+creature moves within a block, we can just send its new state and let the
+client insert that into the last-transmitted data about all blocks.  (This
+is only true of creatures and movable items because only they have unique
+IDs, which this necessitates.)  Note that if a creature moves between
+blocks, this will not function as expected; in that case, use the previous
+function instead.
+
+    module.exports.notifyAboutCreatureUpdate = ( creatureObject ) ->
+        block =
+            module.exports.positionToBlockName creatureObject.location...
+        for playerName in playersWhoCanSeeBlock?[block] ? [ ]
+            player = Player.nameToPlayer playerName
+            if player then player.socket.emit 'creature instance update',
+                block : block
+                creature : creatureObject
+    module.exports.notifyAboutMovableItemUpdate = ( itemObject ) ->
+        block = module.exports.positionToBlockName itemObject.location...
+        for playerName in playersWhoCanSeeBlock?[block] ? [ ]
+            player = Player.nameToPlayer playerName
+            if player then player.socket.emit \
+                    'movable item instance update',
+                block : block
+                item : itemObject
 
 Makers have a reset command that reloads all the blocks near the maker.
 That command calls the following function.
@@ -573,6 +615,13 @@ map?  This will be useful for sending events such as "heard someone speak."
         for playerName in playersWhoCanSeeBlock[bname] ? [ ]
             player = Player.nameToPlayer playerName
             if player then results.push player
+        N = settings.mapBlockSizeInCells
+        for dx in [-N,0,N]
+            for dy in [-N,0,N]
+                bname = module.exports.positionToBlockName \
+                    [ position[0], position[1]+dx, position[2]+dy ]
+                results = results.concat \
+                    module.exports.getCreaturesInBlock bname
         results
 
 ## Movable Items
@@ -680,26 +729,34 @@ own `move()` function for that.  In fact, `move()` calls this function, so
 do not call this function yourself; call `move()` instead.
 
     module.exports.moveCreature = ( creature, newLocation ) ->
-        if typeof creature isnt 'number' then creature = creature.ID
-        lastSeen = new Date
-        if bname = creatureData[creature]?.block
-            delete creaturesInBlock[bname][creature]
-            lastSeen = creatureData[creature].lastSeen
-            delete creatureData[creature]
-            module.exports.notifyAboutBlockUpdate bname
-        if bname = module.exports.positionToBlockName newLocation...
-            creaturesInBlock[bname] ?= { }
-            creaturesInBlock[bname][creature] =
-                require( './creatures' ).Creature::creatureForID creature
-            if ( playersWhoCanSeeBlock[bname] ? [ ] ).length > 0
-                lastSeen = new Date
-            creatureData[creature] =
-                block : bname
-                lastSeen : lastSeen
-            module.exports.notifyAboutBlockUpdate bname
-            yes
+        if newLocation isnt null
+            if not module.exports.validPosition newLocation, creature
+                return no
+            if not newbname = \
+                    module.exports.positionToBlockName newLocation...
+                return no
+        if typeof creature is 'number'
+            id = creature
+            creature = require( './creatures' ).Creature::creatureForID id
         else
-            no
+            id = creature.ID
+        lastSeen = new Date
+        if oldbname = creatureData[id]?.block
+            delete creaturesInBlock[oldbname][id]
+            lastSeen = creatureData[id].lastSeen
+            delete creatureData[id]
+        if newLocation isnt null
+            creaturesInBlock[newbname] ?= { }
+            creaturesInBlock[newbname][id] = creature
+            if ( playersWhoCanSeeBlock[newbname] ? [ ] ).length > 0
+                lastSeen = new Date
+            creatureData[id] = block : newbname, lastSeen : lastSeen
+        if oldbname and oldbname is newbname
+            module.exports.notifyAboutCreatureUpdate creature
+        else
+            if newbname then module.exports.notifyAboutBlockUpdate newbname
+            if oldbname then module.exports.notifyAboutBlockUpdate oldbname
+        yes
 
 This function fetches the contents of a block as an array for use in sending
 to players who can see the block.

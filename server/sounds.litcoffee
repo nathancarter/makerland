@@ -182,7 +182,7 @@ which case all players who can see that location will hear the sound.
             targets = if target instanceof Player then [ target ] else \
                 require( './blocks' ).whoCanSeePosition target
             for target in targets
-                target.socket.emit 'play sound', entry
+                target.socket?.emit 'play sound', entry
 
 ## Exporting
 
