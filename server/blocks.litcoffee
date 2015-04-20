@@ -190,10 +190,10 @@ only exist in cached blocks, and only visible blocks are cached.
             N = settings.mapBlockSizeInCells
             results = [ ]
             typetable = require './landscapeitems'
-            #console.log '\n@landscapeItems:', @landscapeItems
             for i in [corner.x-N,corner.x,corner.x+N]
                 for j in [corner.y-N,corner.y,corner.y+N]
-                    for item in @landscapeItems["#{plane},#{i},#{j}"] or [ ]
+                    bname = module.exports.positionToBlockName plane, i, j
+                    for item in @landscapeItems[bname] ? [ ]
                         if Math.abs( x - item.x ) < item.size/2 and \
                            Math.abs( y - item.y ) < item.size/2
                             results.push item
@@ -699,7 +699,7 @@ map cells.
             [ position[0], position[1], position[2]+1 ]
         ]
         distance = ( x1, y1, x2, y2 ) ->
-            Math.sqrt ( x1 - x2 ) * ( x1 - x2 ) + ( y1 - y2 ) + ( y1 - y2 )
+            Math.sqrt ( x1 - x2 ) * ( x1 - x2 ) + ( y1 - y2 ) * ( y1 - y2 )
         blocks = [ ]
         for point in extremes
             bname = module.exports.positionToBlockName point...
@@ -800,7 +800,7 @@ of map cells.
             [ position[0], position[1], position[2]+1 ]
         ]
         distance = ( x1, y1, x2, y2 ) ->
-            Math.sqrt ( x1 - x2 ) * ( x1 - x2 ) + ( y1 - y2 ) + ( y1 - y2 )
+            Math.sqrt ( x1 - x2 ) * ( x1 - x2 ) + ( y1 - y2 ) * ( y1 - y2 )
         blocks = [ ]
         for point in extremes
             bname = module.exports.positionToBlockName point...

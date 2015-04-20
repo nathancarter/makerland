@@ -36,6 +36,7 @@ calling our `moveTo()` method.
             if @type = module.exports.getWithDefaults @index
                 @typeName = @type.name
                 @behaviors = @type.behaviors
+            @uses = { }
             for behavior in @behaviors ?= [ ]
                 require( './behaviors' ).installBehavior behavior, this
 
@@ -139,11 +140,12 @@ game map, for instance.  The `get` method does, however, return false if the
 item could not be gotten, either due to some blocking behavior or simply the
 creature's already holding too much.
 
-        get : ( item ) =>
+        canCarry : ( item ) =>
             carrying = 0
             carrying += heldItem.space for heldItem in @inventory
-            carrying += item.space
-            if carrying > ( @capacity ? 10 ) then return no
+            carrying + item.space <= ( @capacity ? 10 )
+        get : ( item ) =>
+            if not @canCarry item then return no
             item.attempt 'get', => item.move this
         drop : ( item ) => item.attempt 'drop', => item.move @location
 
@@ -155,6 +157,36 @@ inventory.  These are copied directly from the Player class.
         removeItemFromInventory : ( item ) =>
             if ( index = @inventory.indexOf item ) > -1
                 @inventory.splice index, 1
+
+If a player inspects this creature, we show them our inventory.
+
+        gotInspectedBy : ( player ) =>
+            items = ( [
+                type : 'text'
+                value : require( './movableitems' ).smallIcon item.index
+            ,
+                type : 'text'
+                value : item.typeName
+            ] for item in @inventory )
+            if items.length is 0 then items = [
+                type : 'text'
+                value : '(no items)'
+            ]
+            capname = @typeName[0].toUpperCase() + @typeName[1..]
+            items.unshift
+                type : 'text'
+                value : "<h3>#{capname}'s inventory:</h3>"
+            for own name, action of @uses ? { }
+                items.push
+                    type : 'action'
+                    value : name[0].toUpperCase() + name[1..]
+                    action : => action.apply this, [ player ]
+            items.push
+                type : 'action'
+                value : 'Done'
+                cancel : yes
+                action : -> player.showCommandUI()
+            player.showUI items
 
 When creature objects need to be transmitted to the client, we do not want
 to fill up the network traffic with superfluous data (e.g., behavior

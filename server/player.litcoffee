@@ -535,6 +535,53 @@ access.
                 icon : iconPath
             )
 
+## Player Inventory
+
+These functions put items into the player's inventory, or take them out.
+Neither function manipulates the inner data of the item itself.  Thus you
+should not call these functions yourself, because they will mess up data
+consistency.  Rather, you should call the item's `move()` function, which
+will call these functions in turn.
+
+        addItemToInventory : ( item ) =>
+            if item not in @inventory then @inventory.push item
+        removeItemFromInventory : ( item ) =>
+            if ( index = @inventory.indexOf item ) > -1
+                @inventory.splice index, 1
+
+Can the player add another item to their inventory?  This function checks
+their maximum carrying capacity.
+
+        canCarry : ( item ) =>
+            carrying = 0
+            carrying += heldItem.space for heldItem in @inventory
+            carrying + item.space <= @saveData.capacity
+
+If someone else inspects this player, we just show them our inventory.
+
+        gotInspectedBy : ( otherPlayer ) =>
+            items = ( [
+                type : 'text'
+                value : require( './movableitems' ).smallIcon item.index
+            ,
+                type : 'text'
+                value : item.typeName
+            ] for item in @inventory )
+            if items.length is 0 then items = [
+                type : 'text'
+                value : '(no items)'
+            ]
+            capname = @name[0].toUpperCase() + @name[1..]
+            items.unshift
+                type : 'text'
+                value : "<h3>Player #{capname}'s inventory:</h3>"
+            items.push
+                type : 'action'
+                value : 'Done'
+                cancel : yes
+                action : -> otherPlayer.showCommandUI()
+            otherPlayer.showUI items
+
 ## Player Location
 
 While the player's position will be stored in their `saveData`, we provide
@@ -570,19 +617,26 @@ vision distance, which results in a call to `positionChanged`.
             @positionChanged destination, 10
             @socket.emit 'player position', destination
 
-## Player Inventory
+Get all players within a certain radius of the given position.
 
-These functions put items into the player's inventory, or take them out.
-Neither function manipulates the inner data of the item itself.  Thus you
-should not call these functions yourself, because they will mess up data
-consistency.  Rather, you should call the item's `move()` function, which
-will call these functions in turn.
-
-        addItemToInventory : ( item ) =>
-            if item not in @inventory then @inventory.push item
-        removeItemFromInventory : ( item ) =>
-            if ( index = @inventory.indexOf item ) > -1
-                @inventory.splice index, 1
+    module.exports.playersNearPosition = ( position, radius ) ->
+        extremes = [
+            position
+            [ position[0], position[1]-1, position[2] ]
+            [ position[0], position[1]+1, position[2] ]
+            [ position[0], position[1], position[2]-1 ]
+            [ position[0], position[1], position[2]+1 ]
+        ]
+        distance = ( x1, y1, x2, y2 ) ->
+            Math.sqrt ( x1 - x2 ) * ( x1 - x2 ) \
+                    + ( y1 - y2 ) * ( y1 - y2 )
+        results = [ ]
+        for player in Player::allPlayers
+            pp = player.getPosition()
+            if pp[0] isnt position[0] then continue
+            if distance( pp[1], pp[2], position[1], position[2] ) \
+                < radius then results.push player
+        results
 
 Mix handlers and health into `Player`s.
 

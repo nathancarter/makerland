@@ -513,11 +513,7 @@ so, to refresh the view.
                         type : 'action'
                         value : 'pick up'
                         action : ->
-                            carrying = 0
-                            for heldItem in player.inventory
-                                carrying += heldItem.space
-                            carrying += item.space
-                            if carrying > player.saveData.capacity
+                            if not player.canCarry item
                                 player.showOK 'You cannot carry that much.',
                                     refreshView
                                 return
@@ -540,6 +536,90 @@ so, to refresh the view.
                         delete player.inventoryBeingDisplayed
                         player.showCommandUI()
                 player.showUI contents
+
+The inspect command allows the player to see other players' and creatures'
+inventories, and interact with creature and landscape items.
+
+        inspect :
+            category : 'basic'
+            icon : 'inspect.png'
+            shortInfo : 'Inspect players, creatures, or items nearby'
+            help : 'This command inspects the closest object to you, or lets
+                you pick from a list if there are several.'
+            run : ( player ) ->
+                N = require( './settings' ).mapBlockSizeInCells
+                pos = player.getPosition()
+                bt = require './blocks'
+                closeEnough = ( position ) ->
+                    dx = position[1] - pos[1]
+                    dy = position[2] - pos[2]
+                    Math.sqrt( dx*dx + dy*dy ) < 2
+                player.mapClickMode \
+                    'Click on an item, creature, or player on the map to
+                    inspect it.',
+                    ( x, y ) ->
+                        if not closeEnough [ pos[0], x, y ]
+                            return player.showOK 'You cannot inspect things
+                                that are so far away from you.'
+                        landscape = bt.getItemsOverPoint pos[0], x, y
+                        if not player.isMaker()
+                            landscape = ( i for i in landscape when \
+                                i.visible )
+                        movables =
+                            bt.movableItemsNearPosition [ pos[0], x, y ], 1
+                        creatures =
+                            bt.creaturesNearPosition [ pos[0], x, y ], 1
+                        players = require( './player' ) \
+                            .playersNearPosition [ pos[0], x, y ], 1
+                        players = ( p for p in players when p isnt player )
+                        results = landscape.concat( movables ) \
+                            .concat( creatures ).concat( players )
+                        if results.length is 1
+                            results[0].gotInspectedBy player
+                        else if results.length > 1
+                            controls = [ ]
+                            for thing in results
+                                if thing is player then continue
+                                do ( thing ) ->
+                                    if thing in landscape
+                                        icon =
+                                            require( './landscapeitems' ) \
+                                                .smallIcon thing.type
+                                        name = thing.typeName
+                                    else if thing in movables
+                                        icon = require( './movableitems' ) \
+                                            .smallIcon thing.index
+                                        name = thing.typeName
+                                    else if thing in creatures
+                                        icon = require( './creatures' ) \
+                                            .smallIcon thing.index
+                                        name = thing.typeName
+                                    else
+                                        icon = 'Player'
+                                        name = thing.name
+                                    name = name[0].toUpperCase() + name[1..]
+                                    controls.push [
+                                        type : 'text'
+                                        value : icon
+                                    ,
+                                        type : 'text'
+                                        value : name
+                                    ,
+                                        type : 'action'
+                                        value : 'Inspect'
+                                        action : ->
+                                            thing.gotInspectedBy player
+                                    ]
+                            controls.unshift
+                                type : 'text'
+                                value : '<h3>Inspect which thing?</h3>'
+                            controls.push
+                                type : 'action'
+                                value : 'Cancel'
+                                cancel : yes
+                                action : -> player.showCommandUI()
+                            player.showUI controls
+                    , ( -> player.showCommandUI() ), 'zoom-in'
 
 ## Maker Commands
 

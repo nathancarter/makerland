@@ -77,17 +77,35 @@ keeping all data consistent throughout the game.  If the new location is
 invalid, then `null` will be used instead.
 
         move : ( newLocation ) =>
-            if @location.hasOwnProperty 'removeItemFromInventory'
+            if @location and 'removeItemFromInventory' of @location
                 @location.removeItemFromInventory this
             else if @location instanceof Array
                 require( './blocks' ).removeMovableItemFromMap this
             @location = newLocation
-            if @location.hasOwnProperty 'addItemToInventory'
+            if @location and 'addItemToInventory' of @location
                 @location.addItemToInventory this
             else if @location instanceof Array
                 require( './blocks' ).addMovableItemToMap this, @location
             else
                 @location = null
+
+If this item gets inspected by a player, just print its basic information.
+
+        gotInspectedBy : ( player ) =>
+            player.showUI
+                type : 'text'
+                value : "<h3>Inspecting #{@typeName}:</h3>"
+            ,
+                type : 'text'
+                value : module.exports.normalIcon @index
+            ,
+                type : 'text'
+                value : "<p>Size: #{@space}</p>"
+            ,
+                type : 'action'
+                value : 'Done'
+                cancel : yes
+                action : -> player.showCommandUI()
 
 Mix handlers into `MovableItem`s.
 

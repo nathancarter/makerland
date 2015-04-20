@@ -35,6 +35,7 @@ corners as well.
             @size = module.exports.get @type, 'size'
             @topLeft = x : @x - @size/2, y : @y - @size/2
             @bottomRight = x : @x + @size/2, y : @y + @size/2
+            @uses = { }
             for behavior in @behaviors ?= [ ]
                 require( './behaviors' ).installBehavior behavior, this
 
@@ -50,6 +51,32 @@ landscape items.
             @rectanglesCollide @topLeft.x, @topLeft.y,
                 @bottomRight.x, @bottomRight.y, topLeft.x, topLeft.y,
                 bottomRight.x, bottomRight.y
+
+If a player inspects this landscape item, we give its basic information, and
+then check to see if there is any other way to interact with it.
+
+        gotInspectedBy : ( player ) =>
+            controls = [
+                type : 'text'
+                value : "<h3>Inspecting #{@typeName}:</h3>"
+            ,
+                type : 'text'
+                value : module.exports.normalIcon @type
+            ,
+                type : 'text'
+                value : "<p>Size: #{@size}</p>"
+            ]
+            for own name, action of @uses ? { }
+                controls.push
+                    type : 'action'
+                    value : name[0].toUpperCase() + name[1..]
+                    action : => action.apply this, [ player ]
+            controls.push
+                type : 'action'
+                value : 'Done'
+                cancel : yes
+                action : -> player.showCommandUI()
+            player.showUI controls
 
 Landscape items can also save themselves to disk, by writing to the block in
 which they sit.  This is done through a special method provided by the
