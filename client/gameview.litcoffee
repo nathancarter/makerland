@@ -372,8 +372,8 @@ just the player's name (after login only).
         context.fillText name, gameview.width - size.width - 40, 45
         if currentStatus.isMaker
             [ plane, x, y ] = getPlayerPosition()
-            x = "#{x}".substring 0, "#{x|0}".length+3
-            y = "#{y}".substring 0, "#{y|0}".length+3
+            x = Math.floor( x*100 ) / 100
+            y = Math.floor( y*100 ) / 100
             position = "#{plane},#{x},#{y}"
             size = context.measureText position
             context.strokeText position, gameview.width - size.width - 40,
