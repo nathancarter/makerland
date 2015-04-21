@@ -692,11 +692,10 @@ map cells.
 
     module.exports.movableItemsNearPosition = ( position, radius ) ->
         extremes = [
-            position
-            [ position[0], position[1]-1, position[2] ]
-            [ position[0], position[1]+1, position[2] ]
-            [ position[0], position[1], position[2]-1 ]
-            [ position[0], position[1], position[2]+1 ]
+            [ position[0], position[1]-radius, position[2]-radius ]
+            [ position[0], position[1]-radius, position[2]+radius ]
+            [ position[0], position[1]+radius, position[2]-radius ]
+            [ position[0], position[1]+radius, position[2]+radius ]
         ]
         distance = ( x1, y1, x2, y2 ) ->
             Math.sqrt ( x1 - x2 ) * ( x1 - x2 ) + ( y1 - y2 ) * ( y1 - y2 )
