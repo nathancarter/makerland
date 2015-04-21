@@ -1085,6 +1085,29 @@ remember, then jump back to those locations later.
                         showList()
                 ,
                     type : 'action'
+                    value : 'Teleport on screen'
+                    action : =>
+                        player.mapClickMode \
+                            'Click anywhere on screen to teleport there.
+                            This will fail if you click a location at which
+                            players are not permitted to stand (e.g.,
+                            inside a wall, or in water.)',
+                            ( x, y ) ->
+                                plane = player.getPosition()[0]
+                                require( './animations' ).showAnimation \
+                                    player.getPosition(), 'teleport out',
+                                    center : player.getPosition()
+                                require( './sounds' ).playSound 'teleport',
+                                    player.getPosition()
+                                player.teleport [ plane, x, y ]
+                                require( './animations' ).showAnimation \
+                                    [ plane, x, y ],
+                                    'teleport in', center : [ plane, x, y ]
+                                require( './sounds' ).playSound 'teleport',
+                                    [ plane, x, y ]
+                            , -> player.showCommandUI()
+                ,
+                    type : 'action'
                     value : 'Done'
                     cancel : yes
                     action : => player.showCommandUI()
