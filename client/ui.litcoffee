@@ -105,6 +105,10 @@ It uses the following function to create an array of cells forming an
 individual row in the table that populates that command pane.
 
     dataToCells = ( data ) ->
+        attributify = ( text ) ->
+            if typeof text isnt 'string' then return text
+            text.replace( /'/g, '&apos;' ).replace( /</g, '&lt;' ) \
+                .replace( />/g, '&gt;' ).replace( /"/g, '&quot;' )
         if data instanceof Array
             result = [ ]
             for datum in data
@@ -125,7 +129,7 @@ individual row in the table that populates that command pane.
         ]
         for own key, value of data
             if key not in knownAttrs
-                attrs += " #{key}='#{value}'"
+                attrs += " #{key}='#{attributify value}'"
         focus = undefined
         result = switch data.type
             when 'text'
@@ -136,29 +140,34 @@ individual row in the table that populates that command pane.
             when 'string input'
                 focus = "input_#{data.name}"
                 [
-                    "<input type='text' id='input_#{data.name}'
-                            class='form-control' placeholder='#{data.name}'
+                    "<input type='text' id='input_#{attributify data.name}'
+                            class='form-control'
+                            placeholder='#{attributify data.name}'
                             style='width: 100%'#{attrs}
-                            value='#{data.value ? ''}'></input>"
+                            value='#{attributify data.value ? ''}'></input>"
                 ]
             when 'password input'
                 focus = "input_#{data.name}"
                 [
-                    "<input type='password' id='input_#{data.name}'
-                            class='form-control' placeholder='#{data.name}'
+                    "<input type='password'
+                            id='input_#{attributify data.name}'
+                            class='form-control'
+                            placeholder='#{attributify data.name}'
                             style='width: 100%'#{attrs}>
                      </input>"
                 ]
             when 'choice'
                 name = data.name[0].toUpperCase() + data.name[1..]
-                focus = "input_#{data.name}"
+                focus = "input_#{attributify data.name}"
                 tmp = [
-                    "<label for='input_#{data.name}'>#{name}:</label>"
-                    "<select class='form-control' id='input_#{data.name}'>
+                    "<label for='input_#{attributify data.name}'
+                     >#{name}:</label>"
+                    "<select class='form-control'
+                             id='input_#{attributify data.name}'>
                     #{for own key, value of data.choices
                         selected = if value is data.selected \
                             then 'selected' else ''
-                        "<option value='#{value}' #{selected}
+                        "<option value='#{attributify value}' #{selected}
                          >#{key}</option>"}
                     </select>"
                 ]
@@ -166,12 +175,13 @@ individual row in the table that populates that command pane.
             when 'action'
                 type = if data.default then 'submit' else 'button'
                 name = data.value.replace /\s/g, '_'
-                cancel and= "button_#{data.id}"
-                focus = "button_#{name}"
+                cancel and= "button_#{attributify data.id}"
+                focus = "button_#{attributify name}"
                 buttonType = if data.default then 'btn-primary' else \
                     if cancel then 'btn-danger' else 'btn-default'
                 [
-                    "<input type='#{type}' value='#{data.value}'
+                    "<input type='#{attributify type}'
+                            value='#{attributify data.value}'
                             style='width: 100%'#{attrs}
                             id='button_#{data.id}' class='btn #{buttonType}'
                             onclick='uiButtonClicked(this)'>
@@ -185,16 +195,18 @@ individual row in the table that populates that command pane.
                 ]
             when 'command'
                 [
-                    "<button type='button' value='#{data.name}'#{attrs}
-                            id='command_button_#{data.name}'
-                            class='btn btn-default' style='width:100%'
-                            data-toggle='tooltip' data-placement='left'
-                            title='#{data.help.replace /'/g, '&apos;'}'
-                            onclick='uiCommandClicked(this)'>
+                    "<button type='button'
+                             value='#{attributify data.name}'#{attrs}
+                             id='command_button_#{attributify data.name}'
+                             class='btn btn-default' style='width:100%'
+                             data-toggle='tooltip' data-placement='left'
+                             title='#{attributify data.help}'
+                             onclick='uiCommandClicked(this)'>
                         <img src='#{data.icon}'
-                              onclick='uiCommandClicked(
-                                  document.getElementById(
-                                      \"command_button_#{data.name}\"))'/>
+                             onclick='uiCommandClicked(
+                             document.getElementById(
+                             \"command_button_#{attributify data.name}\"))'
+                             />
                         #{data.name}
                      </button>"
                     "<p#{attrs}>#{data.shortInfo}</p>"
@@ -214,7 +226,7 @@ individual row in the table that populates that command pane.
             when 'upload button'
                 data.value ?= 'Start upload'
                 [
-                    "<input type='submit' value='#{data.value}'
+                    "<input type='submit' value='#{attributify data.value}'
                             style='width: 100%'#{attrs}
                             id='button_#{data.id}' class='btn btn-default'
                             onclick='$(\"#commandPaneForm\").ajaxSubmit();
@@ -234,22 +246,25 @@ individual row in the table that populates that command pane.
             when 'checkbox'
                 [
                     "<div class='checkbox'#{attrs}>
-                     <label><input type='checkbox' id='input_#{data.name}'
+                     <label><input type='checkbox'
+                                   id='input_#{attributify data.name}'
                       #{if data.checked then 'checked' else ''}
-                      value='#{data.name}'> #{data.name}</label>
+                      value='#{attributify data.name}'> #{data.name}</label>
                      </div>"
                 ]
             when 'text input'
                 [
-                    "<textarea id='input_#{data.name}' class='form-control'
-                     rows=20>#{data.value or ''}</textarea>"
+                    "<textarea id='input_#{attributify data.name}'
+                               class='form-control' rows=20
+                     >#{data.value or ''}</textarea>"
                 ]
             when 'code input'
                 [
                     "<div style='border: solid 1px black; padding: 0;
-                      margin: 0;'><textarea id='input_#{data.name}'
+                      margin: 0;'><textarea
+                      id='input_#{attributify data.name}'
                       class='form-control fixed-width code-editor'
-                     rows=20>#{data.value or ''}</textarea></div>
+                      rows=20>#{data.value or ''}</textarea></div>
                      <p align=right>F11 toggles full-screen editing.</p>"
                 ]
             else
