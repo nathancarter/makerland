@@ -7,7 +7,7 @@ to the same object; usually the mixins are added to a prototype/class, but
 that is optional, and they themselves are not a prototype/class.
 
 This module defines several functions that support living things in the
-game, such as hit points and healing.  Each is explained below.
+game, such as hit points, healing, and inventory.  Each is explained below.
 
 ## The Mixing Operation
 
@@ -38,10 +38,11 @@ This first function is an initializer.  Any class into which this mixing is
 mixed must call this initializer.  Player objects should call it after the
 player's `saveData` is loaded; creatures should call it after construction.
 
-    module.exports.methods.initHealth = ->
+    module.exports.methods.initLiving = ->
         scope = @saveData ? this
         scope.maximumHitPoints ?= 100
         scope.hitPoints ?= scope.maximumHitPoints
+        @inventory = [ ]
 
 The second function adds a player's health data to the player's status
 object before it's transmitted to the client for displaying.
@@ -105,3 +106,52 @@ slowly heal.
         scope = @saveData ? this
         delete scope.timeOfDeath
         scope.hitPoints = Math.min scope.maximumHitPoints, 50
+
+The following functions put items into the player's/creature's inventory, or
+take them out.  Neither function manipulates the inner data of the item
+itself.  Thus you should not call these functions yourself, because they
+will mess up data consistency.  Rather, you should call the item's `move()`
+function, which will call these functions in turn.
+
+    module.exports.methods.addItemToInventory = ( item ) ->
+        if item not in @inventory then @inventory.push item
+    module.exports.methods.removeItemFromInventory = ( item ) ->
+        if ( index = @inventory.indexOf item ) > -1
+            @inventory.splice index, 1
+
+Can the player/creature add another item to their inventory?  This function
+checks the new total that would amount to against their maximum carrying
+capacity.
+
+    module.exports.methods.canCarry = ( item ) ->
+        capacity = @saveData?.capacity ? @capacity ? 10
+        carrying = 0
+        carrying += heldItem.space for heldItem in @inventory
+        carrying + item.space <= capacity
+
+The following function is useful when creating `gotInspectedBy()`
+implementations, which must show the inventory.  This creates a portion of a
+command pane UI, listing the items in the player's/creature's inventory.
+Any additional controls can be added to the end of this array before it is
+shown with `player.showUI()`.
+
+    module.exports.methods.inventoryInspected = ->
+        items = ( [
+            type : 'text'
+            value : require( './movableitems' ).smallIcon item.index
+        ,
+            type : 'text'
+            value : item.typeName
+        ] for item in @inventory )
+        if items.length is 0 then items = [
+            type : 'text'
+            value : '(no items)'
+        ]
+        capname = if @typeName
+            @typeName[0].toUpperCase() + @typeName[1..]
+        else
+            'Player ' + @name[0].toUpperCase() + @name[1..]
+        items.unshift
+            type : 'text'
+            value : "<h3>#{capname}'s inventory:</h3>"
+        items

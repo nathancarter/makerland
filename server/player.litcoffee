@@ -40,7 +40,6 @@ object, since we have not loaded any particular player data yet.
             console.log "Connected a player; there are now
                 #{Player::allPlayers.length} players."
             @saveData = { }
-            @inventory = [ ]
             @statusConditions = [ ]
 
 Set up a handler for UI events from the client.
@@ -469,7 +468,7 @@ the accounts table by messing with its original copy.
             for own key, value of accounts.getWithDefaults @name
                 @saveData[key] = value
             delete @saveData.password
-            @initHealth()
+            @initLiving()
 
 This function saves the player data to disk, after first putting the
 password hash back in.
@@ -537,50 +536,15 @@ access.
 
 ## Player Inventory
 
-These functions put items into the player's inventory, or take them out.
-Neither function manipulates the inner data of the item itself.  Thus you
-should not call these functions yourself, because they will mess up data
-consistency.  Rather, you should call the item's `move()` function, which
-will call these functions in turn.
-
-        addItemToInventory : ( item ) =>
-            if item not in @inventory then @inventory.push item
-        removeItemFromInventory : ( item ) =>
-            if ( index = @inventory.indexOf item ) > -1
-                @inventory.splice index, 1
-
-Can the player add another item to their inventory?  This function checks
-their maximum carrying capacity.
-
-        canCarry : ( item ) =>
-            carrying = 0
-            carrying += heldItem.space for heldItem in @inventory
-            carrying + item.space <= @saveData.capacity
-
 If someone else inspects this player, we just show them our inventory.
 
         gotInspectedBy : ( otherPlayer ) =>
-            items = ( [
-                type : 'text'
-                value : require( './movableitems' ).smallIcon item.index
-            ,
-                type : 'text'
-                value : item.typeName
-            ] for item in @inventory )
-            if items.length is 0 then items = [
-                type : 'text'
-                value : '(no items)'
-            ]
-            capname = @name[0].toUpperCase() + @name[1..]
-            items.unshift
-                type : 'text'
-                value : "<h3>Player #{capname}'s inventory:</h3>"
-            items.push
+            otherPlayer.showUI @inventoryInspected().concat [
                 type : 'action'
                 value : 'Done'
                 cancel : yes
                 action : -> otherPlayer.showCommandUI()
-            otherPlayer.showUI items
+            ]
 
 ## Player Location
 
