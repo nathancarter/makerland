@@ -588,11 +588,11 @@ inventories, and interact with creature and landscape items.
                                         name = thing.typeName
                                     else if thing in movables
                                         icon = require( './movableitems' ) \
-                                            .smallIcon thing.index
+                                            .normalIcon thing.index
                                         name = thing.typeName
                                     else if thing in creatures
                                         icon = require( './creatures' ) \
-                                            .smallIcon thing.index
+                                            .normalIcon thing.index
                                         name = thing.typeName
                                     else
                                         icon = 'Player'
@@ -600,7 +600,7 @@ inventories, and interact with creature and landscape items.
                                     name = name[0].toUpperCase() + name[1..]
                                     controls.push [
                                         type : 'text'
-                                        value : icon
+                                        value : "<center>#{icon}</center>"
                                     ,
                                         type : 'text'
                                         value : name
