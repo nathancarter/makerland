@@ -444,10 +444,18 @@ animation data for drawing the animation, then sticks it into a global
 object of active animations that is used in each call to `redrawCanvas`,
 indirectly, by the `drawAnimations` routine below.
 
+After updating the animation list, we look through the list of new
+animations to see (based on their unique IDs given on the server) how many
+of them were pre-existing.  For those that were pre-existing, we copy the
+`memory` object they've already created, so that any state they are already
+in will be preserved across this call.  This way a block update does not
+cause, for example, a particle system to suddenly change all its random
+values.
+
     animationCache = { }
     activeAnimations = { }
     socket.on 'animations for block', ( message ) ->
-        activeAnimations[message.block] = [ ]
+        newAnimationListForBlock = [ ]
         for animation in message.animations
             if animation.definition?
                 animationCache[animation.type] = animation.definition
@@ -489,13 +497,21 @@ indirectly, by the `drawAnimations` routine below.
             catch e
                 console.log "Could not create animation:", code, e
                 return
-            activeAnimations[message.block].push
+            newAnimationListForBlock.push
                 startTime : ( new Date ) - animation.elapsed
                 function : animationFunction
                 parameters : animation.parameters
                 duration : animationCache[animation.type]?.duration ? 1
                 definition : animationCache[animation.type]
+                id : animation.id
                 memory : { }
+        memoryObjects = { }
+        for oldanimation in activeAnimations[message.block] ? [ ]
+            memoryObjects[oldanimation.id] = oldanimation.memory
+        for newanimation in newAnimationListForBlock
+            if memoryObjects.hasOwnProperty newanimation.id
+                newanimation.memory = memoryObjects[newanimation.id]
+        activeAnimations[message.block] = newAnimationListForBlock
 
 This routine is called by `redrawCanvas`, not only to draw all active
 animations, but also to clear out those that have run their full course.

@@ -329,6 +329,7 @@ of course.
                     type : animation.type
                     parameters : animation.parameters
                     elapsed : elapsed
+                    id : animation.id
                 if not playerObject.animationCache?[animation.type]
                     record.definition = animation.definition
                     ( playerObject.animationCache ?= { } )[animation.type] \
