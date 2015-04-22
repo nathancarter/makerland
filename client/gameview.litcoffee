@@ -30,6 +30,50 @@ other data as well.
     socket.on 'cell data changed', ( data ) ->
         delete cellTypeData[data]
         delete cellTypeData["#{data} icon"]
+        for direction in [ 'N', 'S', 'E', 'W', 'NE', 'NW', 'SE', 'SW' ]
+            delete cellTypeData["#{data} fade #{direction}"]
+
+In order to permit cells blurring a bit into adjacent cells, we create a
+method for converting existing cell types into faded edges of themselves,
+for overlaying on the adjacent cells.  The index parameter is the same as to
+`getCellTypeIcon`, while the direction parameter must be one of N, S, E, W,
+NE, SE, NW, SW.
+
+    getFadedCellEdge = ( index, direction, radius ) ->
+        direction = direction.toUpperCase()
+        key = "#{index} fade #{direction}"
+        if not cellTypeData.hasOwnProperty key
+            original = getCellTypeIcon index
+            if not original.complete then return null
+            result = document.createElement 'canvas'
+            result.width = result.height = 80
+            ctx = result.getContext '2d'
+            S = window.gameSettings.cellSizeInPixels
+            ctx.drawImage original, 0, 0, S, S
+            gradient = switch direction
+                when 'N'
+                    ctx.createLinearGradient 0, S, 0, S - radius
+                when 'S'
+                    ctx.createLinearGradient 0, 0, 0, radius
+                when 'E'
+                    ctx.createLinearGradient 0, 0, radius, 0
+                when 'W'
+                    ctx.createLinearGradient S, 0, S - radius, 0
+                when 'NE'
+                    ctx.createRadialGradient 0, S, 0, 0, S, radius
+                when 'SE'
+                    ctx.createRadialGradient 0, 0, 0, 0, 0, radius
+                when 'NW'
+                    ctx.createRadialGradient S, S, 0, S, S, radius
+                when 'SW'
+                    ctx.createRadialGradient S, 0, 0, S, 0, radius
+            gradient.addColorStop 0, 'rgba(255,255,255,0)'
+            gradient.addColorStop 1, 'rgba(255,255,255,1)'
+            ctx.fillStyle = gradient
+            ctx.globalCompositeOperation = 'destination-out'
+            ctx.fillRect 0, 0, S, S
+            cellTypeData[key] = result
+        cellTypeData[key]
 
 Now we create very similar functions for getting data on landscape items
 from the server.
@@ -210,7 +254,53 @@ that moves as the player walks.  Later, it will have an actual map in it.
                     if cellType > -1
                         index = cellType
                         ctdata = lookupCellType index
-                        if ctdata and ctdata['border size'] > 0
+                        if ctdata and ctdata['fade size'] > 0
+                            R = cellSize * ctdata['fade size']
+                            if getMapCell( plane, x+i-1, y+j ) isnt index
+                                if fade = getFadedCellEdge index, 'W', R
+                                    context.drawImage fade,
+                                        screen.x - cellSize, screen.y,
+                                        cellSize, cellSize
+                            if getMapCell( plane, x+i+1, y+j ) isnt index
+                                if fade = getFadedCellEdge index, 'E', R
+                                    context.drawImage fade,
+                                        screen.x + cellSize, screen.y,
+                                        cellSize, cellSize
+                            if getMapCell( plane, x+i, y+j-1 ) isnt index
+                                if fade = getFadedCellEdge index, 'N', R
+                                    context.drawImage fade,
+                                        screen.x, screen.y - cellSize,
+                                        cellSize, cellSize
+                            if getMapCell( plane, x+i, y+j+1 ) isnt index
+                                if fade = getFadedCellEdge index, 'S', R
+                                    context.drawImage fade,
+                                        screen.x, screen.y + cellSize,
+                                        cellSize, cellSize
+                            if getMapCell( plane, x+i-1, y+j-1 ) isnt index
+                                if fade = getFadedCellEdge index, 'NW', R
+                                    context.drawImage fade,
+                                        screen.x - cellSize,
+                                        screen.y - cellSize,
+                                        cellSize, cellSize
+                            if getMapCell( plane, x+i-1, y+j+1 ) isnt index
+                                if fade = getFadedCellEdge index, 'SW', R
+                                    context.drawImage fade,
+                                        screen.x - cellSize,
+                                        screen.y + cellSize,
+                                        cellSize, cellSize
+                            if getMapCell( plane, x+i+1, y+j-1 ) isnt index
+                                if fade = getFadedCellEdge index, 'NE', R
+                                    context.drawImage fade,
+                                        screen.x + cellSize,
+                                        screen.y - cellSize,
+                                        cellSize, cellSize
+                            if getMapCell( plane, x+i+1, y+j+1 ) isnt index
+                                if fade = getFadedCellEdge index, 'SE', R
+                                    context.drawImage fade,
+                                        screen.x + cellSize,
+                                        screen.y + cellSize,
+                                        cellSize, cellSize
+                        else if ctdata and ctdata['border size'] > 0
                             context.strokeStyle = ctdata['border color']
                             context.lineWidth = ctdata['border size']
                             if getMapCell( plane, x+i-1, y+j ) isnt index

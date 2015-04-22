@@ -21,6 +21,7 @@ can walk on a cell type is "all."
         constructor : () ->
             super 'celltypes', 'Cell Types'
             @setDefault 'who can walk on it', 'all'
+            @setDefault 'fade size', 0
             @setDefault 'border size', 0
             @setDefault 'border color', '#000000'
 
@@ -158,6 +159,35 @@ The UI for editing a cell type looks like the following.
             ,
                 [
                     type : 'text'
+                    value : 'Fade amount:'
+                ,
+                    type : 'text'
+                    value : @get entry, 'fade size'
+                ,
+                    type : 'action'
+                    value : 'Change'
+                    action : =>
+                        ui.pickFromList player,
+                            "Choose fade amount.  Cells of this type will
+                            only fade their edges over into neighboring
+                            cells of a <i>different</i> type.
+                            <i>A fade amount other than \"none\" will
+                            override any border properties!</i>",
+                            {
+                                none : 0
+                                narrow : 0.15
+                                medium : 0.3
+                                broad : 0.45
+                            },
+                            @get( entry, 'fade size' ),
+                            ( result ) =>
+                                if result
+                                    @set entry, 'fade size', result
+                                again()
+                ]
+            ,
+                [
+                    type : 'text'
                     value : 'Border size:'
                 ,
                     type : 'text'
@@ -169,7 +199,9 @@ The UI for editing a cell type looks like the following.
                         ui.pickFromList player,
                             "Choose border thickness.  Borders are only
                             drawn between this cell type and neighboring
-                            cells of a <i>different</i> type.",
+                            cells of a <i>different</i> type.
+                            <i>Borders are completely ignored if the cell
+                            also has a fade property!</i>",
                             {
                                 none : 0
                                 thin : 0.5
