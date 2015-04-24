@@ -92,7 +92,7 @@ and remove the player from `allPlayers`.  Also, end the player's periodic
 status updates.
 
             socket.on 'disconnect', =>
-                for item in @inventory
+                for item in @inventory ? [ ]
                     item.move @getPosition()
                 index = Player::allPlayers.indexOf this
                 Player::allPlayers.splice index, 1
