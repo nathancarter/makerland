@@ -39,38 +39,51 @@ The players command lists all players who have logged in.
                     type : 'text'
                     value : '<h3>Players logged in now:</h3>'
                 ]
+                teleport = ( mover, goal ) ->
+                    require( './animations' ).showAnimation \
+                        mover.getPosition(), 'teleport out',
+                        center : mover.getPosition()
+                    require( './sounds' ).playSound 'teleport',
+                        mover.getPosition()
+                    mover.teleport goal.getPosition()
+                    require( './animations' ).showAnimation \
+                        goal.getPosition(), 'teleport in',
+                        center : goal.getPosition()
+                    require( './sounds' ).playSound 'teleport',
+                        goal.getPosition()
                 for name in names
-                    if player.name is 'admin' and name isnt 'Admin'
-                        toShow.push [
-                            type : 'text'
-                            value : name
-                        ,
-                            type : 'action'
-                            value : 'Teleport player here'
-                            action : =>
-                                other = Player.nameToPlayer \
-                                    name.toLowerCase()
-                                if other
-                                    require( './animations' ) \
-                                        .showAnimation \
-                                        other.getPosition(), 'teleport out',
-                                        center : other.getPosition()
-                                    require( './sounds' ).playSound \
-                                        'teleport', other.getPosition()
-                                    other.teleport player.getPosition()
-                                    require( './animations' ) \
-                                        .showAnimation \
-                                        player.getPosition(), 'teleport in',
-                                        center : player.getPosition()
-                                    require( './sounds' ).playSound \
-                                        'teleport', player.getPosition()
-                                    player.showOK "Teleported #{name}
-                                        here!"
-                        ]
-                    else
-                        toShow.push
-                            type : 'text'
-                            value : name
+                    do ( name ) ->
+                        if player.name is 'admin' and name isnt 'Admin'
+                            toShow.push [
+                                type : 'text'
+                                value : name
+                            ,
+                                type : 'action'
+                                value : 'Bring here'
+                                action : =>
+                                    if other = Player.nameToPlayer name
+                                        teleport other, player
+                                        player.showOK "Teleported #{name}
+                                            here!"
+                                    else
+                                        player.showOK "#{name} seems to
+                                            have logged out."
+                            ,
+                                type : 'action'
+                                value : 'Go there'
+                                action : =>
+                                    if other = Player.nameToPlayer name
+                                        teleport player, other
+                                        player.showOK "Teleported you to
+                                            #{name}!"
+                                    else
+                                        player.showOK "#{name} seems to
+                                            have logged out."
+                            ]
+                        else
+                            toShow.push
+                                type : 'text'
+                                value : name
                 toShow.push
                     type : 'action'
                     value : 'Done'
