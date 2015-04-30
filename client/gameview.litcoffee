@@ -256,46 +256,78 @@ that moves as the player walks.  Later, it will have an actual map in it.
                         ctdata = lookupCellType index
                         if ctdata and ctdata['fade size'] > 0
                             R = cellSize * ctdata['fade size']
-                            if getMapCell( plane, x+i-1, y+j ) isnt index
-                                if fade = getFadedCellEdge index, 'W', R
+                            neighbor = getMapCell( plane, x+i-1, y+j )
+                            if neighbor isnt index
+                                ntype = lookupCellType neighbor
+                                if ntype['fade size'] is 0 and \
+                                   ntype['border size'] is 0 and \
+                                   fade = getFadedCellEdge index, 'W', R
                                     context.drawImage fade,
                                         screen.x - cellSize, screen.y,
                                         cellSize, cellSize
-                            if getMapCell( plane, x+i+1, y+j ) isnt index
-                                if fade = getFadedCellEdge index, 'E', R
+                            neighbor = getMapCell( plane, x+i+1, y+j )
+                            if neighbor isnt index
+                                ntype = lookupCellType neighbor
+                                if ntype['fade size'] is 0 and \
+                                   ntype['border size'] is 0 and \
+                                   fade = getFadedCellEdge index, 'E', R
                                     context.drawImage fade,
                                         screen.x + cellSize, screen.y,
                                         cellSize, cellSize
-                            if getMapCell( plane, x+i, y+j-1 ) isnt index
-                                if fade = getFadedCellEdge index, 'N', R
+                            neighbor = getMapCell( plane, x+i, y+j-1 )
+                            if neighbor isnt index
+                                ntype = lookupCellType neighbor
+                                if ntype['fade size'] is 0 and \
+                                   ntype['border size'] is 0 and \
+                                   fade = getFadedCellEdge index, 'N', R
                                     context.drawImage fade,
                                         screen.x, screen.y - cellSize,
                                         cellSize, cellSize
-                            if getMapCell( plane, x+i, y+j+1 ) isnt index
-                                if fade = getFadedCellEdge index, 'S', R
+                            neighbor = getMapCell( plane, x+i, y+j+1 )
+                            if neighbor isnt index
+                                ntype = lookupCellType neighbor
+                                if ntype['fade size'] is 0 and \
+                                   ntype['border size'] is 0 and \
+                                   fade = getFadedCellEdge index, 'S', R
                                     context.drawImage fade,
                                         screen.x, screen.y + cellSize,
                                         cellSize, cellSize
-                            if getMapCell( plane, x+i-1, y+j-1 ) isnt index
-                                if fade = getFadedCellEdge index, 'NW', R
+                            neighbor = getMapCell( plane, x+i-1, y+j-1 )
+                            if neighbor isnt index
+                                ntype = lookupCellType neighbor
+                                if ntype['fade size'] is 0 and \
+                                   ntype['border size'] is 0 and \
+                                   fade = getFadedCellEdge index, 'NW', R
                                     context.drawImage fade,
                                         screen.x - cellSize,
                                         screen.y - cellSize,
                                         cellSize, cellSize
-                            if getMapCell( plane, x+i-1, y+j+1 ) isnt index
-                                if fade = getFadedCellEdge index, 'SW', R
+                            neighbor = getMapCell( plane, x+i-1, y+j+1 )
+                            if neighbor isnt index
+                                ntype = lookupCellType neighbor
+                                if ntype['fade size'] is 0 and \
+                                   ntype['border size'] is 0 and \
+                                   fade = getFadedCellEdge index, 'SW', R
                                     context.drawImage fade,
                                         screen.x - cellSize,
                                         screen.y + cellSize,
                                         cellSize, cellSize
-                            if getMapCell( plane, x+i+1, y+j-1 ) isnt index
-                                if fade = getFadedCellEdge index, 'NE', R
+                            neighbor = getMapCell( plane, x+i+1, y+j-1 )
+                            if neighbor isnt index
+                                ntype = lookupCellType neighbor
+                                if ntype['fade size'] is 0 and \
+                                   ntype['border size'] is 0 and \
+                                   fade = getFadedCellEdge index, 'NE', R
                                     context.drawImage fade,
                                         screen.x + cellSize,
                                         screen.y - cellSize,
                                         cellSize, cellSize
-                            if getMapCell( plane, x+i+1, y+j+1 ) isnt index
-                                if fade = getFadedCellEdge index, 'SE', R
+                            neighbor = getMapCell( plane, x+i+1, y+j+1 )
+                            if neighbor isnt index
+                                ntype = lookupCellType neighbor
+                                if ntype['fade size'] is 0 and \
+                                   ntype['border size'] is 0 and \
+                                   fade = getFadedCellEdge index, 'SE', R
                                     context.drawImage fade,
                                         screen.x + cellSize,
                                         screen.y + cellSize,
