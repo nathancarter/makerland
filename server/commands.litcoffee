@@ -910,6 +910,7 @@ the mouse on the map itself.
                     cancel : yes
                     action : -> mainMenu()
                 editItem = ( item ) ->
+                    delta = 0.05
                     player.showUI
                         type : 'text'
                         value : '<h3>Editing landscape item</h3>'
@@ -924,6 +925,46 @@ the mouse on the map itself.
                         action : ->
                             require( './behaviors' ).editAttachments \
                                 player, item, changeItems
+                    ,
+                        type : 'text'
+                        value : 'Move the item with these buttons:'
+                    ,
+                        [
+                            type : 'text'
+                            value : ' '
+                        ,
+                            type : 'action'
+                            value : '&#8593;'
+                            action : -> item.moveBy 0, -delta
+                        ,
+                            type : 'text'
+                            value : ' '
+                        ]
+                    ,
+                        [
+                            type : 'action'
+                            value : '&#8592;'
+                            action : -> item.moveBy -delta, 0
+                        ,
+                            type : 'text'
+                            value : ' '
+                        ,
+                            type : 'action'
+                            value : '&#8594;'
+                            action : -> item.moveBy delta, 0
+                        ]
+                    ,
+                        [
+                            type : 'text'
+                            value : ' '
+                        ,
+                            type : 'action'
+                            value : '&#8595;'
+                            action : -> item.moveBy 0, delta
+                        ,
+                            type : 'text'
+                            value : ' '
+                        ]
                     ,
                         type : 'action'
                         value : 'Delete it'

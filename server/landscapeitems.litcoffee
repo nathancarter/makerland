@@ -20,8 +20,8 @@ At construction time, store the name of the block in which we live, and
 compute our size based on our type, then our top-left and bottom-right
 corners as well.
 
-        constructor : ( @plane, @x, @y ) ->
-            @position = [ @plane, @x, @y ]
+        constructor : ( plane, x, y ) ->
+            @setPosition plane, x, y
             blockTable = require './blocks'
             @block = blockTable.positionToBlockName @plane, @x, @y
             if tableEntry = blockTable.getLandscapeItem @plane, @x, @y
@@ -38,6 +38,10 @@ corners as well.
             @uses = { }
             for behavior in @behaviors ?= [ ]
                 require( './behaviors' ).installBehavior behavior, this
+
+Convenience function for manipulating four attributes at once.
+
+        setPosition : ( @plane, @x, @y ) => @position = [ @plane, @x, @y ]
 
 This utility tests whether an object at a given position is bumping into
 this landscape item.  The object's position is given by a rectangular
@@ -77,6 +81,14 @@ then check to see if there is any other way to interact with it.
                 cancel : yes
                 action : -> player.showCommandUI()
             player.showUI controls
+
+To move this landscape item by a small amount, specify the dx and dy to this
+function, and it will call the appropriate function in the blocks table for
+you.  Returns true on success, false on failure.
+
+        moveBy : ( dx, dy ) =>
+            require( './blocks' ).moveLandscapeItem this, @plane,
+                @x + dx, @y + dy
 
 Landscape items can also save themselves to disk, by writing to the block in
 which they sit.  This is done through a special method provided by the

@@ -160,6 +160,13 @@ place of accuracy.
             @setBlockData plane, x, y, 'landscape items',
                 ( item for item in items when not @pointsAreClose \
                   item.position[0], item.position[1], blockx, blocky )
+
+To update an landscape item, which means saving its latest data into the
+block that already contains the item, pass the item to the following
+function.  This function finds the block containing the item, then finds the
+item data within that block, then updates it to match the content of the
+object passed as parameter.
+
         setLandscapeItem : ( updatedItem ) =>
             { plane, x, y, type, behaviors } = updatedItem
             items = @getBlockData plane, x, y, 'landscape items'
@@ -176,6 +183,21 @@ place of accuracy.
                     @setBlockData plane, x, y, 'landscape items', items
                     return yes
             no
+
+To move a landscape item, we must do a few things.  First, ensure that there
+is not another landscape item at the location to which we want to move the
+given one.  Then put a new item with the same data at the new location while
+deleting the old item.  Return true on success, false on failure.
+
+        moveLandscapeItem : ( oldItem, newPlane, newX, newY ) =>
+            @removeLandscapeItem oldItem.position...
+            success = @addLandscapeItem newPlane, newX, newY, oldItem.type
+            if success
+                oldItem.setPosition newPlane, newX, newY
+            else
+                @addLandscapeItem oldItem.position..., oldItem.type
+            oldItem.save()
+            success
 
 This function checks all blocks touching the current one and finds all
 landscape items whose rectangle includes the given map coordinates.  The
