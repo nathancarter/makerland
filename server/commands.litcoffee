@@ -490,24 +490,26 @@ so, to refresh the view.
                         ]
                         for own name, func of item.uses
                             if typeof func is 'function'
-                                contents.push [
-                                    type : 'text'
-                                    value : ''
-                                ,
-                                    type : 'action'
-                                    value : name
-                                    action : ->
-                                        try
-                                            func.apply item
-                                        catch e
-                                            author = mi.getAuthors(
-                                                item.index )[0]
-                                            e.prefixLength = 4 # no idea why
-                                            require( './logs' ).logError \
-                                                author, "doing \"#{name}\"
-                                                to \"#{item.typeName}\"",
-                                                "#{func}", e
-                                ]
+                                do ( func ) ->
+                                    contents.push [
+                                        type : 'text'
+                                        value : ''
+                                    ,
+                                        type : 'action'
+                                        value : name
+                                        action : ->
+                                            try
+                                                func.apply item
+                                            catch e
+                                                author = mi.getAuthors(
+                                                    item.index )[0]
+                                                e.prefixLength = 4
+                                                require( './logs' ) \
+                                                .logError author,
+                                                    "doing \"#{name}\" to
+                                                    \"#{item.typeName}\"",
+                                                    "#{func}", e
+                                    ]
                 if contents.length is 1
                     contents.push { type : 'text', value : '(no items)' }
                 contents.push
