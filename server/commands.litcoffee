@@ -911,6 +911,50 @@ the mouse on the map itself.
                     value : 'Done'
                     cancel : yes
                     action : -> mainMenu()
+                pasteBehaviorsFrom = ( item ) ->
+                    pasteBehaviors = ( target ) ->
+                        target.behaviors = item.behaviors.slice()
+                        target.save?()
+                        player.showOK "Pasted #{item.behaviors.length}
+                            behaviors.", -> pasteBehaviorsFrom item
+                    player.mapClickMode \
+                        "Click on a landscape item on the map to paste the
+                        behaviors onto it.  (Number of behaviors to paste:
+                        #{item.behaviors.length}.)  This will completely
+                        overwrite any behaviors the target already has.",
+                        ( x, y ) ->
+                            targets = bt.getItemsOverPoint \
+                                player.getPosition()[0], x, y
+                            if targets.length is 1
+                                pasteBehaviors targets[0]
+                            else if targets.length > 1
+                                controls = [ ]
+                                for target in targets
+                                    do ( target ) ->
+                                        controls = controls.concat [
+                                            type : 'text'
+                                            value : "#{target.typeName}
+                                                at coordinates
+                                                (#{target.x},#{target.y})"
+                                        ,
+                                            type : 'action'
+                                            value : 'Paste into this one'
+                                            action : ->
+                                                pasteBehaviors target
+                                        ]
+                                controls.unshift
+                                    type : 'text'
+                                    value : '<h3>Which one?</h3>
+                                        <p>You clicked on or near several
+                                        landscape items.  Into which do you
+                                        want to paste the behaviors?</p>'
+                                controls.push
+                                    type : 'action'
+                                    value : 'Cancel'
+                                    cancel : yes
+                                    action : -> pasteBehaviorsFrom item
+                                player.showUI controls
+                        , -> editItem item
                 editItem = ( item ) ->
                     delta = 0.05
                     player.showUI
@@ -927,6 +971,10 @@ the mouse on the map itself.
                         action : ->
                             require( './behaviors' ).editAttachments \
                                 player, item, changeItems
+                    ,
+                        type : 'action'
+                        value : 'Copy behaviors to other items'
+                        action : -> pasteBehaviorsFrom item
                     ,
                         type : 'text'
                         value : 'Move the item with these buttons:'

@@ -11,6 +11,6 @@
     "port" : 9999,
     "movableItemLifespanInSeconds" : 600,
     "creatureLifespanInSeconds" : 600,
-    "timePlayersStayDeadInSeconds" : 10,
+    "timePlayersStayDeadInSeconds" : 60,
     "locationPlayersAwakeAfterDeath" : [ 9, 0, 0 ]
 }
