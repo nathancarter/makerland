@@ -43,6 +43,10 @@ player's `saveData` is loaded; creatures should call it after construction.
         scope.maximumHitPoints ?= 100
         scope.hitPoints ?= scope.maximumHitPoints
         @inventory = [ ]
+        if this instanceof require( './creatures' ).Creature
+            @__heartBeatInterval = setInterval =>
+                @heartBeat()
+            , 2000
 
 The second function adds a player's health data to the player's status
 object before it's transmitted to the client for displaying.
@@ -65,6 +69,7 @@ living dies, trigger the death routine.
         if typeof delta isnt 'number' then return
         if not isFinite( delta ) or isNaN delta then return
         scope = @saveData ? this
+        original = scope.hitPoints
         scope.hitPoints += delta
         if scope.hitPoints > scope.maximumHitPoints
             scope.hitPoints = scope.maximumHitPoints
@@ -76,12 +81,15 @@ living dies, trigger the death routine.
             require( './animations' ).showAnimation @getPosition(),
                 'sparkle', { target : this.name, color : '#cc0000' }
             require( './sounds' ).playSound 'bone crack', @getPosition()
+        if scope.hitPoints isnt original
+            if this instanceof require( './creatures' ).Creature
+                console.log @typeName, 'hp', original, '->', scope.hitPoints
         if scope.hitPoints < 0 then @death() else @updateStatus?()
 
-Livings have a heart beat, which heals them slowly.
+Livings have a heart beat, which heals them slowly, as long as they remain
+alive.
 
-    module.exports.methods.heartBeat = ->
-        @changeHealth 1
+    module.exports.methods.heartBeat = -> @changeHealth @healRate ? 1
 
 When a living dies, handle it as follows.  First, move all their possessions
 out onto the ground nearby.  Then, if the object is a player instead of a
@@ -97,6 +105,10 @@ and disconnect the socket.
         @updateStatus?()
         @saveData?.timeOfDeath = new Date
         @socket?.disconnect()
+        if @__heartBeatInterval?
+            clearInterval @__heartBeatInterval
+            delete @__heartBeatInterval
+        @destroy?()
 
 This function is called when the game re-awakens a player from death.  It
 gives them a small amount of hit points from which they will be able to

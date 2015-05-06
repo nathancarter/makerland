@@ -607,7 +607,7 @@ function instead.
             player = Player.nameToPlayer playerName
             if player then player.socket.emit 'creature instance update',
                 block : block
-                creature : creatureObject
+                creature : creatureObject.forClient()
     module.exports.notifyAboutMovableItemUpdate = ( itemObject ) ->
         block = module.exports.positionToBlockName itemObject.location...
         for playerName in playersWhoCanSeeBlock?[block] ? [ ]

@@ -35,6 +35,8 @@ calling our `moveTo()` method.
             if @type = module.exports.getWithDefaults @index
                 @typeName = @type.name
                 @behaviors = @type.behaviors
+                @maximumHitPoints = @type.maximumHitPoints
+                @healRate = @type.healRate
             @uses = { }
             for behavior in @behaviors ?= [ ]
                 require( './behaviors' ).installBehavior behavior, this
@@ -51,14 +53,6 @@ creature its index in that array as its unique ID.
             if not @ID?
                 @ID = Creature::allCreatures.length
                 Creature::allCreatures.push this
-            # debugging information for when too many creatures appeared...
-            #try
-            #    throw Error 'Inside the Creature constructor'
-            #catch e
-            #    console.log '\n\n\nA CREATURE IS BEING CONSTRUCTED!'
-            #    console.log "index #{@index} typeName #{@typeName} ID
-            #        #{@ID}"
-            #    console.log e.stack.split( '\n' )[..10].join '\n'
 
 We therefore create a corresponding "destructor" which should be called to
 prepare this creature for garbage collection, such as when the creature
@@ -208,6 +202,8 @@ functionality.
 First, give the table its name and set default values for keys.
 
             super 'creatures'
+            @setDefault 'maximumHitPoints', 100
+            @setDefault 'healRate', 1
 
 ## Maker Database Browsing
 
@@ -250,7 +246,7 @@ Who can edit individual entries in the creatures table is determined by the
 authors list, which is the default implementation of `canEdit` in the
 `Table` class.
 
-The UI for editing a movable item looks like the following.
+The UI for editing a creature looks like the following.
 
         edit : ( player, entry, callback = -> player.showCommandUI() ) =>
             again = => @edit player, entry, callback
@@ -336,6 +332,92 @@ The UI for editing a movable item looks like the following.
                             accordingly.</p>",
                             again, ( contents ) =>
                                 @setFile entry, 'icon', contents
+                ]
+            ,
+                [
+                    type : 'text'
+                    value : 'Maximum hit points:'
+                ,
+                    type : 'text'
+                    value : @get entry, 'maximumHitPoints'
+                ,
+                    type : 'action'
+                    value : 'Change'
+                    action : =>
+                        player.showUI
+                            type : 'text'
+                            value : '<h3>Enter new maximum hit points:</h3>
+                                <p>For reference, new players start with 100
+                                hit points.  A small animal or insect might
+                                have 10 hit points, and a bear or elephant
+                                might have up to 1000.  Gigantic or magical
+                                creatures might have more.</p>'
+                        ,
+                            type : 'string input'
+                            name : 'new max hp'
+                            value : @get entry, 'maximumHitPoints'
+                        ,
+                            type : 'action'
+                            value : 'Change'
+                            default : yes
+                            action : ( event ) =>
+                                newval = event['new max hp'].trim()
+                                asInt = parseInt newval
+                                if isFinite( newval ) \
+                                   and not isNaN( asInt ) and asInt > 0
+                                    @set entry, 'maximumHitPoints', asInt
+                                    again()
+                                else
+                                    player.showOK 'Maximum hit points must
+                                        be a positive whole number.', again
+                        ,
+                            type : 'action'
+                            value : 'Cancel'
+                            cancel : yes
+                            action : again
+                ]
+            ,
+                [
+                    type : 'text'
+                    value : 'Heal rate:'
+                ,
+                    type : 'text'
+                    value : @get entry, 'healRate'
+                ,
+                    type : 'action'
+                    value : 'Change'
+                    action : =>
+                        player.showUI
+                            type : 'text'
+                            value : '<h3>Enter new heal rate:</h3>
+                                <p>This is the number of hit points the
+                                creature regains every 2 seconds.  For
+                                players, this number is 1.  Do not use a
+                                very high value, or the creature
+                                will be nearly invincible.</p>'
+                        ,
+                            type : 'string input'
+                            name : 'new heal rate'
+                            value : @get entry, 'healRate'
+                        ,
+                            type : 'action'
+                            value : 'Change'
+                            default : yes
+                            action : ( event ) =>
+                                newval = event['new heal rate'].trim()
+                                asFloat = parseFloat newval
+                                if isFinite( newval ) \
+                                   and not isNaN( asFloat ) and asFloat >= 0
+                                    @set entry, 'healRate', asFloat
+                                    again()
+                                else
+                                    player.showOK 'Heal rate must be a
+                                        non-negative number.', again
+                        ,
+                            type : 'action'
+                            value : 'Cancel'
+                            cancel : yes
+                            action : again
                 ]
             ,
                 type : 'action'
