@@ -21,6 +21,7 @@ The class maintains a list of all connected players, as a class variable.
 You can look up a player by name with the following class method.
 
         @nameToPlayer : ( name ) ->
+            name = name.toLowerCase()
             for player in Player::allPlayers
                 if player.name is name then return player
             null

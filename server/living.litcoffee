@@ -111,7 +111,8 @@ The following functions put items into the player's/creature's inventory, or
 take them out.  Neither function manipulates the inner data of the item
 itself.  Thus you should not call these functions yourself, because they
 will mess up data consistency.  Rather, you should call the item's `move()`
-function, which will call these functions in turn.
+function, which will call these functions in turn.  Be sure to first check
+the `canCarry()` function, defined below.
 
     module.exports.methods.addItemToInventory = ( item ) ->
         if item not in @inventory then @inventory.push item
@@ -128,6 +129,27 @@ capacity.
         carrying = 0
         carrying += heldItem.space for heldItem in @inventory
         carrying + item.space <= capacity
+
+Call this function to find an item (or all items) in the player's/creature's
+inventory that match the given data.
+ * If the data is a number, it will be matched against the items' indices in
+   the movable items table.  This includes the case where data is a string
+   containing just a single positive integer.
+ * If it is a string, it will be matched against the items' names.
+ * If it is a regexp, it will be tested against the items' names.
+
+    module.exports.methods.searchInventory = ( data, multiple = false ) ->
+        check = ( item ) ->
+            if typeof data is 'number' then return item.index is data
+            if typeof data is 'string' and /^[0-9]+$/.test data
+                return "#{item.index}" is data
+            if data instanceof RegExp then return data.test item.typeName
+            "#{data}".toLowerCase() is item.typeName.toLowerCase()
+        results = [ ]
+        for item in @inventory
+            if check item
+                if not multiple then return item else results.push item
+        if multiple then results else null
 
 The following function is useful when creating `gotInspectedBy()`
 implementations, which must show the inventory.  This creates a portion of a
