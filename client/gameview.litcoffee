@@ -611,7 +611,9 @@ values.
                         }
                         var CELL =
                             #{window.gameSettings.cellSizeInPixels};\n
-                        with ( view ) { #{code} }
+                        ( function () {
+                            with ( view ) { #{code} }
+                        } )();
                         view.restore();
                     })"
             try

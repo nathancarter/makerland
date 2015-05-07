@@ -558,9 +558,10 @@ inventories, and interact with creature and landscape items.
         inspect :
             category : 'basic'
             icon : 'inspect.png'
-            shortInfo : 'Inspect players, creatures, or items nearby'
-            help : 'This command inspects the closest object to you, or lets
-                you pick from a list if there are several.'
+            shortInfo : 'Inspect players, creatures, or items'
+            help : 'This command inspects the object you choose with your
+                mouse, or lets you pick from a list if there are several
+                clumped together.'
             run : ( player ) ->
                 N = require( './settings' ).mapBlockSizeInCells
                 pos = player.getPosition()
@@ -594,7 +595,6 @@ inventories, and interact with creature and landscape items.
                         else if results.length > 1
                             controls = [ ]
                             for thing in results
-                                if thing is player then continue
                                 do ( thing ) ->
                                     if thing in landscape
                                         icon =
@@ -635,6 +635,76 @@ inventories, and interact with creature and landscape items.
                                 action : -> player.showCommandUI()
                             player.showUI controls
                     , ( -> player.showCommandUI() ), 'zoom-in'
+
+
+The attack command allows the player to initiate combat with other players
+and creatures.
+
+        attack :
+            category : 'basic'
+            icon : 'attack.png'
+            shortInfo : 'Start combat with a player or creature'
+            help : 'This command attacks the player or creature you choose
+                with your mouse, or lets you pick from a list if there are
+                several.'
+            run : ( player ) ->
+                N = require( './settings' ).mapBlockSizeInCells
+                pos = player.getPosition()
+                bt = require './blocks'
+                closeEnough = ( position ) ->
+                    dx = position[1] - pos[1]
+                    dy = position[2] - pos[2]
+                    Math.sqrt( dx*dx + dy*dy ) < 2
+                player.mapClickMode \
+                    'Click on a creature or player to attack it.',
+                    ( x, y ) ->
+                        if not closeEnough [ pos[0], x, y ]
+                            return player.showOK 'You cannot attack things
+                                that are so far away from you.'
+                        creatures =
+                            bt.creaturesNearPosition [ pos[0], x, y ], 1
+                        players = require( './player' ) \
+                            .playersNearPosition [ pos[0], x, y ], 1
+                        players = ( p for p in players when p isnt player )
+                        results = creatures.concat players
+                        if results.length is 1
+                            player.attack results[0]
+                            player.showCommandUI()
+                        else if results.length > 1
+                            controls = [ ]
+                            for thing in results
+                                do ( thing ) ->
+                                    if thing in creatures
+                                        icon = require( './creatures' ) \
+                                            .normalIcon thing.index
+                                        name = thing.typeName
+                                    else
+                                        icon = 'Player'
+                                        name = thing.name
+                                    name = name[0].toUpperCase() + name[1..]
+                                    controls.push [
+                                        type : 'text'
+                                        value : "<center>#{icon}</center>"
+                                    ,
+                                        type : 'text'
+                                        value : name
+                                    ,
+                                        type : 'action'
+                                        value : 'Attack'
+                                        action : ->
+                                            player.attack thing
+                                            player.showCommandUI()
+                                    ]
+                            controls.unshift
+                                type : 'text'
+                                value : '<h3>Attack which target?</h3>'
+                            controls.push
+                                type : 'action'
+                                value : 'Cancel'
+                                cancel : yes
+                                action : -> player.showCommandUI()
+                            player.showUI controls
+                    , ( -> player.showCommandUI() ), 'crosshair'
 
 ## Maker Commands
 

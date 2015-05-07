@@ -54,6 +54,10 @@ creature its index in that array as its unique ID.
                 @ID = Creature::allCreatures.length
                 Creature::allCreatures.push this
 
+Players have a `getPosition()` member, so creatures should have it as well.
+
+        getPosition : => @location
+
 We therefore create a corresponding "destructor" which should be called to
 prepare this creature for garbage collection, such as when the creature
 dies.  This function moves the creature out of the global instances array,

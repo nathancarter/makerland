@@ -632,6 +632,7 @@ Which players (and later creatures) can see a certain position on the game
 map?  This will be useful for sending events such as "heard someone speak."
 
     module.exports.whoCanSeePosition = ( position ) =>
+        if position not instanceof Array then return [ ]
         bname = module.exports.positionToBlockName position...
         results = [ ]
         for playerName in playersWhoCanSeeBlock[bname] ? [ ]
