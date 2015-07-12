@@ -107,16 +107,10 @@ We want to tell the user running the server process what their internal and
 external IP addresses are, so that they can advertise these facts to anyone
 whom they want to join them in the game.
 
-    require( 'request' ) 'http://www.myexternalip.com',
-        ( error, response, body ) ->
-            if error
-                console.log 'Error attempting to find external IP address:',
-                    error.message, '\n'
-            else if response.statusCode isnt 200
-                console.log 'Attempting to find external IP address gave
-                    bad HTTP status code:', response.statusCode, '\n'
-            else if match = /data-ip="([^"]+)"/.exec body
-                console.log "\tExternal users connect here:\t
-                    http://#{match[1]}:#{settings.port or 9999}\n"
-            else
-                console.log 'Could not find external IP address.\n'
+    require( 'external-ip' )() ( error, ip ) ->
+        if error
+            console.log 'Error attempting to find external IP address:',
+                error.message, '\n'
+        else
+            console.log "\tExternal users connect here:\t
+                http://#{ip}:#{settings.port or 9999}\n"
