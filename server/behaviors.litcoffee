@@ -286,7 +286,8 @@ callback will be called when the player clicks Done.
             ]
             for behavior, index in object.behaviors
                 do ( index, behavior ) =>
-                    type = beTable.get behavior['behavior type']
+                    # must use variables not yet used, to preserve "do"
+                    btype = beTable.get behavior['behavior type']
                     params = [ ]
                     for own key, value of behavior
                         if key isnt 'behavior type'
@@ -301,7 +302,7 @@ callback will be called when the player clicks Done.
                         value : "<b>Parameters:</b><br>#{params.join ', '}"
                     ]
                     pair = [ ]
-                    if Object.keys( type.parameters ? { } ).length > 0
+                    if Object.keys( btype.parameters ? { } ).length > 0
                         pair.push
                             type : 'action'
                             value : 'Edit'
@@ -310,10 +311,10 @@ callback will be called when the player clicks Done.
                                     type : 'text'
                                     value : "<h3>Editing #{name}:</h3>"
                                 ]
-                                for own name, desc of type.parameters or { }
+                                for own name, desc of btype.parameters ? { }
                                     if name[...8] isnt 'default '
                                         value = behavior[name] ? \
-                                            type.parameters["default
+                                            btype.parameters["default
                                                 #{name}"] ? ''
                                         controls.push
                                             type : 'text'
