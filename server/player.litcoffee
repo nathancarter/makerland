@@ -196,12 +196,11 @@ first parameter can be a string or an array of strings.
         showOK : ( text, callback = @showCommandUI ) =>
             if text not instanceof Array then text = [ text ]
             args = ( { type : 'text', value : t } for t in text )
-            args.push {
+            args.push
                 type : 'action'
                 value : 'OK'
                 cancel : yes
                 action : callback
-            }
             @showUI args
 
 The following function presents a file upload UI, returning control to the
@@ -402,6 +401,7 @@ commands.
                 isMaker : @isMaker()
                 defaultCellType : defaultCellType
                 conditions : ( c.text for c in @statusConditions )
+                movementRate : @getStat 'movement rate'
             @addHealthToStatus result
             result
 

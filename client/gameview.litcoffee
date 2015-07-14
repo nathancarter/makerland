@@ -696,9 +696,9 @@ sync.  Feel free to make computations herein depend on `frameRate`.
     handleKeysPressed = ->
         if currentStatus.dead then return
         dx = dy = 0
-        speed = 2 * frameRate/1000
+        speed = ( currentStatus.movementRate ? 2 ) * frameRate/1000
         if keysDown[keyCodes.left] or keysDown[keyCodes.right] or \
-                keysDown[keyCodes.up] or keysDown[keyCodes.down]
+           keysDown[keyCodes.up] or keysDown[keyCodes.down]
             setWhereIWantToGo null
             if keysDown[keyCodes.left] then dx -= speed
             if keysDown[keyCodes.right] then dx += speed
@@ -707,7 +707,7 @@ sync.  Feel free to make computations herein depend on `frameRate`.
         else if destination = getWhereIWantToGo()
             [ plane, x, y ] = getPlayerPosition()
             if ( Math.abs( x - destination.x ) <= speed ) and \
-                    ( Math.abs( y - destination.y ) <= speed )
+               ( Math.abs( y - destination.y ) <= speed )
                 setWhereIWantToGo null
                 return
             else

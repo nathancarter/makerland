@@ -21,6 +21,25 @@ any object, class, or prototype.
         module.exports.mixIntoObject klass.prototype
     module.exports.mixIntoConstructor = module.exports.mixIntoClass
 
+## Global data
+
+Aour big global data structure is a list of stats that each living will
+have, together with its default values.
+
+    statsDefaultValues =
+
+Minimum and maximum damage refer to how much damage this creature does when
+striking other creatures.  The actual damage on a given hit is chosen
+uniformly from within this range.
+
+        'minimum damage' : 5
+        'maximum damage' : 15
+
+This is the rate at which the player walks around the game world, in units
+of blocks per second.
+
+        'movement rate' : 2
+
 ## Livings Initialization
 
     module.exports.methods = { }
@@ -48,6 +67,8 @@ player's `saveData` is loaded; creatures should call it after construction.
             @__heartBeatInterval = setInterval =>
                 @heartBeat()
             , 2000
+        scope.stats ?= { }
+        scope.stats[key] ?= value for own key, value of statsDefaultValues
 
 ## Health for Livings
 
@@ -264,7 +285,8 @@ We have found the highest-priority enemy on our enemies list that's close
 enough to strike.  The following code attempts to strike it.
 
         @attempt 'hit', => target.attempt 'got hit', =>
-            damage = require( './random' ).uniformClosed 5, 15
+            damage = require( './random' ).uniformClosed \
+                @getStat( 'minimum damage' ), @getStat 'maximum damage'
             require( './animations' ).showAnimation @getPosition(),
                 'hit',
                 agent : this.name ? this.ID
@@ -272,3 +294,28 @@ enough to strike.  The following code attempts to strike it.
                 strength : damage/50 + 0.5
             target.changeHealth -damage, this
             target.attackedBy this
+
+## Stats for Livings
+
+A living's base value for a statistic is stored in its stats mapping.  We
+can read and write it as follows.
+
+    module.exports.methods.getBaseStat = ( key ) ->
+        ( @saveData ? this )?.stats?[key]
+    module.exports.methods.setBaseStat = ( key, value ) ->
+        scope = @saveData ? this
+        scope.stats[key] = value
+
+Stat bonuses are stored in a separate object, so that they can be easily
+reported as bonuses, and so that they do not get accidentally permanently
+added to the base stats.
+
+    module.exports.methods.getStatBonus = ( key ) -> @statBonuses?[key] ? 0
+    module.exports.methods.setStatBonus = ( key, value ) ->
+        @statBonuses ?= { }
+        @statBonuses[key] = value
+
+The actual value of a stat for a living is the base plus the bonus.
+
+    module.exports.methods.getStat = ( key ) ->
+        @getBaseStat( key ) + @getStatBonus( key )

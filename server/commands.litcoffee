@@ -636,7 +636,6 @@ inventories, and interact with creature and landscape items.
                             player.showUI controls
                     , ( -> player.showCommandUI() ), 'zoom-in'
 
-
 The attack command allows the player to initiate combat with other players
 and creatures.
 
@@ -705,6 +704,38 @@ and creatures.
                                 action : -> player.showCommandUI()
                             player.showUI controls
                     , ( -> player.showCommandUI() ), 'crosshair'
+
+The stats command shows the player their base values for all stats, their
+current bonuses, and thus their current totals.
+
+        stats :
+            category : 'basic'
+            icon : 'stats.png'
+            shortInfo : 'View your character\'s stats'
+            help : 'This command shows you a table containing your
+                character\'s base stats, current stat bonuses, and the
+                totals.'
+            run : ( player ) ->
+                asText = ( string ) -> type : 'text', value : "#{string}"
+                header = ( string ) -> asText "<b><u>#{string}</u></b>"
+                toShow = [
+                    asText '<h3>Your stats:</h3>'
+                    ( header string \
+                      for string in [ 'Name', 'Base', 'Bonus', 'Total' ] )
+                ]
+                for own key of player.saveData.stats
+                    toShow.push ( asText string for string in [
+                        "<b>#{key[0].toUpperCase() + key[1..]}:</b>"
+                        player.getBaseStat key
+                        player.getStatBonus key
+                        player.getStat key
+                    ] )
+                toShow.push
+                    type : 'action'
+                    value : 'OK'
+                    cancel : yes
+                    action : -> player.showCommandUI()
+                player.showUI toShow
 
 ## Maker Commands
 
