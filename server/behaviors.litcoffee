@@ -296,7 +296,7 @@ callback will be called when the player clicks Done.
                                 '(unspecified)'}"
                     controls.push [
                         type : 'text'
-                        value : "<b>Name:</b><br>#{type.name}"
+                        value : "<b>Name:</b><br>#{btype.name}"
                     ,
                         type : 'text'
                         value : "<b>Parameters:</b><br>#{params.join ', '}"
@@ -348,7 +348,7 @@ callback will be called when the player clicks Done.
                                     value : "<p>The behavior's description,
                                              for reference:</p>
                                              <div class='well'
-                                             >#{type.description}</div>"
+                                             >#{btype.description}</div>"
                                 ]
                                 player.showUI controls
                     else
