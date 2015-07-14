@@ -446,6 +446,12 @@ can run multiple times on multiple objects.
                     var result = new ctor( index, null );
                     return result.typeName ? result : null;
                 }
+                function livingsNear ( position, radius ) {
+                    return require( './blocks' ).creaturesNearPosition(
+                        position, radius ).concat(
+                            require( './player' ).playersNearPosition(
+                                position, radius ) );
+                }
                 var loggedSetInterval = null;"
             if author
                 functions +=
@@ -464,8 +470,9 @@ can run multiple times on multiple objects.
                             } catch ( e ) {
                                 clearInterval( clearCode );
                                 require( './logs' ).logError( '#{author}',
-                                    'code called by setInterval()', func+'',
-                                    e );
+                                    'code called by setInterval()' +
+                                    ' -- line number may be unreliable',
+                                    func+'', e );
                             }
                         };
                         clearCode = setInterval.apply( null, arguments );

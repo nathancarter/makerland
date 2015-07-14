@@ -80,7 +80,7 @@ living dies, trigger the death routine.
         scope.hitPoints += delta
         if scope.hitPoints > scope.maximumHitPoints
             scope.hitPoints = scope.maximumHitPoints
-        if delta / scope.maximumHitPoints > 0.03
+        if delta > @healRate ? 1
             require( './animations' ).showAnimation @getPosition(),
                 'sparkle',
                 target : this.name ? this.ID
@@ -110,6 +110,9 @@ and disconnect the socket.
     module.exports.methods.death = ( killer ) ->
         killer.emit 'killed', this
         @emit 'died', killer
+        require( './animations' ).showAnimation @getPosition(),
+            'death', position : @getPosition()
+        require( './sounds' ).playSound 'death knell', @getPosition()
         for item in ( @inventory ? [ ] ).slice()
             destination = @getPosition()
             destination[1] += Math.random()
@@ -216,11 +219,26 @@ already on that list, they are moved to the top instead of added again.
             @enemies.splice already, 1
         @enemies.unshift enemy
 
-Begin attacked by an enemy adds them to the bottom of your enemies list.  If
+Being attacked by an enemy adds them to the bottom of your enemies list.  If
 they were already on that list, they are not moved.
 
     module.exports.methods.attackedBy = ( enemy ) ->
         if enemy not in @enemies then @enemies.push enemy
+
+The following function filters the enemies list by those that are with a
+given radius of the player.
+
+    module.exports.methods.enemiesWithin = ( radius ) ->
+        whereIAm = @getPosition()
+        if not whereIAm? then return [ ]
+        closeEnough = ( enemy ) ->
+            whereItIs = enemy.getPosition()
+            if not whereItIs? or whereIAm[0] isnt whereItIs[0]
+                return no
+            dx = whereIAm[1] - whereItIs[1]
+            dy = whereIAm[2] - whereItIs[2]
+            Math.sqrt( dx*dx + dy*dy ) <= radius
+        ( enemy for enemy in @enemies when closeEnough enemy )
 
 The following routine is called every heartbeat in this living.  It
 implements a single step of combat.  Details below.
@@ -238,25 +256,19 @@ who has died or logged out.
 Next, we attempt to fight the highest-priority enemy within reach.
 
         whereIAm = @getPosition()
-        for enemy in @enemies
-            whereItIs = enemy.getPosition()
-            if whereIAm[0] isnt whereItIs[0] then continue
-            dx = whereIAm[1] - whereItIs[1]
-            dy = whereIAm[2] - whereItIs[2]
-            if Math.sqrt( dx*dx + dy*dy ) > 1 then continue
+        reachableEnemies = @enemiesWithin 1
+        if reachableEnemies.length is 0 then return
+        target = reachableEnemies[0]
 
 We have found the highest-priority enemy on our enemies list that's close
 enough to strike.  The following code attempts to strike it.
 
-            @attempt 'hit', => enemy.attempt 'got hit', =>
-                require( './animations' ).showAnimation @getPosition(),
-                    'hit',
-                    agent : this.name ? this.ID
-                    target : enemy.name ? enemy.ID
-                enemy.changeHealth -10, this
-                enemy.attackedBy this
-
-We can only attempt to strike one enemy at a time, so we now stop searching
-for enemies to strike.
-
-            break
+        @attempt 'hit', => target.attempt 'got hit', =>
+            damage = require( './random' ).uniformClosed 5, 15
+            require( './animations' ).showAnimation @getPosition(),
+                'hit',
+                agent : this.name ? this.ID
+                target : target.name ? target.ID
+                strength : damage/50 + 0.5
+            target.changeHealth -damage, this
+            target.attackedBy this
