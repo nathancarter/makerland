@@ -39,3 +39,43 @@ likely to be chosen.
 
     module.exports.uniformFromArray = ( A ) ->
         A[module.exports.uniformInteger 0, A.length-1]
+
+## Checking an action's success
+
+When a living (creature or player) attempts a task with difficulty n, we
+take the relevant stat and randomly decide if they succeed, weighting the
+probability of success by the stat value and the probability of failure by
+the difficulty n.
+
+    module.exports.statCheck = ( living, statName, difficulty ) ->
+        statValue = living.getStat statName
+        random = module.exports.uniformInteger( 1, statValue + difficulty )
+        if result = random <= statValue
+            living.emit 'passed stat check', statName, difficulty
+        else
+            living.emit 'failed stat check', statName, difficulty
+        result
+
+## Checking a competitive action's success
+
+This is the same as the previous, but the difficulty is given by the stat
+value of some competing living that is trying to prevent the first from
+completing its action (e.g., an enemy trying to dodge an attack, using its
+dodging stat).
+
+    module.exports.statCompetition =
+    ( actor, actorStatName, opponent, opponentStatName ) ->
+        statValue = actor.getStat actorStatName
+        difficulty = opponent.getStat opponentStatName
+        random = module.exports.uniformInteger( 1, statValue + difficulty )
+        if result = random <= statValue
+            actor.emit 'won stat competition', actorStatName, opponent,
+                opponentStatName
+            opponent.emit 'lost stat competition', opponentStatName, actor,
+                actorStatName
+        else
+            actor.emit 'lost stat competition', actorStatName, opponent,
+                opponentStatName
+            opponent.emit 'won stat competition', opponentStatName, actor,
+                actorStatName
+        result

@@ -35,6 +35,16 @@ uniformly from within this range.
         'minimum damage' : 5
         'maximum damage' : 15
 
+Attack accuracy is the ability to connect successfully when you attempt to
+hit an enemy.  Dodging ability is its counterpart, the ability to avoid
+being hit when an enemy attempts to hit you.  These numbers are largely
+irrelevant in the absolute; what matters is how the values of an attacker
+and defender compare.  Making them equal by default means that livings with
+default stats have a 50% chance of hitting one another on each swing.
+
+        'attack accuracy' : 10
+        'dodging ability' : 10
+
 This is the rate at which the player walks around the game world, in units
 of blocks per second.
 
@@ -69,9 +79,11 @@ player's `saveData` is loaded; creatures should call it after construction.
         @inventory = [ ]
         @enemies = [ ]
         if this instanceof require( './creatures' ).Creature
-            @__heartBeatInterval = setInterval =>
-                @heartBeat()
-            , 2000
+            setTimeout => # randomly offset heartbeat from others'
+                @__heartBeatInterval = setInterval =>
+                    @heartBeat()
+                , 2000
+            , Math.random()*2000
         scope.stats ?= { }
         scope.stats[key] ?= value for own key, value of statsDefaultValues
 
@@ -287,21 +299,40 @@ Next, we attempt to fight the highest-priority enemy within reach.
         target = reachableEnemies[0]
 
 We have found the highest-priority enemy on our enemies list that's close
-enough to strike.  The following code attempts to strike it.
+enough to strike.  At this point, it doesn't matter whether our attack
+succeeds, the enemy should be notified that we have attacked it.
+
+        target.attackedBy this
+
+Now we test whether we randomly succeed in our attempt to strike it.  If we
+missed, play a "miss" sound and stop.
+
+        random = require './random'
+        if not random.statCompetition( this,   'attack accuracy',
+                                       target, 'dodging ability' )
+            require( './sounds' ).playSound 'miss', @getPosition()
+            this.emit 'missed target', target
+            target.emit 'dodged attack', this
+            return
+
+We connected, so we now check to see if there are any event handlers that
+block our attempt to actually do damage.
 
         @attempt 'hit', => target.attempt 'got hit', =>
+
+If not, then the following code will be run.  It computes and delivers the
+damage, with a corresponding animation that shows a small projectile moving
+from attacker to target.  Animation and sound for the actual damage will
+be triggered by the change in health.
+
             min = @getStat 'minimum damage'
             max = @getStat 'maximum damage'
-            damage = require( './random' ).uniformClosed min, max
-            console.log ( @name ? @typeName ), 'hit for', damage,
-                'which is supposed to be in the range', min, max
-            require( './animations' ).showAnimation @getPosition(),
-                'hit',
+            damage = random.uniformClosed min, max
+            require( './animations' ).showAnimation @getPosition(), 'hit',
                 agent : this.name ? this.ID
                 target : target.name ? target.ID
                 strength : damage/50 + 0.5
             target.changeHealth -damage, this
-            target.attackedBy this
 
 ## Stats for Livings
 
