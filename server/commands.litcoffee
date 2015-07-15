@@ -467,6 +467,7 @@ so, to refresh the view.
                     type : 'text'
                     value : '<h3>Your inventory:</h3>'
                 ]
+                eqTypes = require( './living' ).humanEquipmentTypes()
                 for item in player.inventory
                     do ( item ) ->
                         contents.push [
@@ -488,6 +489,17 @@ so, to refresh the view.
                                     player.showOK failReason, refreshView
                                 , player
                         ]
+                        if item.equipmentType in eqTypes
+                            contents.push [
+                                type : 'text'
+                                value : ''
+                            ,
+                                type : 'action'
+                                value : 'equip'
+                                action : ->
+                                    player.showOK 'This is not yet
+                                        implemented.', refreshView
+                            ]
                         for own name, func of item.uses
                             if typeof func is 'function'
                                 do ( func ) ->

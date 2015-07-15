@@ -214,6 +214,7 @@ First, give the table its name and set default values for keys.
             Living = require './living'
             for name in Living.statNames()
                 @setDefault name, Living.statDefault name
+            @setDefault 'body parts', Living.humanEquipmentTypes()
 
 ## Maker Database Browsing
 
@@ -473,6 +474,27 @@ The UI for editing a creature looks like the following.
                             action : again
                 ]
             toShow = toShow.concat [
+                [
+                    type : 'text'
+                    value : '<b>Body parts:</b>'
+                ,
+                    type : 'text'
+                    value : @get( entry, 'body parts' ).join ', '
+                ,
+                    type : 'action'
+                    value : 'Change'
+                    action : =>
+                        save = ( newList ) =>
+                            @set entry, 'body parts', newList
+                            again()
+                        require( './ui' ).editListUI player,
+                            @get( entry, 'body parts' ),
+                            "Editing list of body parts for creature
+                                \"#{@get entry, 'name'}\" (that is, body
+                                parts that can wear equipment)",
+                            ( -> yes ), save, again
+                ]
+            ,
                 type : 'action'
                 value : 'Edit behaviors'
                 action : =>

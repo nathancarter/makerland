@@ -35,6 +35,7 @@ carrying us, or a position on the map as a plane,x,y triple.
                 @typeName = @type.name
                 @space = @type.space
                 @behaviors = @type.behaviors
+                @equipmentType = @type.equipmentType
             @uses = { }
             for behavior in @behaviors ?= [ ]
                 require( './behaviors' ).installBehavior behavior, this
@@ -134,6 +135,7 @@ First, give the table its name and set default values for keys.
 
             super 'movableitems', 'Movable Items'
             @setDefault 'space', 1
+            @setDefault 'equipmentType', ''
 
 ## Maker Database Browsing
 
@@ -289,6 +291,51 @@ The UI for editing a movable item looks like the following.
                                 @set entry, 'space', asfloat
                                 player.showOK "Size of movable item
                                     #{entry} changed to #{asfloat}.", again
+                        ,
+                            type : 'action'
+                            value : 'Cancel'
+                            cancel : yes
+                            action : again
+                ]
+            ,
+                [
+                    type : 'text'
+                    value : 'Type of equipment:'
+                ,
+                    type : 'text'
+                    value : @get entry, 'equipmentType'
+                ,
+                    type : 'action'
+                    value : 'Change'
+                    action : =>
+                        humanTypes = require( './living' ) \
+                            .humanEquipmentTypes()
+                        player.showUI
+                            type : 'text'
+                            value : "<h3>Changing equipment type for
+                                #{@get entry, 'name'}:</h3>
+                                <p>If this can be worn, for example on the
+                                head as a helmet or hat, use \"head\" as the
+                                type of equipment.  The full set of human
+                                body parts that can accept equipment is
+                                #{humanTypes.join ', '}.  But you can use
+                                any value (e.g., tentacles for an octopus).
+                                If this is not a piece of wearable
+                                equipment, make its equipment type
+                                blank.</p>"
+                        ,
+                            type : 'string input'
+                            name : 'equipment type'
+                        ,
+                            type : 'action'
+                            value : 'Change equipment type'
+                            default : yes
+                            action : ( event ) =>
+                                newtype = event['equipment type']
+                                @set entry, 'equipmentType', newtype
+                                player.showOK "Equipment type for movable
+                                    item #{entry} changed to #{newtype}.",
+                                    again
                         ,
                             type : 'action'
                             value : 'Cancel'

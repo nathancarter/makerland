@@ -23,7 +23,7 @@ any object, class, or prototype.
 
 ## Global data
 
-Aour big global data structure is a list of stats that each living will
+Our first big global data structure is a list of stats that each living will
 have, together with its default values.
 
     statsDefaultValues =
@@ -55,6 +55,26 @@ These stats can be queried using the following API.
     module.exports.statNames = -> Object.keys statsDefaultValues
     module.exports.statDefault = ( key ) -> statsDefaultValues[key]
 
+The second big global data structure is a list of equipment types that a
+normal human-shaped creature can use.  These are a list of body parts that
+can accept equipment.  Non-human-shaped creatures will need to choose
+different parts; it is not necessary that they appear on this global list.
+
+    humanEquipmentTypes = [
+        'head'
+        'neck'
+        'body'
+        'arms'
+        'legs'
+        'feet'
+        'hands'
+        'weapon'
+    ]
+
+These types can be queried using the following API.
+
+    module.exports.humanEquipmentTypes = -> humanEquipmentTypes[..]
+
 ## Livings Initialization
 
     module.exports.methods = { }
@@ -78,6 +98,7 @@ player's `saveData` is loaded; creatures should call it after construction.
         scope.hitPoints ?= scope.maximumHitPoints
         @inventory = [ ]
         @enemies = [ ]
+        @equipment = { }
         if this instanceof require( './creatures' ).Creature
             setTimeout => # randomly offset heartbeat from others'
                 @__heartBeatInterval = setInterval =>
