@@ -597,7 +597,7 @@ Get all players within a certain radius of the given position.
                     + ( y1 - y2 ) * ( y1 - y2 )
         results = [ ]
         for player in Player::allPlayers
-            pp = player.getPosition()
+            if not ( pp = player.getPosition() )? then continue
             if pp[0] isnt position[0] then continue
             if distance( pp[1], pp[2], position[1], position[2] ) \
                 < radius then results.push player
