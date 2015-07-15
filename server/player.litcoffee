@@ -494,10 +494,9 @@ commands at all times, even ones just added moments ago.
                 @saveData.commands = ( key for own key of commands )
 
 The player may be new, and thus not have any commands; in that case we
-populate the list of commands with all the basic commands.  We actually do
-this for all players, so that in case anyone loses access to a basic
-command, or a new basic command is invented, players will automatically have
-access.
+populate the list of commands with just the quit command.  (Everyone should
+be able to quit!)  There must be in-game ways for learning all the other
+commands, such as a tutorial area for new players.
 
             @saveData.commands ?= [ 'quit' ]
             @saveData.commands
