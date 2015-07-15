@@ -521,7 +521,7 @@ at the time of attachment.
                     object.intervalSetIndex
                 runnable object, behaviorData
             catch e
-                e.prefixLength ?= runnable.prefixLength
+                e.prefixLength ?= runnable?.prefixLength
                 require( './logs' ).logError author,
                     "behavior #{@get index, 'name'}", code, e
 
