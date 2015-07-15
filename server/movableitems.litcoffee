@@ -79,6 +79,7 @@ invalid, then `null` will be used instead.
 
         move : ( newLocation ) =>
             if @location and 'removeItemFromInventory' of @location
+                @location.unequip? this
                 @location.removeItemFromInventory this
             else if @location instanceof Array
                 require( './blocks' ).removeMovableItemFromMap this
@@ -107,6 +108,14 @@ If this item gets inspected by a player, just print its basic information.
                 value : 'Done'
                 cancel : yes
                 action : -> player.showCommandUI()
+
+We can detect whether we are equipped by looking up our equipment type in
+our holder's equipment mapping (if we have a holder).
+
+        isEquipped : =>
+            if not @location? or @location instanceof Array
+                return no
+            @location.equipment?[@equipmentType] is this
 
 Mix handlers into `MovableItem`s.
 

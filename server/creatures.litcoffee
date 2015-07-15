@@ -37,6 +37,7 @@ calling our `moveTo()` method.
                 @behaviors = @type.behaviors
                 @maximumHitPoints = @type.maximumHitPoints
                 @healRate = @type.healRate
+                @bodyParts = @type.bodyParts
             @uses = { }
             for behavior in @behaviors ?= [ ]
                 require( './behaviors' ).installBehavior behavior, this
@@ -214,7 +215,7 @@ First, give the table its name and set default values for keys.
             Living = require './living'
             for name in Living.statNames()
                 @setDefault name, Living.statDefault name
-            @setDefault 'body parts', Living.humanEquipmentTypes()
+            @setDefault 'bodyParts', Living.humanEquipmentTypes()
 
 ## Maker Database Browsing
 
@@ -479,16 +480,16 @@ The UI for editing a creature looks like the following.
                     value : '<b>Body parts:</b>'
                 ,
                     type : 'text'
-                    value : @get( entry, 'body parts' ).join ', '
+                    value : @get( entry, 'bodyParts' ).join ', '
                 ,
                     type : 'action'
                     value : 'Change'
                     action : =>
                         save = ( newList ) =>
-                            @set entry, 'body parts', newList
+                            @set entry, 'bodyParts', newList
                             again()
                         require( './ui' ).editListUI player,
-                            @get( entry, 'body parts' ),
+                            @get( entry, 'bodyParts' ),
                             "Editing list of body parts for creature
                                 \"#{@get entry, 'name'}\" (that is, body
                                 parts that can wear equipment)",

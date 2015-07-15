@@ -470,6 +470,9 @@ so, to refresh the view.
                 eqTypes = require( './living' ).humanEquipmentTypes()
                 for item in player.inventory
                     do ( item ) ->
+                        contents.push
+                            type : 'text'
+                            value : '<hr>'
                         contents.push [
                             type : 'text'
                             value : mi.normalIcon item.index
@@ -489,7 +492,20 @@ so, to refresh the view.
                                     player.showOK failReason, refreshView
                                 , player
                         ]
-                        if item.equipmentType in eqTypes
+                        if item.isEquipped()
+                            contents.push [
+                                type : 'text'
+                                value : "(equipped, #{item.equipmentType})"
+                            ,
+                                type : 'action'
+                                value : 'unequip'
+                                action : ->
+                                    if maybeError = player.unequip item
+                                        return player.showOK maybeError,
+                                            refreshView
+                                    refreshView()
+                            ]
+                        else if item.equipmentType in eqTypes
                             contents.push [
                                 type : 'text'
                                 value : ''
@@ -497,8 +513,10 @@ so, to refresh the view.
                                 type : 'action'
                                 value : 'equip'
                                 action : ->
-                                    player.showOK 'This is not yet
-                                        implemented.', refreshView
+                                    if maybeError = player.equip item
+                                        return player.showOK maybeError,
+                                            refreshView
+                                    refreshView()
                             ]
                         for own name, func of item.uses
                             if typeof func is 'function'

@@ -248,13 +248,19 @@ Any additional controls can be added to the end of this array before it is
 shown with `player.showUI()`.
 
     module.exports.methods.inventoryInspected = ->
-        items = ( [
-            type : 'text'
-            value : require( './movableitems' ).smallIcon item.index
-        ,
-            type : 'text'
-            value : item.typeName
-        ] for item in @inventory )
+        items = [ ]
+        equipment = [ ]
+        for item in @inventory
+            row = [
+                type : 'text'
+                value : require( './movableitems' ).smallIcon item.index
+            ,
+                type : 'text'
+                value : item.typeName + if item.isEquipped() then \
+                    " (equipped, #{item.equipmentType})" else ''
+            ]
+            ( if item.isEquipped() then equipment else items ).push row
+        items = equipment.concat items
         if items.length is 0 then items = [
             type : 'text'
             value : '(no items)'
@@ -383,3 +389,40 @@ The actual value of a stat for a living is the base plus the bonus.
 
     module.exports.methods.getStat = ( key ) ->
         @getBaseStat( key ) + @getStatBonus( key )
+
+## Equipment for Livings
+
+This function causes a living to equip an item.  Several checks need to be
+made first.  This function either returns a string explaining why the item
+couldn't be equipped, or undefined if the equipping succeeded.
+
+    module.exports.methods.equip = ( item ) ->
+
+The living must be holding the item and be able to equip it (i.e., have the
+right body part).
+
+        if item.location isnt this
+            return 'You are not carrying that.'
+        myBodyParts = @bodyParts ? module.exports.humanEquipmentTypes()
+        if item.equipmentType not in myBodyParts
+            return 'You cannot equip things of that type.'
+
+Okay, I can equip it.  Do so now.
+
+        @equipment[item.equipmentType] = item
+        item.emit 'equipped by', this
+        this.emit 'equipped item', item
+        return
+
+This function is the reverse, unequipping something that you have equipped.
+Again, it checks to be sure this makes sense, and returns an error message
+on failure, or none on success.
+
+    module.exports.methods.unequip = ( item ) ->
+        for own type, equippedItem of @equipment
+            if equippedItem is item
+                delete @equipment[type]
+                item.emit 'unequipped by', this
+                this.emit 'unequipped item', item
+                return
+        'But you are not using that item now.'
