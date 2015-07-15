@@ -19,7 +19,7 @@ Draws a random integer from the set of integers from n to m inclusive, with
 each equally likely to be chosen.
 
     module.exports.uniformInteger = ( n, m ) ->
-        ( Math.random() * ( m - n + 1 ) ) | 0 + n
+        ( ( Math.random() * ( m - n + 1 ) ) | 0 ) + n
 
 ## Uniform random variable on [a,b]
 
