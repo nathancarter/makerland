@@ -40,6 +40,11 @@ of blocks per second.
 
         'movement rate' : 2
 
+These stats can be queried using the following API.
+
+    module.exports.statNames = -> Object.keys statsDefaultValues
+    module.exports.statDefault = ( key ) -> statsDefaultValues[key]
+
 ## Livings Initialization
 
     module.exports.methods = { }
@@ -285,8 +290,11 @@ We have found the highest-priority enemy on our enemies list that's close
 enough to strike.  The following code attempts to strike it.
 
         @attempt 'hit', => target.attempt 'got hit', =>
-            damage = require( './random' ).uniformClosed \
-                @getStat( 'minimum damage' ), @getStat 'maximum damage'
+            min = @getStat 'minimum damage'
+            max = @getStat 'maximum damage'
+            damage = require( './random' ).uniformClosed min, max
+            console.log ( @name ? @typeName ), 'hit for', damage,
+                'which is supposed to be in the range', min, max
             require( './animations' ).showAnimation @getPosition(),
                 'hit',
                 agent : this.name ? this.ID
@@ -314,6 +322,10 @@ added to the base stats.
     module.exports.methods.setStatBonus = ( key, value ) ->
         @statBonuses ?= { }
         @statBonuses[key] = value
+    module.exports.methods.addStatBonus = ( key, value, duration = 0 ) ->
+        @setStatBonus key, value + @getStatBonus key
+        if duration
+            setTimeout ( => @addStatBonus key, -value ), duration
 
 The actual value of a stat for a living is the base plus the bonus.
 

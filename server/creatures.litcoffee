@@ -41,6 +41,9 @@ calling our `moveTo()` method.
             for behavior in @behaviors ?= [ ]
                 require( './behaviors' ).installBehavior behavior, this
             @initLiving()
+            if @type
+                for name in require( './living' ).statNames()
+                    @setBaseStat name, @type[name]
 
 Now place the creature into the global instances array and store within the
 creature its index in that array as its unique ID.
@@ -208,6 +211,9 @@ First, give the table its name and set default values for keys.
             super 'creatures'
             @setDefault 'maximumHitPoints', 100
             @setDefault 'healRate', 1
+            Living = require './living'
+            for name in Living.statNames()
+                @setDefault name, Living.statDefault name
 
 ## Maker Database Browsing
 
@@ -240,6 +246,9 @@ the following.
             while "#{i}" in entries
                 i++
             @set "#{i}", name : 'new creature'
+            Living = require './living'
+            for statName in Living.statNames()
+                @set "#{i}", statName, Living.statDefault statName
             @setAuthors "#{i}", [ player.name ]
             player.showOK "The new creature was created with index #{i}.
                 You have been set as its only author.
@@ -254,7 +263,7 @@ The UI for editing a creature looks like the following.
 
         edit : ( player, entry, callback = -> player.showCommandUI() ) =>
             again = => @edit player, entry, callback
-            player.showUI
+            toShow = [
                 type : 'text'
                 value : "<h3>Editing creature #{entry}:</h3>"
             ,
@@ -423,7 +432,47 @@ The UI for editing a creature looks like the following.
                             cancel : yes
                             action : again
                 ]
-            ,
+            ]
+            Living = require './living'
+            for name in Living.statNames()
+                do ( name ) => toShow.push [
+                    type : 'text'
+                    value : "#{name[0].toUpperCase() + name[1..]}:"
+                ,
+                    type : 'text'
+                    value : @get entry, name
+                ,
+                    type : 'action'
+                    value : 'Change'
+                    action : =>
+                        player.showUI
+                            type : 'text'
+                            value : "<h3>Enter new #{name}:</h3>"
+                        ,
+                            type : 'string input'
+                            name : "new #{name}"
+                            value : @get entry, name
+                        ,
+                            type : 'action'
+                            value : 'Change'
+                            default : yes
+                            action : ( event ) =>
+                                newval = event["new #{name}"].trim()
+                                asFloat = parseFloat newval
+                                if isFinite( newval ) \
+                                   and not isNaN( asFloat )
+                                    @set entry, name, asFloat
+                                    again()
+                                else
+                                    player.showOK 'Any stat must be a finite
+                                        number, and cannot be NaN.', again
+                        ,
+                            type : 'action'
+                            value : 'Cancel'
+                            cancel : yes
+                            action : again
+                ]
+            toShow = toShow.concat [
                 type : 'action'
                 value : 'Edit behaviors'
                 action : =>
@@ -447,6 +496,8 @@ The UI for editing a creature looks like the following.
                 value : 'Done'
                 cancel : yes
                 action : callback
+            ]
+            player.showUI toShow
 
 A maker can remove a creature type if and only if that maker can edit it.
 
