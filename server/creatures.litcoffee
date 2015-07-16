@@ -38,6 +38,7 @@ calling our `moveTo()` method.
                 @maximumHitPoints = @type.maximumHitPoints
                 @healRate = @type.healRate
                 @bodyParts = @type.bodyParts
+                @experience = @type.experience
             @uses = { }
             for behavior in @behaviors ?= [ ]
                 require( './behaviors' ).installBehavior behavior, this
@@ -212,6 +213,7 @@ First, give the table its name and set default values for keys.
             super 'creatures'
             @setDefault 'maximumHitPoints', 100
             @setDefault 'healRate', 1
+            @setDefault 'experience', 150
             Living = require './living'
             for name in Living.statNames()
                 @setDefault name, Living.statDefault name
@@ -475,6 +477,54 @@ The UI for editing a creature looks like the following.
                             action : again
                 ]
             toShow = toShow.concat [
+                [
+                    type : 'text'
+                    value : "Experience:"
+                ,
+                    type : 'text'
+                    value : @get entry, 'experience'
+                ,
+                    type : 'action'
+                    value : 'Change'
+                    action : =>
+                        sum = @get( entry, 'maximumHitPoints' ) + \
+                              @get( entry, 'dodging ability' ) + \
+                              @get( entry, 'attack accuracy' ) + \
+                              @get( entry, 'minimum damage' ) + \
+                              @get( entry, 'maximum damage' )
+                        player.showUI
+                            type : 'text'
+                            value : "<h3>Enter new experience amount:</h3>
+                                <p>This is the number of experience points a
+                                player earns for killing this creature.  A
+                                reasonable value for a creature like this is
+                                approximately #{sum} experience points.</p>"
+                        ,
+                            type : 'string input'
+                            name : "new amount"
+                            value : @get entry, 'experience'
+                        ,
+                            type : 'action'
+                            value : 'Change'
+                            default : yes
+                            action : ( event ) =>
+                                newval = event["new amount"].trim()
+                                asFloat = parseFloat newval
+                                if isFinite( newval ) \
+                                   and not isNaN( asFloat ) and newval >= 0
+                                    @set entry, 'experience', asFloat
+                                    again()
+                                else
+                                    player.showOK 'Experience amount must be
+                                        a finite, nonnegative number.',
+                                        again
+                        ,
+                            type : 'action'
+                            value : 'Cancel'
+                            cancel : yes
+                            action : again
+                ]
+            ,
                 [
                     type : 'text'
                     value : '<b>Body parts:</b>'

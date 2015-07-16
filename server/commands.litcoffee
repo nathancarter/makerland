@@ -744,7 +744,7 @@ current bonuses, and thus their current totals.
             shortInfo : 'View your character\'s stats'
             help : 'This command shows you a table containing your
                 character\'s base stats, current stat bonuses, and the
-                totals.'
+                totals.  It also shows experience points.'
             run : ( player ) ->
                 asText = ( string ) -> type : 'text', value : "#{string}"
                 header = ( string ) -> asText "<b><u>#{string}</u></b>"
@@ -760,11 +760,18 @@ current bonuses, and thus their current totals.
                         player.getStatBonus key
                         player.getStat key
                     ] )
-                toShow.push
+                experience = player.saveData.experience ? 0
+                toShow = toShow.concat [
+                    type : 'text'
+                    value : "You also have #{experience} experience points
+                        to spend on improving these stats, when you are in
+                        a place or with a person that can help you train."
+                ,
                     type : 'action'
                     value : 'OK'
                     cancel : yes
                     action : -> player.showCommandUI()
+                ]
                 player.showUI toShow
 
 ## Maker Commands

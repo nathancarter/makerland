@@ -161,22 +161,34 @@ routine defined later in this module.
         @changeHealth @healRate ? 1
         @fightEnemies()
 
-When a living dies, handle it as follows.  First, move all their possessions
-out onto the ground nearby.  Then, if the object is a player instead of a
-creature, do three things: update their status, mark their time of death,
-and disconnect the socket.
+When a living dies, handle it as follows.  First, emit events and play
+sounds and animations.
 
     module.exports.methods.death = ( killer ) ->
-        killer.emit 'killed', this
+        killer?.emit 'killed', this
         @emit 'died', killer
         require( './animations' ).showAnimation @getPosition(),
             'death', position : @getPosition()
         require( './sounds' ).playSound 'death knell', @getPosition()
+
+If a player killed a creature, grant experience points.
+
+        if ( killer instanceof require( './player' ).Player ) and \
+           ( this instanceof require( './creatures' ).Creature )
+            killer.saveData.experience ?= 0
+            killer.saveData.experience += @experience ? 0
+
+This living, at death, should drop all its possessions.
+
         for item in ( @inventory ? [ ] ).slice()
             destination = @getPosition()
             destination[1] += Math.random()
             destination[2] += Math.random()
             item.move destination
+
+Things that die stop attacking, get marked as dead, stop their heartbeat,
+and either disconnect (if players) or are destroyed (if creatures).
+
         @enemies = [ ]
         @updateStatus?()
         @saveData?.timeOfDeath = new Date
@@ -371,6 +383,19 @@ can read and write it as follows.
     module.exports.methods.setBaseStat = ( key, value ) ->
         scope = @saveData ? this
         scope.stats[key] = value
+
+Some base stats cannot be incremented at certain times, so we provide a
+function that checks to see if we can increase it, and one that does
+increment it if we can.  The check function returns undefined if we *can*
+increment it, and a string explaining why not if we cannot.
+
+    module.exports.methods.checkIncrementBaseStat = ( key ) ->
+        if key is 'minimum damage' and \
+           @getBaseStat( key ) >= @getBaseStat 'maximum damage'
+            'You must increase your maximum damage first.'
+    module.exports.methods.incrementBaseStat = ( key ) ->
+        if not @checkIncrementBaseStat key
+            @setBaseStat key, 1 + @getBaseStat key
 
 Stat bonuses are stored in a separate object, so that they can be easily
 reported as bonuses, and so that they do not get accidentally permanently

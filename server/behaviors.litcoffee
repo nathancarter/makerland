@@ -452,6 +452,10 @@ can run multiple times on multiple objects.
                             require( './player' ).playersNearPosition(
                                 position, radius ) );
                 }
+                function confirm ( player, text, yesAction, noAction ) {
+                    require( './ui' ).areYouSure( player, text, yesAction,
+                        noAction );
+                }
                 var loggedSetInterval = null;"
             if author
                 functions +=
