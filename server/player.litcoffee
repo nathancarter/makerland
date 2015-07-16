@@ -83,9 +83,12 @@ the command in question, and if so, run it.
                         command #{event.name} without permission."
 
 If the event tells us where the player has moved, then notify the handler
-for position changes.
+for position changes.  The exception is that the client cannot tell us to
+move to a new plane.
 
             socket.on 'player position', ( data ) =>
+                myPos = @getPosition()
+                if myPos? and data.position[0] isnt myPos[0] then return
                 @positionChanged data.position, data.visionDistance
 
 When this player disconnects, drop all their possessions, tell the console,
