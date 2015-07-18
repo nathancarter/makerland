@@ -814,6 +814,7 @@ the map.  How near is given in the second argument, and is measured in units
 of map cells.
 
     module.exports.creaturesNearPosition = ( position, radius ) ->
+        if not position? then return [ ]
         extremes = [
             position
             [ position[0], position[1]-1, position[2] ]
