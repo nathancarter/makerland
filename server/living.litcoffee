@@ -432,7 +432,12 @@ right body part).
         if item.equipmentType not in myBodyParts
             return 'You cannot equip things of that type.'
 
-Okay, I can equip it.  Do so now.
+If something else is already equipped, unequip that first.
+
+        if @equipment[item.equipmentType]
+            @unequip @equipment[item.equipmentType]
+
+Now equip what I was asked to equip.
 
         @equipment[item.equipmentType] = item
         item.emit 'equipped by', this
@@ -451,4 +456,5 @@ on failure, or none on success.
                 item.emit 'unequipped by', this
                 this.emit 'unequipped item', item
                 @updateEquipmentStatus?()
+                return
         'But you are not using that item now.'
