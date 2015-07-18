@@ -405,6 +405,7 @@ commands.
                 defaultCellType : defaultCellType
                 conditions : ( c.text for c in @statusConditions )
                 movementRate : @getStat 'movement rate'
+                equipment : @equipmentData ? { }
             @addHealthToStatus result
             result
 
@@ -437,6 +438,16 @@ the latter at disconnection.
             , 2000
         stopStatusUpdates : =>
             clearInterval @statusUpdateInterval if @statusUpdateInterval?
+
+When players equip and unequip items, we track the indices of those items,
+so that the client can draw them on the player's avatar, if appropriate.
+That is done with the following function.
+
+        updateEquipmentStatus : =>
+            @equipmentData = { }
+            for own bodyPart, equippedItem of @equipment
+                @equipmentData[bodyPart] = equippedItem.index
+            @updateStatus()
 
 Players can also have "status conditions."  These are very short bits of
 text that are added to the player status, and come with a predetermined time

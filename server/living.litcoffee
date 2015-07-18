@@ -437,6 +437,7 @@ Okay, I can equip it.  Do so now.
         @equipment[item.equipmentType] = item
         item.emit 'equipped by', this
         this.emit 'equipped item', item
+        @updateEquipmentStatus?()
         return
 
 This function is the reverse, unequipping something that you have equipped.
@@ -449,5 +450,5 @@ on failure, or none on success.
                 delete @equipment[type]
                 item.emit 'unequipped by', this
                 this.emit 'unequipped item', item
-                return
+                @updateEquipmentStatus?()
         'But you are not using that item now.'

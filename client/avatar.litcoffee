@@ -181,6 +181,50 @@ structure specifying data such as leg color, body color, height, and so on.
         context.font = '16px serif'
         size = context.measureText name
         context.fillText name, head.x-size.width/2, head.y-20
+        # draw equipment
+        for own bodyPart, imageIndex of currentStatus.equipment ? { }
+            if not ( image = getMovableItemIcon imageIndex ).complete
+                continue
+            heightOverWidth = image.height / image.width
+            rectangle = switch bodyPart
+                when 'head'
+                    hs = appearance?.headSize or 0.1
+                    top : head.y - hs*scale*1.6
+                    left : head.x - hs*scale*1.2
+                    bottom : head.y - hs*scale*1.6 + \
+                             hs*scale*2.4*heightOverWidth
+                    right : head.x + hs*scale*1.2
+                when 'neck'
+                    hs = appearance?.headSize or 0.1
+                    top : head.y + hs*scale
+                    left : head.x - hs*scale
+                    bottom : head.y + 2*hs*scale
+                    right : head.x + hs*scale
+                when 'body'
+                    top : Math.min lshoulder.y, rshoulder.y
+                    left : point( shoulder, -0.13 ).x
+                    bottom : Math.max lhips.y, rhips.y
+                    right : point( shoulder, +0.13 ).x
+                when 'arms'
+                    top : lelbow.y - 0.25*scale*heightOverWidth
+                    left : lelbow.x - 0.25*scale
+                    bottom : lelbow.y + 0.25*scale*heightOverWidth
+                    right : lelbow.x + 0.25*scale
+                when 'hands'
+                    top : lhand.y - 5
+                    left : lhand.x - 5
+                    bottom : lhand.y + 5
+                    right : lhand.x + 5
+                when 'weapon'
+                    top : rhand.y + 0.1*scale - 0.5*scale*heightOverWidth
+                    left : rhand.x - 0.1*scale
+                    bottom : rhand.y + 0.1*scale
+                    right : rhand.x - 0.1*scale + 0.5*scale*heightOverWidth
+            if rectangle?
+                width = rectangle.right - rectangle.left
+                height = rectangle.bottom - rectangle.top
+                context.drawImage image, rectangle.left, rectangle.top,
+                    width, height
 
 The following function takes the same set of parameters as the previous,
 except the pose and left parameters have been replaced with a motion
