@@ -40,12 +40,12 @@ calling our `moveTo()` method.
                 @bodyParts = @type.bodyParts
                 @experience = @type.experience
             @uses = { }
-            for behavior in @behaviors ?= [ ]
-                require( './behaviors' ).installBehavior behavior, this
             @initLiving()
             if @type
                 for name in require( './living' ).statNames()
                     @setBaseStat name, @type[name]
+            for behavior in @behaviors ?= [ ]
+                require( './behaviors' ).installBehavior behavior, this
 
 Now place the creature into the global instances array and store within the
 creature its index in that array as its unique ID.

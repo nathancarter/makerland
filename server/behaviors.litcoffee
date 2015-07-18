@@ -456,7 +456,8 @@ can run multiple times on multiple objects.
                     require( './ui' ).areYouSure( player, text, yesAction,
                         noAction );
                 }
-                var loggedSetInterval = null;"
+                var loggedSetInterval = null;
+                var random = require( './random' );"
             if author
                 functions +=
                     "function log () {
@@ -493,7 +494,7 @@ can run multiple times on multiple objects.
             prefix = "( function ( args ) { #{declarations}\n"
             prefixLength = prefix.split( '\n' ).length - 1
             prefix = "#{functions}#{prefix}"
-            codeString = prefix + codeString + ' } )'
+            codeString = prefix + codeString + '\n} )'
             try
                 applyMe = eval codeString
                 result = ( object, args ) -> applyMe.apply object, [ args ]

@@ -354,8 +354,18 @@ missed, play a "miss" sound and stop.
             target.emit 'dodged attack', this
             return
 
-We connected, so we now check to see if there are any event handlers that
-block our attempt to actually do damage.
+Our hit connected, so execute a normal combat strike against the enemy.
+
+        @hitEnemy target
+
+The previous function uses the following method to do an ordinary combat hit
+against an enemy.  We factor it out here so that it can be used at other
+times as well.
+
+    module.exports.methods.hitEnemy = ( target ) ->
+
+First check to see if there are any event handlers that block our attempt to
+actually do damage.
 
         @attempt 'hit', => target.attempt 'got hit', =>
 
