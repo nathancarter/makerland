@@ -18,11 +18,19 @@ the HTTP protocol.
         'js' : 'application/javascript'
         'css' : 'text/css'
 
-Export one function, `serveFile`, that takes two parameters.  The first is
+Export one function, `serveFile`, that takes three parameters.  The first is
 the name of the file requested, and the second is the response object to use
 for transmitting the results.
 
-    module.exports.serveFile = ( filename, response ) ->
+The final parameter is an options object.  So far, it supports only one
+option, `no-cdns`, which, if set to true, causes the server to behave as
+follows.  If it is about to serve an `.html` file, it searches through its
+content for all script and stylesheet tags, and if any point to a `.js` or
+`.css` file from an external website, but the same file exists in a folder
+called `from-cdns` locally, then the URL to the external file is replaced
+with a relative URL to the local file.
+
+    module.exports.serveFile = ( filename, response, options ) ->
 
 If the filename is actually a request for a resource from the game database,
 handle that separately from other files.
@@ -53,9 +61,35 @@ Try to read the file.  If you cannot, give a 500 error.
                 if err
                     return sendErrorToClient response, 500, "#{err}\n"
 
-We got the file's content, so send it.
+We got the file's content, so apply the CDN-replacement filter if that
+option has been set.
 
-                sendFileToClient response, file, filename.split( '.' ).pop()
+                extension = filename.split( '.' ).pop()
+                if extension2mimetype[extension] is 'text/HTML' and \
+                   options['no-cdns']
+                    localCopies = fs.readdirSync path.join process.cwd(),
+                        'client', 'from-cdns'
+                    re = /// <
+                        (script[^<]+src|link[^<]+href) # tag and attribute
+                        (\s*=\s*)                      # ...equals...
+                        ('[^']+'|"[^"]+")              # attribute value
+                        ///
+                    updated = ''
+                    while match = re.exec file
+                        updated += file[...match.index]
+                        resource = match[3][1...-1]
+                        withoutPath = resource.split( '/' ).pop()
+                        updated += if withoutPath in localCopies
+                            "<#{match[1]}#{match[2]}'#{path.join \
+                                'from-cdns', withoutPath}'"
+                        else
+                            match[0]
+                        file = file[match.index+match[0].length..]
+                    file = updated + file
+
+Finally, send the file content to the client.
+
+                sendFileToClient response, file, extension
 
 The following routine returns an error to a client.  The first parameter is
 the response object to use, the second the error code as an integer, and the

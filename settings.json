@@ -12,5 +12,6 @@
     "movableItemLifespanInSeconds" : 600,
     "creatureLifespanInSeconds" : 600,
     "timePlayersStayDeadInSeconds" : 60,
-    "locationPlayersAwakeAfterDeath" : [ 9, 0, 0 ]
+    "locationPlayersAwakeAfterDeath" : [ 9, 0, 0 ],
+    "noCDNs" : true
 }

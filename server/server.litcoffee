@@ -26,7 +26,7 @@ The entirety of the HTTP server is defined here.
                 return handleUpload uri[8..], request, response
             catch e
                 console.log 'Error uploading file', uri, 'Message:', e
-        fileserver.serveFile uri, response
+        fileserver.serveFile uri, response, "no-cdns" : settings.noCDNs
     .listen settings.port or 9999
 
 ## Handling File Uploads
