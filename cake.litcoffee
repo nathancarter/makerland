@@ -55,12 +55,36 @@ compiles, minifies, and generates source maps.
 
     build.asyncTask 'electron', 'Compile all electron .litcoffee sources',
     ( done ) ->
+
+The last thing it does is copy the entire client and server folders into the
+electron app folder.  We define a function here to do that, and we use that
+function below.
+
+        copyEverything = ->
+            ncp = require( 'ncp' ).ncp
+            console.log 'Copying client folder into electron folder...'
+            ncp './client', './electron/client', ( err ) ->
+                if err
+                    console.log 'Error copying client folder into electron
+                        folder:', err
+                    process.exit 1
+                console.log 'Copying server folder into electron folder...'
+                ncp './server', './electron/server', ( err ) ->
+                    if err
+                        console.log 'Error copying server folder into
+                            electron folder:', err
+                        process.exit 1
+                    done()
+
+The first thing it does is compile all the sources in the electron folder.
+It then defers to the above function at the end of that process.
+
         toBuild = build.dir './electron', /\.litcoffee$/
         do recur = ->
             if ( next = toBuild.shift() )?
                 build.compile next, recur
             else
-                done()
+                copyEverything()
 
 ## The `submodules` build process
 

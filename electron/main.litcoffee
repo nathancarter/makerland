@@ -7,12 +7,28 @@ and is poorly documented.  Try back later.
     app = require 'app'
     BrowserWindow = require 'browser-window'
     ipc = require 'ipc'
+    fs = require 'fs'
+    path = require 'path'
     # require( 'crash-reporter' ).start()
+
+If the player does not have a universes folder yet, create one.
+
+    myUniversesFolder = path.join app.getPath( 'userData' ), 'universes'
+    try
+        fs.mkdirSync myUniversesFolder
+    catch e
+        if e.code isnt 'EEXIST'
+            console.log "My Universes folder does not exist, and could not
+                create it.  Error when trying to create: #{e}"
+            process.exit 1
 
 Load all my universes.
 
-    myUniverses =
-        'my test 1' :
+    myUniverses = { }
+    for universe in fs.readdirSync myUniversesFolder
+        fullpath = path.join myUniversesFolder, universe
+        if not fs.statSync( fullpath ).isDirectory() then continue
+        myUniverses[universe] =
             state : 'closed'
 
 Be able to spawn child processes

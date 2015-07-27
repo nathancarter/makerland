@@ -12,3 +12,5 @@ client/makerland*.*
 tmp/
 electron/*.js
 electron/*.map
+electron/client
+electron/server
