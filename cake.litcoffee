@@ -51,6 +51,17 @@ compiles, minifies, and generates source maps.
 
         build.compile './client/all.litcoffee', -> done()
 
+## The `electron` build process
+
+    build.asyncTask 'electron', 'Compile all electron .litcoffee sources',
+    ( done ) ->
+        toBuild = build.dir './electron', /\.litcoffee$/
+        do recur = ->
+            if ( next = toBuild.shift() )?
+                build.compile next, recur
+            else
+                done()
+
 ## The `submodules` build process
 
 Although there are currently no submodules, this task is ready in the

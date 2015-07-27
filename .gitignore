@@ -10,3 +10,5 @@ lessons/
 gamedb/
 client/makerland*.*
 tmp/
+electron/*.js
+electron/*.map

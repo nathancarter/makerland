@@ -1,6 +1,8 @@
 
 # Main Game Server
 
+    console.log 'Initializing MakerLand...'
+
 ## HTTP
 
 Start an HTTP server to serve game files.  Pass the responsibility off to
@@ -88,6 +90,15 @@ players before exiting the game.  This handler does so.
             player.save()
         console.log 'Done.'
         process.exit()
+
+## Listening on STDIN
+
+The process can receive commands on STDIN and write output on STDOUT
+
+    process.stdin.on 'readable', ->
+        chunk = process.stdin.read()
+        if chunk?
+            console.log 'heard this from STDIN:', "#{chunk}"
 
 ## Detecting IP Address
 

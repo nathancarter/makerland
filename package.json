@@ -16,6 +16,11 @@
     "uglify-js": "2.4.15"
   },
   "scripts": {
-    "start": "coffee server/server.litcoffee"
+    "start": "coffee server/server.litcoffee",
+    "electron": "electron electron"
+  },
+  "devDependencies": {
+    "electron-packager": "^5.0.1",
+    "electron-prebuilt": "^0.30.1"
   }
 }
