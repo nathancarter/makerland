@@ -367,6 +367,7 @@ times as well.
 First check to see if there are any event handlers that block our attempt to
 actually do damage.
 
+        random = require './random'
         @attempt 'hit', => target.attempt 'got hit', =>
 
 If not, then the following code will be run.  It computes and delivers the
