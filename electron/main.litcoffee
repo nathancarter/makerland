@@ -74,9 +74,23 @@ Auxiliary routine used above.
     updateUniverseLists = ->
         if not mainWindow? then return
         mainWindow.webContents.send 'clearColumn', true
+        numUniverses = 0
         for own name, data of myUniverses
-            mainWindow.webContents.send 'addUniverse', true, name,
-                data.state
+            if data.state is 'closed' or not data.server
+                data.numPlayers = 0
+            data.numPlayers ?= 0
+            mainWindow.webContents.send 'addUniverse', true,
+                name : name
+                numPlayers : data.numPlayers
+                state : data.state
+                internalIP : data.internalIP
+                externalIP : data.externalIP
+            numUniverses++
+        if numUniverses is 0
+            mainWindow.webContents.send 'addMessage', true,
+                '<h4>You have no universes.</h4>
+                 <p>You must have deleted even the sample universe (!).</p>
+                 <p>To create a new one, use the button below.</p>'
         mainWindow.webContents.send 'clearColumn', false
         mainWindow.webContents.send 'addMessage', false,
             '<h4>No other universes nearby</h4>
@@ -90,7 +104,6 @@ Listen for buttons clicked in windows we spawn.
     ipc.on 'universe state set', ( event, data ) ->
         if myUniverses.hasOwnProperty data.name
             previous = myUniverses[data.name].state
-            myUniverses[data.name].state = data.state
             if previous is 'closed' and data.state isnt 'closed'
                 myUniverses[data.name].server = startServer data.name
             if data.state is 'open-to-me'
@@ -99,7 +112,14 @@ Listen for buttons clicked in windows we spawn.
             if data.state is 'open-to-all'
                 myUniverses[data.name].server.stdin.write \
                     'localConnectionsOnly=no\n'
+            if previous isnt 'closed' and data.state is 'closed'
+                stopServer data.name
+            myUniverses[data.name].state = data.state
             updateUniverseLists()
+    ipc.on 'visit universe', ( event, data ) ->
+        if not universe = myUniverses[data] then return
+        require( 'shell' ).openExternal \
+            "http://localhost:#{universe.server.port}"
 
 Auxiliary routine for spawning game servers.
 
@@ -128,6 +148,19 @@ Second, fire up the child process.
         if child
             child.stdout.on 'data', ( data ) ->
                 console.log "#{folderName} STDOUT:\n#{data}"
+                needsUpdate = no
+                if match = /there are now ([0-9]+) players/.exec data
+                    myUniverses[folderName].numPlayers = match[1]
+                    needsUpdate = yes
+                re = /Internal users connect here:\s*(http:\/\/[0-9.:]+)/
+                if match = re.exec data
+                    myUniverses[folderName].internalIP = match[1]
+                    needsUpdate = yes
+                re = /External users connect here:\s*(http:\/\/[0-9.:]+)/
+                if match = re.exec data
+                    myUniverses[folderName].externalIP = match[1]
+                    needsUpdate = yes
+                if needsUpdate then updateUniverseLists()
             child.stderr.on 'data', ( data ) ->
                 console.log "#{folderName} STDERR:\n#{data}"
             child.on 'close', ( code ) ->
@@ -141,11 +174,25 @@ Store the port in it and return it.
         child.port = settings.port
         child
 
+There is a corresponding function for stopping a server.
+
+    stopServer = ( folderName ) ->
+        console.log "Attempting to stop universe #{folderName}..."
+        if not ( data = myUniverses[folderName] )?
+            console.log '\tNo universe with that name!'
+            return no
+        delete data.internalIP
+        delete data.externalIP
+        if data.state is 'closed' or not data.server?
+            delete data.server
+            console.log '\tThat universe\'s server is not running!'
+            return no
+        console.log "\tKilling server for universe #{folderName}
+            (process ID #{data.server.pid})..."
+        process.kill data.server.pid, 'SIGINT'
+        delete data.server
+        return yes
+
 When quitting, kill child processes.
 
-    app.on 'quit', ->
-        for own name, data of myUniverses
-            if data.state isnt 'closed' and data.server?
-                console.log "Killing server for universe #{data.name}
-                    (process ID #{data.server.pid})..."
-                process.kill data.server.pid, 'SIGINT'
+    app.on 'quit', -> stopServer universe for own universe of myUniverses
