@@ -3,6 +3,13 @@
 
     console.log 'Initializing MakerLand...'
 
+The `localConnectionsOnly` global variable is modified in the STDIN handler
+declared [later in this file](#listening-on-stdin).  It is declared here so
+that all functions in this module can see it.
+
+    localConnectionsOnly = no
+    isLocalAddress = ( addr ) -> /localhost|127\.0\.0\.1|::1/.test addr
+
 ## HTTP
 
 Start an HTTP server to serve game files.  Pass the responsibility off to
@@ -20,6 +27,12 @@ The following built-in node modules are relevant.
 The entirety of the HTTP server is defined here.
 
     server = http.createServer ( request, response ) ->
+        if localConnectionsOnly and \
+           not isLocalAddress request.headers.host
+            response.writeHead 403, 'Content-Type' : 'text/plain'
+            response.write '403 Forbidden'
+            response.end()
+            return
         uri = ( url.parse request.url ).pathname
         if uri is '/'
             uri = 'client.html'
@@ -77,6 +90,19 @@ object for that client to control; its constructor handles everything.
     io = require( 'socket.io' ).listen server
     io.sockets.on 'connection', ( socket ) -> new Player socket
 
+But we also want to keep track of whether we're allowed to receive
+connections from outside localhost, so we add the following handler for the
+handshake event with a new potential connection, which will refuse the
+connection in the right circumstances.
+
+The "next" function is called with an error if there is one, or undefined if
+there is no error, and it handles the accepting/rejection of the connection.
+
+    io.use ( socket, next ) ->
+        next if localConnectionsOnly and \
+           not isLocalAddress socket.handshake.address
+            new Error 'That universe is open only to its owner.'
+
 ## Ctrl-C Handler
 
 If the user who ran the game process presses Ctrl-C, we want to save all
@@ -90,15 +116,6 @@ players before exiting the game.  This handler does so.
             player.save()
         console.log 'Done.'
         process.exit()
-
-## Listening on STDIN
-
-The process can receive commands on STDIN and write output on STDOUT
-
-    process.stdin.on 'readable', ->
-        chunk = process.stdin.read()
-        if chunk?
-            console.log 'heard this from STDIN:', "#{chunk}"
 
 ## Detecting IP Address
 
@@ -125,3 +142,28 @@ whom they want to join them in the game.
         else
             console.log "\tExternal users connect here:\t
                 http://#{ip}:#{settings.port or 9999}\n"
+
+## Listening on STDIN
+
+The process can receive commands on STDIN and write output on STDOUT.
+
+    process.stdin.on 'readable', ->
+        chunk = process.stdin.read()
+
+The one command supported this way is modifications to the
+`localConnectionsOnly` variable.
+
+        if /localConnectionsOnly=no/.test chunk
+            localConnectionsOnly = no
+        if /localConnectionsOnly=yes/.test chunk
+            localConnectionsOnly = yes
+            for player in Player::allPlayers
+                if isLocalAddress player.socket.handshake.address
+                    console.log "Permitting #{player.name} to remain in the
+                        universe (from
+                        #{player.socket.handshake.address})..."
+                else
+                    console.log "Saving and disconnecting #{player.name}
+                        (from #{player.socket.handshake.address})..."
+                    player.save()
+                    player.socket.disconnect()

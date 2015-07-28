@@ -7,12 +7,12 @@ anyone who imports this module, directly as module properties.
 
 ## Computing the game root folder
 
-The following is the default game root folder, used only in development
-copies of the source code repository.  Most of the time, you should pass a
-specific game root folder using the `--root` option supported below.
+The default game root folder is the current directory.  It's more convenient
+to specify another game root folder using the `--root` option supported
+below.
 
     path = require 'path'
-    module.exports.gameRoot = path.join __dirname, '..'
+    module.exports.gameRoot = process.cwd()
 
 We look to see if the game root folder was specified on the command line.
 If so, we replace the default with that.

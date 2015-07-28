@@ -74,4 +74,6 @@ Add event handlerst to the "Create Universe" and "Quit" buttons.
         $( '#create-button' ).on 'click', ->
             ipc.send 'clicked button', 'create universe'
         $( '#quit-button' ).on 'click', ->
-            ipc.send 'clicked button', 'quit'
+            if confirm 'Quitting closes all your universes.  Anyone in them
+                    will be kicked out.  Do you want to proceed?'
+                ipc.send 'clicked button', 'quit'

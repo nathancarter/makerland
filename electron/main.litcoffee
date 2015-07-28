@@ -11,6 +11,11 @@ and is poorly documented.  Try back later.
     path = require 'path'
     # require( 'crash-reporter' ).start()
 
+And even though the following may seem out-of-place in a CoffeeScript file,
+it's necessary for launching CoffeeScript-based modules as child processes.
+
+    require 'coffee-script/register'
+
 If the player does not have a universes folder yet, create one.
 
     myUniversesFolder = path.join app.getPath( 'userData' ), 'universes'
@@ -31,33 +36,6 @@ Load all my universes.
         myUniverses[universe] =
             state : 'closed'
 
-Be able to spawn child processes
-
-    # process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME']
-
-    ###
-    require( 'coffee-script/register' );
-    var path = require( 'path' );
-    var child = require( 'child_process' ).fork( 'server/server.litcoffee', {
-        cwd : process.cwd(),
-        silent : true
-    } );
-    if ( child ) {
-        child.stdout.on( 'data', function ( data ) {
-          console.log( 'child process STDOUT:\n' + data );
-        } );
-        child.stderr.on( 'data', function ( data ) {
-          console.log( 'child process STDERR:\n' + data );
-        } );
-        child.on( 'close', function ( code ) {
-          console.log( 'child process exited with code ' + code );
-        } );
-        console.log( 'child pid is ' + child.pid );
-    } else {
-        console.log( 'child was null!!' );
-    }
-    ###
-
 Keep a global reference of the window object, so the window won't be closed
 automatically when the JavaScript object is GCed.
 
@@ -69,16 +47,6 @@ their menu bar to stay active until the user quits explicitly with Cmd + Q
     app.on 'window-all-closed', ->
         if process.platform isnt 'darwin' then app.quit()
 
-When quitting, kill child process
-
-    ###
-    app.on( 'quit', function () {
-        console.log( 'killing makerland process ' + child.pid + '...' );
-        process.kill(child.pid, 'SIGINT');
-        console.log( 'done killing.' );
-    } );
-    ###
-
 This method will be called when Electron has finished initialization and is
 ready to create browser windows.
 
@@ -88,7 +56,7 @@ Create the browser window.
 
         mainWindow = new BrowserWindow { width: 1024, height: 768 }
 
-refresh its content
+Refresh its content
 
         mainWindow.loadUrl "file://#{__dirname}/index.html"
         mainWindow.webContents.on 'did-finish-load', updateUniverseLists
@@ -121,5 +89,63 @@ Listen for buttons clicked in windows we spawn.
         if arg is 'quit' then app.quit()
     ipc.on 'universe state set', ( event, data ) ->
         if myUniverses.hasOwnProperty data.name
+            previous = myUniverses[data.name].state
             myUniverses[data.name].state = data.state
+            if previous is 'closed' and data.state isnt 'closed'
+                myUniverses[data.name].server = startServer data.name
+            if data.state is 'open-to-me'
+                myUniverses[data.name].server.stdin.write \
+                    'localConnectionsOnly=yes\n'
+            if data.state is 'open-to-all'
+                myUniverses[data.name].server.stdin.write \
+                    'localConnectionsOnly=no\n'
             updateUniverseLists()
+
+Auxiliary routine for spawning game servers.
+
+    startServer = ( folderName ) ->
+        fullUniversePath = path.join myUniversesFolder, folderName
+
+First, update the server settings to use a port we're not already using.
+
+        settingsFile = path.join fullUniversePath, 'settings.json'
+        settings = JSON.parse fs.readFileSync settingsFile
+        usedPorts = [ ]
+        for own name, data of myUniverses
+            if data.server then usedPorts.push data.server.port
+        settings.port = 9900
+        while settings.port in usedPorts then settings.port++
+        fs.writeFileSync settingsFile, JSON.stringify settings, null, 4
+
+Second, fire up the child process.
+
+        server =
+            path.resolve path.join __dirname, 'server', 'server.litcoffee'
+        console.log "Starting universe stored at #{fullUniversePath}..."
+        child = require( 'child_process' ).fork server,
+            cwd : fullUniversePath
+            silent : yes
+        if child
+            child.stdout.on 'data', ( data ) ->
+                console.log "#{folderName} STDOUT:\n#{data}"
+            child.stderr.on 'data', ( data ) ->
+                console.log "#{folderName} STDERR:\n#{data}"
+            child.on 'close', ( code ) ->
+                console.log "#{folderName} exited with code #{code}"
+            console.log "#{folderName} child process ID is #{child.pid}"
+        else
+            console.log "#{folderName} child process is null; fork failed"
+
+Store the port in it and return it.
+
+        child.port = settings.port
+        child
+
+When quitting, kill child processes.
+
+    app.on 'quit', ->
+        for own name, data of myUniverses
+            if data.state isnt 'closed' and data.server?
+                console.log "Killing server for universe #{data.name}
+                    (process ID #{data.server.pid})..."
+                process.kill data.server.pid, 'SIGINT'
