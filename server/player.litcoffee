@@ -536,7 +536,7 @@ access.
         showCommandUI : =>
             @showUI ( for command in @commands()
                 iconPath = if commands[command].icon?
-                    path.join settings.clientPath( 'commandIconFolder' ),
+                    path.join settings.universePath( 'commandIconFolder' ),
                         commands[command].icon
                 else
                     undefined

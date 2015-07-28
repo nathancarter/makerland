@@ -47,13 +47,19 @@ handle that separately from other files.
 Now we know it's not a request for a resource from the game database, but
 for a typical file.  So we proceed.  Find the full path to the filename.
 
-        filename = path.join process.cwd(), 'client', filename
+        filename = path.join __dirname, '..', 'client', original = filename
 
-Verify that the file exists.  If it does not, give a 404 error.
+Verify that the file exists.  If it does not, try to find the file in the
+universe folder itself.  If even that fails, give a 404 error.
 
         fs.exists filename, ( exists ) ->
             if not exists
-                return sendErrorToClient response, 404, '404 Not Found'
+                settings = require './settings'
+                alternateName = path.join settings.gameRoot, original
+                if fs.existsSync alternateName # sync to simplify code here
+                    filename = alternateName
+                else
+                    return sendErrorToClient response, 404, '404 Not Found'
 
 Try to read the file.  If you cannot, give a 500 error.
 
@@ -67,7 +73,7 @@ option has been set.
                 extension = filename.split( '.' ).pop()
                 if extension2mimetype[extension] is 'text/HTML' and \
                    options['no-cdns']
-                    localCopies = fs.readdirSync path.join process.cwd(),
+                    localCopies = fs.readdirSync path.join __dirname, '..',
                         'client', 'from-cdns'
                     re = /// <
                         (script[^<]+src|link[^<]+href) # tag and attribute

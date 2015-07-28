@@ -5,9 +5,26 @@ Loads the settings JSON data from the root folder if the game (not the
 folder containing this module, but its parent) and exposes all that data to
 anyone who imports this module, directly as module properties.
 
-    fs = require 'fs'
+## Computing the game root folder
+
+The following is the default game root folder, used only in development
+copies of the source code repository.  Most of the time, you should pass a
+specific game root folder using the `--root` option supported below.
+
     path = require 'path'
     module.exports.gameRoot = path.join __dirname, '..'
+
+We look to see if the game root folder was specified on the command line.
+If so, we replace the default with that.
+
+    for item, index in process.argv[2..]
+        if item is '--root'
+            module.exports.gameRoot = process.argv[index+3]
+            break
+
+Now compute the path to the settings file based on that root folder.
+
+    fs = require 'fs'
     settingsFile = path.join module.exports.gameRoot, 'settings.json'
 
 ## Getting the raw data
@@ -50,10 +67,10 @@ The following function is the same, except it returns a path relative to the
 client subfolder of the repository, so the path is suitable to transmit to
 the client, for its use in forming URLs to request data from the server.
 
-    module.exports.clientPath = ( key ) ->
+    module.exports.universePath = ( key ) ->
         absolute = module.exports.getPath key
-        prefix = path.resolve module.exports.gameRoot, 'client'
+        prefix = path.resolve module.exports.gameRoot
         if absolute[...prefix.length] is prefix
             absolute[prefix.length..]
         else
-            throw "Not a path in the client folder: #{absolute}"
+            throw "Not a path in the universe folder: #{absolute}"
