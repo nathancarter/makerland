@@ -94,7 +94,6 @@ Next, the row of buttons inside the universe panel.
             group.innerHTML += buttonHTML key, value
         div.appendChild group
         inside.appendChild div
-        inside.appendChild document.createElement 'p'
 
 Add the element to the left column.
 

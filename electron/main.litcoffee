@@ -9,18 +9,32 @@ and is poorly documented.  Try back later.
     ipc = require 'ipc'
     fs = require 'fs'
     path = require 'path'
-    # require( 'crash-reporter' ).start()
+    ncp = require( 'ncp' ).ncp
 
 And even though the following may seem out-of-place in a CoffeeScript file,
 it's necessary for launching CoffeeScript-based modules as child processes.
 
     require 'coffee-script/register'
 
-If the player does not have a universes folder yet, create one.
+If on Mac, navigate the bundle.
+
+    if process.platform is 'darwin' and process.cwd()[-5..] is 'MacOS'
+        process.chdir '../Resources/app/'
+
+If the player does not have a universes folder yet, create one, and copy the
+sample universe into it.
 
     myUniversesFolder = path.join app.getPath( 'userData' ), 'universes'
     try
         fs.mkdirSync myUniversesFolder
+        sampleUniverse = path.resolve path.join __dirname, 'sampleuniverse'
+        ncp sampleUniverse, path.join( myUniversesFolder,
+        'Sample Universe' ), ( err ) ->
+            if err
+                console.log "Could not copy Sample Universe from
+                    #{sampleUniverse} to folder #{myUniversesFolder}:
+                    #{err}"
+            updateUniverseLists()
     catch e
         if e.code isnt 'EEXIST'
             console.log "My Universes folder does not exist, and could not
@@ -98,9 +112,9 @@ Auxiliary routine used above.
             numUniverses++
         if numUniverses is 0
             mainWindow.webContents.send 'addMessage', true,
-                '<h4>You have no universes.</h4>
+                '<hr><h4>You have no universes.</h4>
                  <p>You must have deleted even the sample universe (!).</p>
-                 <p>To create a new one, use the button below.</p>'
+                 <p>To create a new one, use the button below.</p><hr>'
         mainWindow.webContents.send 'clearColumn', false
         numUniverses = 0
         for own name, data of nearbyUniverses
@@ -111,10 +125,10 @@ Auxiliary routine used above.
             numUniverses++
         if numUniverses is 0
             mainWindow.webContents.send 'addMessage', false,
-                '<h4>No other universes nearby</h4>
+                '<hr><h4>No other universes nearby</h4>
                  <p>To see other universes,
                  <br>have a friend on your network run MakerLand
-                 <br>and open a universe for you to visit.</p>'
+                 <br>and open a universe for you to visit.</p><hr>'
 
 We want to listen for Multicast DNS MakerLand advertisements nearby.
 
@@ -189,7 +203,6 @@ Listen for buttons clicked in windows we spawn.
                 folder = ( name ) -> path.join myUniversesFolder, name
                 name = makeName i = 1
                 while fs.existsSync folder name then name = makeName ++i
-                ncp = require( 'ncp' ).ncp
                 ncp folder( data.name ), folder( name ), ( err ) ->
                     if err
                         require( 'dialog' ).showMessageBox mainWindow,

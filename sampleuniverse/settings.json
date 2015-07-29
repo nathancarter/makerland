@@ -1,0 +1,24 @@
+{
+    "gameDatabaseRoot": "./database/",
+    "commandIconFolder": "./icons/",
+    "fileUploadFolder": "./uploads/",
+    "cellSizeInPixels": 80,
+    "mapBlockSizeInCells": 8,
+    "clientSettings": [
+        "cellSizeInPixels",
+        "mapBlockSizeInCells"
+    ],
+    "privateGame": false,
+    "gameTitle": "<h3>Sample Universe</h3><hr><h4>Log in or sign up</h4>",
+    "gameTitleImage": "./makerlandlogo.png",
+    "port": 9900,
+    "movableItemLifespanInSeconds": 600,
+    "creatureLifespanInSeconds": 600,
+    "timePlayersStayDeadInSeconds": 60,
+    "locationPlayersAwakeAfterDeath": [
+        0,
+        0,
+        0
+    ],
+    "noCDNs": true
+}

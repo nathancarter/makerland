@@ -14,3 +14,5 @@ electron/*.js
 electron/*.map
 electron/client
 electron/server
+electron/sampleuniverse
+MakerLand-*-*

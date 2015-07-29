@@ -60,7 +60,7 @@ The last thing it does is copy the entire client and server folders into the
 electron app folder.  We define a function here to do that, and we use that
 function below.
 
-        toCopy = [ 'client', 'server' ]
+        toCopy = [ 'client', 'server', 'sampleuniverse' ]
         copyEverything = ->
             if not ( next = toCopy.shift() )? then return done()
             ncp = require( 'ncp' ).ncp
