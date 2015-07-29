@@ -1,0 +1,236 @@
+<html>
+    <head>
+        <title>MakerLand</title>
+        <script>
+            window.$ = window.jQuery =
+                require( './client/from-cdns/jquery-1.11.2.min.js' );
+            require( './client/from-cdns/jquery-migrate-1.2.1.min.js' );
+            require( './client/from-cdns/jquery.form.js' );
+            require( './client/from-cdns/bootstrap.min.js' );
+            require( './create.js' );
+        </script>
+        <link rel='stylesheet'
+              href='../client/from-cdns/bootstrap.min.css'/>
+        <link rel='stylesheet'
+              href='../client/from-cdns/bootstrap-theme.min.css'/>
+    </head>
+    <body>
+    <div class="container">
+
+        <div class="col-md-12">
+            <hr>
+            <h1 align=center>Create a New Universe</h1>
+            <hr>
+        </div>
+
+        <form class="create-form">
+
+            <div class="col-sm-12"><h2>Basic Options</h2></div>
+
+            <div class="col-sm-12"><hr></div>
+
+            <div class="form-group">
+                <label for="inputName"
+                    class="col-sm-2 control-label">Name</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control"
+                        id="inputName" placeholder="My Cool Universe">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <span class='help-block'>The name is what others will
+                        see in their "Nearby Universes" list.</span>
+                </div>
+            </div>
+
+            <div class="col-sm-12"><hr></div>
+
+            <div class="form-group">
+                <label for="inputPrivate"
+                    class="col-sm-2 control-label">Creating Accounts</label>
+                <div class="col-sm-10">
+                    <select class="form-control" id="inputPrivate">
+                        <option value="public">Visitors can create a new
+                            account at any time</option>
+                        <option value="private">Visitors cannot create new
+                            accounts</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <span class='help-block'>The "admin" character can
+                        always create new accounts for known and trusted
+                        friends.</span>
+                </div>
+            </div>
+
+            <div class="col-sm-12"><hr></div>
+
+            <div class="form-group">
+                <label for="inputTitle"
+                    class="col-sm-2 control-label">Welcome text</label>
+                <div class="col-sm-10">
+                    <textarea class="form-control" rows="3"
+                        id="inputTitle"
+                        ><h3>Log in or sign up:</h3></textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <span class='help-block'>This HTML will be shown on the
+                        title screen, above the username/password input
+                        boxes.</span>
+                </div>
+            </div>
+
+            <div class="col-sm-12"><hr></div>
+
+            <div class="form-group">
+                <label for="inputTitleImage"
+                    class="col-sm-2 control-label">Welcome image</label>
+                <div class="col-sm-10">
+                    <button type="button" class="btn btn-default"
+                        id="choose-file-button">Choose file...</button>
+                    &nbsp; &nbsp; &nbsp;
+                    <span id='chosen-file-name'>(no file chosen)</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <span class='help-block'>This (large) image will be used
+                        as the background for the welcome screen when
+                        visitors connect.</span>
+                </div>
+            </div>
+
+            <div class="col-sm-12"><hr></div>
+
+            <div class="form-group">
+                <label for="inputDead"
+                    class="col-sm-2 control-label">Death time</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control"
+                        id="inputDead" placeholder="60">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <span class='help-block'>If a player dies, for how many
+                        seconds do they stay dead before they can
+                        reconnect?</span>
+                </div>
+            </div>
+
+            <div class="col-sm-12"><hr></div>
+
+            <div class="col-sm-12">
+                <h2>Advanced Options</h2>
+                <div class="alert alert-danger" role="alert">Do not modify
+                    these values unless you know what you're doing and have
+                    good reason for the changes!</div>
+            </div>
+
+            <div class="col-sm-12"><hr></div>
+
+            <div class="form-group">
+                <label for="inputCell"
+                    class="col-sm-2 control-label">Cell size</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control"
+                        id="inputCell" placeholder="80">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <span class='help-block'>Size of a map cell, in
+                        pixels</span>
+                </div>
+            </div>
+
+            <div class="col-sm-12"><hr></div>
+
+            <div class="form-group">
+                <label for="inputBlock"
+                    class="col-sm-2 control-label">Block size</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control"
+                        id="inputBlock" placeholder="8">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <span class='help-block'>Size of a map block, in
+                        cells</span>
+                </div>
+            </div>
+
+            <div class="col-sm-12"><hr></div>
+
+            <div class="form-group">
+                <label for="inputItem"
+                    class="col-sm-2 control-label">Item lifespan</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control"
+                        id="inputItem" placeholder="600">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <span class='help-block'>How long, in seconds, an item
+                        can exist without being seen by a player, before
+                        it is garbage collected</span>
+                </div>
+            </div>
+
+            <div class="col-sm-12"><hr></div>
+
+            <div class="form-group">
+                <label for="inputCreature"
+                    class="col-sm-2 control-label">Creature lifespan</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control"
+                        id="inputCreature" placeholder="600">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <span class='help-block'>How long, in seconds, a
+                        creature can exist without being touched by a
+                        player, before it is garbage collected</span>
+                </div>
+            </div>
+
+            <div class="col-sm-12"><hr></div>
+
+            <div class="form-group">
+                <label for="inputWake"
+                    class="col-sm-2 control-label">Wake point</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control"
+                        id="inputWake" placeholder="[0,0,0]">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <span class='help-block'>Game coordinates where a
+                        player is placed upon waking from death</span>
+                </div>
+            </div>
+
+        </form>
+
+        <div class="col-md-12">
+            <hr>
+            <p align=right>
+                <button type="button" class="btn btn-success"
+                    id="create-button">Create!</button>
+                <button type="button" class="btn btn-danger"
+                    id="cancel-button">Cancel</button>
+            </p>
+        </div>
+
+    </div>
+    </body>
+</html>

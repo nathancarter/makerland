@@ -75,9 +75,9 @@ Next, the row of buttons inside the universe panel.
         group.setAttribute 'class', 'btn-group'
         group.setAttribute 'role', 'group'
         buttonHTML = ( id, text ) ->
-            "<button type='button'
-            id='#{safeName( data.name )}-#{id}'
-            class='btn btn-default btn-xs'>#{text}</button> "
+            "<button type='button' id='#{safeName( data.name )}-#{id}'
+            #{if data.state isnt 'closed' then 'disabled="disabled"' \
+                else ''}class='btn btn-default btn-xs'>#{text}</button> "
         group.innerHTML += buttonHTML 'copy', 'Copy'
         group.innerHTML += buttonHTML 'rename', 'Rename'
         group.innerHTML += buttonHTML 'delete', 'Delete'
@@ -203,11 +203,11 @@ column, rather than a specific universe element.
         element.innerHTML = text.replace /"/g, '\\"'
         document.getElementById( column ).appendChild element
 
-Add event handlerst to the "Create Universe" and "Quit" buttons.
+Add event handlers to the "Create Universe" and "Quit" buttons.
 
     $ ->
         $( '#create-button' ).on 'click', ->
-            ipc.send 'clicked button', 'create universe'
+            window.location.href = 'create.html'
         $( '#quit-button' ).on 'click', ->
             if confirm 'Quitting closes all your universes.  Anyone in them
                     will be kicked out.  Do you want to proceed?'

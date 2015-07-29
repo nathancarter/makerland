@@ -226,6 +226,37 @@ Listen for buttons clicked in windows we spawn.
                                 deletion was not performed.'
                     else
                         updateUniverseLists()
+    ipc.on 'create new universe', ( event, data ) ->
+        name = data.name
+        delete data.name
+        data.gameDatabaseRoot = './database'
+        data.commandIconFolder = './icons/'
+        data.fileUploadFolder = './uploads/'
+        data.clientSettings = [ 'cellSizeInPixels', 'mapBlockSizeInCells' ]
+        data.noCDNs = yes
+        newUniverseFolder = path.join myUniversesFolder, name
+        try
+            fs.mkdirSync newUniverseFolder
+        catch e
+            require( 'dialog' ).showErrorBox 'Could not create universe',
+                "There was an error when attempting to create a folder on
+                your filesystem for the new universe.\n\n#{e}"
+            return
+        fs.writeFileSync path.join( newUniverseFolder, 'settings.json' ),
+            JSON.stringify data, null, 4
+        mainWindow.loadUrl "file://#{__dirname}/index.html"
+        mainWindow.webContents.on 'did-finish-load', updateUniverseLists
+    ipc.on 'choose universe title image', ( event ) ->
+        require( 'dialog' ).showOpenDialog mainWindow, {
+            title : 'Choose universe title image'
+            filters : [
+                name : 'Images'
+                extensions: [ 'jpg', 'png', 'gif' ]
+            ]
+            properties : [ 'openFile' ]
+        }, ( fileChosen ) ->
+            if fileChosen
+                mainWindow.webContents.send 'file chosen', fileChosen
 
 Auxiliary routine for spawning game servers.
 

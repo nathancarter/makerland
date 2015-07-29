@@ -4,6 +4,35 @@
 We will need the user interface module.
 
     ui = require './ui'
+    settings = require './settings'
+    fs = require 'fs'
+    path = require 'path'
+
+On startup, first ensure that the universe folder contains all the command
+icons that are available.  Do not overwrite any icons that are already
+there, in case the owner has customized them, but populate with any missing
+ones.
+
+    sourceFolder = path.resolve path.join __dirname, '..', 'client', 'icons'
+    destFolder = path.join settings.gameRoot,
+        settings.universePath 'commandIconFolder'
+    try
+        fs.mkdirSync destFolder
+    catch e
+        if e.code isnt 'EEXIST'
+            console.log "Command icons folder does not exist, and could not
+                create it.  Error when trying to create: #{e}"
+            process.exit 1
+    for iconfile in fs.readdirSync sourceFolder
+        sourceFile = path.join sourceFolder, iconfile
+        destFile = path.join destFolder, iconfile
+        if not fs.existsSync destFile
+            try
+                fs.createReadStream sourceFile
+                .pipe fs.createWriteStream destFile
+            catch e
+                console.log "Could not copy icon #{sourceFile} to folder
+                    #{destFolder}: #{e}"
 
 This module will define all the commands available to players.  The module
 object will be a mapping from command names to objects defining the
