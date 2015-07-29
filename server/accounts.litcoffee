@@ -18,7 +18,7 @@ creates default values for some key player stats.
 
         constructor : () ->
             super 'accounts'
-            if not @exists 'admin' then @createAccount 'admin', 'admin'
+            if not @exists 'admin' then @create 'admin', 'admin'
             @setDefault 'capacity', 10
 
 ## Overriding `set`
@@ -45,7 +45,7 @@ Is the given name a valid player name?  If so, return it in canonical form
 Is the given password a valid password?  Return true or false.  Valid
 passwords are anything containing at least 5 letters.
 
-        validPassword : ( password ) -> password.length > 5
+        validPassword : ( password ) -> password.length >= 5
         passwordRules : 'A password must have at least 5 characters in it.'
 
 This method allows checking to see if a username-password pair is valid.
