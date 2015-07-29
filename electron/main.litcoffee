@@ -27,14 +27,23 @@ If the player does not have a universes folder yet, create one.
                 create it.  Error when trying to create: #{e}"
             process.exit 1
 
-Load all my universes.
+The function for loading all the user's universes.  It's called from the
+`updateUniverseLists` function, below.
 
     myUniverses = { }
-    for universe in fs.readdirSync myUniversesFolder
-        fullpath = path.join myUniversesFolder, universe
-        if not fs.statSync( fullpath ).isDirectory() then continue
-        myUniverses[universe] =
-            state : 'closed'
+    loadUniverses = ->
+        newObject = { }
+        for universe in fs.readdirSync myUniversesFolder
+            fullpath = path.join myUniversesFolder, universe
+            if not fs.statSync( fullpath ).isDirectory() then continue
+            newObject[universe] = myUniverses[universe] ? state : 'closed'
+        myUniverses = newObject
+
+We will do a similar thing for nearby universes, using mDNS, below.  But we
+must declare the global variable here, so that it is visible throughout this
+module.
+
+    nearbyUniverses = { }
 
 Keep a global reference of the window object, so the window won't be closed
 automatically when the JavaScript object is GCed.
@@ -73,13 +82,14 @@ Auxiliary routine used above.
 
     updateUniverseLists = ->
         if not mainWindow? then return
+        loadUniverses()
         mainWindow.webContents.send 'clearColumn', true
         numUniverses = 0
         for own name, data of myUniverses
             if data.state is 'closed' or not data.server
                 data.numPlayers = 0
             data.numPlayers ?= 0
-            mainWindow.webContents.send 'addUniverse', true,
+            mainWindow.webContents.send 'addMyUniverse',
                 name : name
                 numPlayers : data.numPlayers
                 state : data.state
@@ -92,10 +102,53 @@ Auxiliary routine used above.
                  <p>You must have deleted even the sample universe (!).</p>
                  <p>To create a new one, use the button below.</p>'
         mainWindow.webContents.send 'clearColumn', false
-        mainWindow.webContents.send 'addMessage', false,
-            '<h4>No other universes nearby</h4>
-             <p>To see other universes,<br>have a friend run MakerLand
-             <br>and open a universe for you to visit.</p>'
+        numUniverses = 0
+        for own name, data of nearbyUniverses
+            mainWindow.webContents.send 'addOtherUniverse',
+                name : name
+                externalIP : data.address
+                port : data.port
+            numUniverses++
+        if numUniverses is 0
+            mainWindow.webContents.send 'addMessage', false,
+                '<h4>No other universes nearby</h4>
+                 <p>To see other universes,
+                 <br>have a friend on your network run MakerLand
+                 <br>and open a universe for you to visit.</p>'
+
+We want to listen for Multicast DNS MakerLand advertisements nearby.
+
+To do so, we must first know what our own IP addresses are, so that we can
+distinguish which mDNS responses come from our own machine vs. other
+machines.
+
+    myIPs = [ ]
+    for own name, list of require( 'os' ).networkInterfaces()
+        myIPs.push iface.address for iface in list
+
+Now listen for mDNS events.
+
+    mdns = require 'mdns'
+    mdnsBrowser = mdns.createBrowser mdns.tcp 'makerland'
+    mdnsBrowser.on 'serviceUp', ( service ) ->
+        ipv4s = ( address for address in service.addresses \
+            when /\d+\.\d+\.\d+\.\d+/.test address )
+        if ipv4s.length is 0 then return
+        ipv4 = ipv4s.shift()
+        if ipv4 in myIPs then return
+        name = service.txtRecord.name
+        nearbyUniverses[name] =
+            address : ipv4
+            port : service.port
+            hostname : service.name # bad as a unique ID, but what else??
+        updateUniverseLists()
+    mdnsBrowser.on 'serviceDown', ( service ) ->
+        for own name, data of nearbyUniverses
+            if data.hostname is service.name
+                delete nearbyUniverses[name]
+                break
+        updateUniverseLists()
+    mdnsBrowser.start()
 
 Listen for buttons clicked in windows we spawn.
 
@@ -116,10 +169,63 @@ Listen for buttons clicked in windows we spawn.
                 stopServer data.name
             myUniverses[data.name].state = data.state
             updateUniverseLists()
-    ipc.on 'visit universe', ( event, data ) ->
+    ipc.on 'visit my universe', ( event, data ) ->
         if not universe = myUniverses[data] then return
         require( 'shell' ).openExternal \
             "http://localhost:#{universe.server.port}"
+    ipc.on 'visit other universe', ( event, data ) ->
+        if not universe = nearbyUniverses[data] then return
+        require( 'shell' ).openExternal \
+            "http://#{universe.address}:#{universe.port}"
+    ipc.on 'universe action', ( event, data ) ->
+        switch data.action
+            when 'copy'
+                makeName = ( i ) ->
+                    name = data.name
+                    while match = /^copy (?:[0-9]+ )?of /i.exec name
+                        name = name[match[0].length..]
+                    if i is 1 then "Copy of #{name}" \
+                    else "Copy #{i} of #{name}"
+                folder = ( name ) -> path.join myUniversesFolder, name
+                name = makeName i = 1
+                while fs.existsSync folder name then name = makeName ++i
+                ncp = require( 'ncp' ).ncp
+                ncp folder( data.name ), folder( name ), ( err ) ->
+                    if err
+                        require( 'dialog' ).showMessageBox mainWindow,
+                            type : 'error'
+                            buttons : [ 'OK' ]
+                            title : 'Renaming error'
+                            message : 'An error was encountered, and the
+                                copy was not performed.'
+                    else
+                        updateUniverseLists()
+            when 'rename'
+                fs.rename path.join( myUniversesFolder, data.name ),
+                    path.join( myUniversesFolder, data.value ), ( err ) ->
+                        if err
+                            require( 'dialog' ).showMessageBox mainWindow,
+                                type : 'error'
+                                buttons : [ 'OK' ]
+                                title : 'Renaming error'
+                                message : 'An error was encountered, and the
+                                    renaming was not performed.  Perhaps you
+                                    chose an invalid name, and should try
+                                    another.'
+                        else
+                            updateUniverseLists()
+            when 'delete'
+                folder = path.join myUniversesFolder, data.name
+                require( 'rimraf' ) folder, ( err ) ->
+                    if err
+                        require( 'dialog' ).showMessageBox mainWindow,
+                            type : 'error'
+                            buttons : [ 'OK' ]
+                            title : 'Renaming error'
+                            message : 'An error was encountered, and the
+                                deletion was not performed.'
+                    else
+                        updateUniverseLists()
 
 Auxiliary routine for spawning game servers.
 

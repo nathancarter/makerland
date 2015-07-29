@@ -42,7 +42,7 @@ The entirety of the HTTP server is defined here.
             catch e
                 console.log 'Error uploading file', uri, 'Message:', e
         fileserver.serveFile uri, response, "no-cdns" : settings.noCDNs
-    .listen settings.port or 9999
+    .listen serverPort = settings.port or 9999
 
 ## Handling File Uploads
 
@@ -128,7 +128,7 @@ their own computer's network interfaces.  So we query those.
         for iface in list
             if iface.family is 'IPv4' and iface.address isnt '127.0.0.1'
                 console.log "\t#{message}:\t
-                    http://#{iface.address}:#{settings.port or 9999}"
+                    http://#{iface.address}:#{serverPort}"
                 message = 'Alternate internal address'
 
 We want to tell the user running the server process what their internal and
@@ -141,7 +141,20 @@ whom they want to join them in the game.
                 error.message, '\n'
         else
             console.log "\tExternal users connect here:\t
-                http://#{ip}:#{settings.port or 9999}\n"
+                http://#{ip}:#{serverPort}\n"
+
+## Advertising on Multicast ("Bonjour")
+
+Broadcast ourselves as a MakerLand server.
+
+    mdns = require 'mdns'
+    mdnsAd = mdns.createAdvertisement mdns.tcp( 'makerland' ), serverPort,
+        txtRecord :
+            name : settings.gameRoot.split( require( 'path' ).sep ).pop()
+    mdnsAd.start()
+
+Note that this advertisement will get started and stopped in the following
+section, if the game is opened to all or just local connections.
 
 ## Listening on STDIN
 
@@ -153,10 +166,13 @@ The process can receive commands on STDIN and write output on STDOUT.
 The one command supported this way is modifications to the
 `localConnectionsOnly` variable.
 
-        if /localConnectionsOnly=no/.test chunk
+        if /localConnectionsOnly=no/.test chunk and localConnectionsOnly
             localConnectionsOnly = no
-        if /localConnectionsOnly=yes/.test chunk
+            mdnsAd.start()
+        if /localConnectionsOnly=yes/.test chunk and \
+           not localConnectionsOnly
             localConnectionsOnly = yes
+            mdnsAd.stop()
             for player in Player::allPlayers
                 if isLocalAddress player.socket.handshake.address
                     console.log "Permitting #{player.name} to remain in the

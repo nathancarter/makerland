@@ -60,21 +60,17 @@ The last thing it does is copy the entire client and server folders into the
 electron app folder.  We define a function here to do that, and we use that
 function below.
 
+        toCopy = [ 'client', 'server' ]
         copyEverything = ->
+            if not ( next = toCopy.shift() )? then return done()
             ncp = require( 'ncp' ).ncp
-            console.log 'Copying client folder into electron folder...'
-            ncp './client', './electron/client', ( err ) ->
+            console.log "Copying #{next} folder into electron folder..."
+            ncp "./#{next}", "./electron/#{next}", ( err ) ->
                 if err
-                    console.log 'Error copying client folder into electron
-                        folder:', err
+                    console.log "Error copying #{next} folder into electron
+                        folder:", err
                     process.exit 1
-                console.log 'Copying server folder into electron folder...'
-                ncp './server', './electron/server', ( err ) ->
-                    if err
-                        console.log 'Error copying server folder into
-                            electron folder:', err
-                        process.exit 1
-                    done()
+                copyEverything()
 
 The first thing it does is compile all the sources in the electron folder.
 It then defers to the above function at the end of that process.

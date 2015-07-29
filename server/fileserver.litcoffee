@@ -84,7 +84,7 @@ option has been set.
                     while match = re.exec file
                         updated += file[...match.index]
                         resource = match[3][1...-1]
-                        withoutPath = resource.split( '/' ).pop()
+                        withoutPath = resource.split( path.sep ).pop()
                         updated += if withoutPath in localCopies
                             "<#{match[1]}#{match[2]}'#{path.join \
                                 'from-cdns', withoutPath}'"

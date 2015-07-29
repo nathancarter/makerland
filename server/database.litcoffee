@@ -20,7 +20,7 @@ the given path is not a database URL.
 
     module.exports.parseDatabaseURL = ( path ) ->
         if /^\/db\/[^/]+\/[^/]+\/[^\/]+$/.test path
-            [ table, entry, key ] = path.split( '/' )[2..]
+            [ table, entry, key ] = path.split( require( 'path' ).sep )[2..]
             table : table
             entry : entry
             key : key
