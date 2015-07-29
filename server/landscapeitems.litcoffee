@@ -131,9 +131,11 @@ Then if there are no entries in it (i.e., this is the first time it's been
 loaded) then pre-populate it with some simple invisible squares for use by
 makers.
 
+            settings = require './settings'
             if @entries().length is 0
-                icon = fs.readFileSync path.resolve \
-                    'client/icons/square.png'
+                icon = fs.readFileSync path.join settings.gameRoot,
+                    settings.universePath( 'commandIconFolder' ),
+                    'square.png'
                 for i in [ 0, 1, 2 ]
                     size = [ 'small', 'normal', 'large' ][i]
                     @set i,
