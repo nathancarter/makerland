@@ -16,7 +16,7 @@ If you want to build and test evertything, just run `cake all`. It simply
 invokes all the other tasks, defined below.
 
     build.task 'all', 'All the other tasks together', ->
-        build.enqueue 'compile'
+        build.enqueue 'compile', 'electron'
 
 ## Requirements
 
@@ -26,13 +26,7 @@ modules we'll need later (which were installed by npm install).
     build.verifyPackagesInstalled()
     fs = require 'fs'
     exec = require( 'child_process' ).exec
-
-## Constants
-
-These constants define how the functions below perform.
-
     p = require 'path'
-    submodules = { }
 
 ## The `compile` build process
 
@@ -60,7 +54,7 @@ The last thing it does is copy the entire client and server folders into the
 electron app folder.  We define a function here to do that, and we use that
 function below.
 
-        toCopy = [ 'client', 'server', 'sampleuniverse' ]
+        toCopy = [ 'client', 'server', 'sampleuniverse', 'node_modules' ]
         copyEverything = ->
             if not ( next = toCopy.shift() )? then return done()
             ncp = require( 'ncp' ).ncp
@@ -81,16 +75,3 @@ It then defers to the above function at the end of that process.
                 build.compile next, recur
             else
                 copyEverything()
-
-## The `submodules` build process
-
-Although there are currently no submodules, this task is ready in the
-event that there will be more later.  It enters each of their subfolders and
-runs any necessary build process on those submodules.
-
-    build.asyncTask 'submodules', 'Build any git submodule projects',
-    ( done ) ->
-        commands = for own submodule, command of submodules
-            description : "Running #{submodule} build process...".green
-            command : "cd #{submodule} && #{command} && cd .."
-        build.runShellCommands commands, done
