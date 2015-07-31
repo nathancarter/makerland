@@ -1229,6 +1229,63 @@ the mouse on the map itself.
                                     action : -> changeItems()
                                 player.showUI controls
                         , -> mainMenu()
+                copyMapBlock = ->
+                    [ plane, x, y ] = player.getPosition()[..]
+                    player.copiedMapBlock = bt.getBlock plane, x, y
+                    topLeft = ( parseInt i for i in \
+                        bt.positionToBlockName( plane, x, y ).split ',' )
+                    bottomRight = [
+                        topLeft[0]
+                        topLeft[1] + settings.mapBlockSizeInCells
+                        topLeft[2] + settings.mapBlockSizeInCells
+                    ]
+                    require( './animations' ).showAnimation \
+                        player.getPosition(), 'highlight region',
+                        corner1 : topLeft, corner2 : bottomRight
+                    player.showOK 'Copied!  You can now move to another map
+                        block and paste it.', mainMenu
+                pasteMapBlock = ->
+                    toPaste = player.copiedMapBlock
+                    if toPaste not instanceof Object or \
+                       not toPaste.cells? or not toPaste['landscape items']?
+                        return player.showOK 'You have not yet copied a map
+                            block, and so you have nothing to paste.',
+                            mainMenu
+                    [ plane, x, y ] = player.getPosition()[..]
+                    mapBlockOverwritten = bt.getBlock plane, x, y
+                    bt.setBlock plane, x, y, toPaste
+                    blockName = bt.positionToBlockName plane, x, y
+                    bt.resetBlock blockName
+                    topLeft = ( parseInt i for i in blockName.split ',' )
+                    bottomRight = [
+                        topLeft[0]
+                        topLeft[1] + settings.mapBlockSizeInCells
+                        topLeft[2] + settings.mapBlockSizeInCells
+                    ]
+                    require( './animations' ).showAnimation \
+                        player.getPosition(), 'highlight region',
+                        corner1 : topLeft, corner2 : bottomRight
+                    player.showUI
+                        type : 'text'
+                        value : '<p><b>You have pasted the map
+                                block!</b></p>'
+                    ,
+                        type : 'action'
+                        value : 'Whoops!  Undo that!'
+                        cancel : yes
+                        action : ->
+                            bt.setBlock plane, x, y, mapBlockOverwritten
+                            bt.resetBlock blockName
+                            require( './animations' ).showAnimation \
+                                player.getPosition(), 'highlight region',
+                                corner1 : topLeft, corner2 : bottomRight
+                            player.showOK 'The paste action has been
+                                undone.', mainMenu
+                    ,
+                        type : 'action'
+                        value : 'Good, keep that change.'
+                        default : yes
+                        action : mainMenu
                 do mainMenu = -> player.showUI
                     type : 'text'
                     value : '<h3>Editing game world</h3>
@@ -1248,6 +1305,14 @@ the mouse on the map itself.
                     type : 'action'
                     value : 'Edit landscape items on map'
                     action : changeItems
+                ,
+                    type : 'action'
+                    value : 'Copy map block near me'
+                    action : copyMapBlock
+                ,
+                    type : 'action'
+                    value : 'Paste map block near me'
+                    action : pasteMapBlock
                 ,
                     type : 'action'
                     value : 'Done'
