@@ -96,13 +96,12 @@ and remove the player from `allPlayers`.  Also, end the player's periodic
 status updates.
 
             socket.on 'disconnect', =>
-                for item in @inventory ? [ ]
-                    item.move @getPosition()
                 index = Player::allPlayers.indexOf this
                 Player::allPlayers.splice index, 1
                 console.log "Disconnected #{@name or 'a player'};
                     there are now #{Player::allPlayers.length} players."
                 @stopStatusUpdates()
+                @saveInventory()
                 @save()
                 oldPosition = @getPosition()
                 @positionChanged null, null
@@ -358,6 +357,7 @@ versus logging back in for the first time since they died.
                         character is still deep in death.",
                         => @socket.disconnect()
                     return
+            @loadInventory()
             @justLoggedIn = yes
             console.log "\tPlayer logged in as #{name}."
             destination =
@@ -493,6 +493,28 @@ password hash back in.
             toSave = JSON.parse JSON.stringify @saveData
             toSave.password = accounts.get @name, 'password'
             accounts.set @name, toSave
+
+This function prepares the player's inventory for saving, by recording each
+item's serialization in an array in the player's `saveData`.
+
+        saveInventory : =>
+            @saveData.inventory =
+                for item in @inventory
+                    serialization : item.serialize()
+                    equipped : item.isEquipped()
+            for item in ( @inventory ? [ ] ).slice()
+                item.destroy()
+
+This function reverses the previous, and should be called on a newly-loaded
+player.  It instantiates all saved inventory items into the player's actual
+inventory.
+
+        loadInventory : =>
+            mi = require( './movableitems' )
+            for dataObj in @saveData.inventory ? [ ]
+                item = mi.MovableItem.deserialize dataObj.serialization
+                item.move this
+                if dataObj.equipped then @equip item
 
 ## Command Access
 

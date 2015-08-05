@@ -91,6 +91,15 @@ invalid, then `null` will be used instead.
             else
                 @location = null
 
+For movable items, serialization is straightforward because movable items
+have no individual properties.  They are determined completely by their
+index in the movable items table.  The serialization is to and from objects
+that are JSONable.
+
+        serialize : => index : @index
+        @deserialize : ( dataObj ) ->
+            if dataObj.index? then new MovableItem dataObj.index else null
+
 If this item gets inspected by a player, just print its basic information.
 
         gotInspectedBy : ( player ) =>
