@@ -1,7 +1,9 @@
 
 # Avatar Drawing Routines
 
-First, the data for the walk cycle of a stick figure.  The walk cycle has
+## Pose data
+
+Now, the data for the walk cycle of a stick figure.  The walk cycle has
 four keyframes, which appear in the following array.  The entry for each
 extremity is a triple, (x,y,b), where (x,y) is the point in the plane where
 the extremity sits and b is the amount by which the joint for that limb is
@@ -72,6 +74,8 @@ parameter is true if the avatar is facing left, false otherwise.
             diff.y *= -1 # ensure it points left iff left parameter is true
         x : ( end1.x + end2.x )/2 + diff.x*amount
         y : ( end1.y + end2.y )/2 + diff.y*amount
+
+## Drawing routines
 
 Finally, the routine that draws an avatar in a given pose.  The context
 parameter is the 2D graphics context to draw on.  The name parameter is the

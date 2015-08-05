@@ -377,14 +377,36 @@ they are z-ordered in among them, so that players can, f.ex., hide behind a
 tree.  It also includes movable items and creatures among the landscape
 items, for the same reason.
 
+All of these things can have offsets, stored in the following mapping from
+player names to small translation vectors.  An offset will almost always be
+set (and cleared) by an animation, and allows an avatar to jump, wiggle,
+strike, etc. Each element of the following object is a key-value pair, the
+key being the name of the player, and the value being an object with keys x
+and y, measured in units of map cells.
+
+    counter = 0
+    visibleOffsets = null
+    do clearVisibleOffsets = -> visibleOffsets = { }
+    setVisibleOffset = ( name, x, y ) ->
+        visibleOffsets["#{name}".toLowerCase()] = x : x, y : y
+    getVisibleOffset = ( name ) ->
+        if visibleOffsets.hasOwnProperty "#{name}".toLowerCase()
+            visibleOffsets["#{name}".toLowerCase()]
+        else
+            x : 0, y : 0
+
+And now, the promised drawing function.
+
     drawLandscapeItems = ( context ) ->
         orderedItems = { }
         add = ( item ) ->
-            if not item.x or not item.y
-                screencoords = mapCoordsToScreenCoords item.position[1],
-                    item.position[2]
-                item.x = screencoords.x
-                item.y = screencoords.y
+            screencoords = mapCoordsToScreenCoords item.position[1],
+                item.position[2]
+            offset = getVisibleOffset item.name
+            item.x = screencoords.x + ( offset?.x ? 0 )
+            item.y = screencoords.y + ( offset?.y ? 0 )
+            newpos = screenCoordsToMapCoords item.x, item.y
+            item.position = [ item.position[0], newpos.x, newpos.y ]
             if item.type is 'item' or item.type is 'creature'
                 item.x -= item.width/2
                 item.y -= item.height/2
@@ -401,41 +423,34 @@ items, for the same reason.
             [ plane, x, y ] = ( parseInt i for i in name.split ',' )
             for item in data['landscape items'] ? [ ]
                 [ itemx, itemy ] = item.position
-                screenpos = mapCoordsToScreenCoords itemx+x, itemy+y
                 if typeinfo = lookupLandscapeItemType item.type
                     image = getLandscapeItemIcon item.type
                     if image.complete
                         add
                             type : 'item'
                             image : image
-                            x : screenpos.x
-                            y : screenpos.y
+                            position : [ plane, itemx+x, itemy+y ]
                             width : cellSize*typeinfo.size
                             height : cellSize*typeinfo.size
             for item in data['movable items'] ? [ ]
-                [ plane, itemx, itemy ] = item.location
-                screenpos = mapCoordsToScreenCoords itemx, itemy
                 if typeinfo = lookupMovableItemType item.index
                     image = getMovableItemIcon item.index
                     if image.complete
                         add
                             type : 'item'
                             image : image
-                            x : screenpos.x
-                            y : screenpos.y
+                            position : item.location
                             width : image.width
                             height : image.height
             for creature in data['creatures'] ? [ ]
-                [ plane, itemx, itemy ] = creature.location
-                screenpos = mapCoordsToScreenCoords itemx, itemy
                 if typeinfo = lookupCreatureType creature.index
                     image = getCreatureIcon creature.index
                     if image.complete
                         add
                             type : 'creature'
+                            name : creature.ID
                             image : image
-                            x : screenpos.x
-                            y : screenpos.y
+                            position : creature.location
                             width : image.width
                             height : image.height
                             direction : creature.motionDirection
@@ -642,6 +657,7 @@ animations, but also to clear out those that have run their full course.
 
     drawAnimations = ( context ) ->
         if currentStatus.dead then return
+        clearVisibleOffsets()
         now = new Date
         for own block, animations of activeAnimations
             updatedList = [ ]

@@ -344,12 +344,16 @@ succeeds, the enemy should be notified that we have attacked it.
         target.attackedBy this
 
 Now we test whether we randomly succeed in our attempt to strike it.  If we
-missed, play a "miss" sound and stop.
+missed, play a "miss" sound and animation, then stop.
 
         random = require './random'
         if not random.statCompetition( this,   'attack accuracy',
                                        target, 'dodging ability' )
             require( './sounds' ).playSound 'miss', @getPosition()
+            require( './animations' ).showAnimation @getPosition(),
+                'miss',
+                agent : this.name ? this.ID
+                target : target.name ? target.ID
             this.emit 'missed target', target
             target.emit 'dodged attack', this
             return
@@ -368,21 +372,39 @@ First check to see if there are any event handlers that block our attempt to
 actually do damage.
 
         random = require './random'
-        @attempt 'hit', => target.attempt 'got hit', =>
+        @attempt 'hit', =>
+            target.attempt 'got hit', =>
 
 If not, then the following code will be run.  It computes and delivers the
 damage, with a corresponding animation that shows a small projectile moving
 from attacker to target.  Animation and sound for the actual damage will
 be triggered by the change in health.
 
-            min = @getStat 'minimum damage'
-            max = @getStat 'maximum damage'
-            damage = random.uniformClosed min, max
-            require( './animations' ).showAnimation @getPosition(), 'hit',
+                min = @getStat 'minimum damage'
+                max = @getStat 'maximum damage'
+                damage = random.uniformClosed min, max
+                require( './animations' ).showAnimation @getPosition(),
+                    'hit',
+                    agent : this.name ? this.ID
+                    target : target.name ? target.ID
+                    strength : damage/50 + 0.5
+                target.changeHealth -damage, this
+
+If either of the above attempts fail, then we want to show the "miss"
+sound and animation instead.
+
+            , =>
+                require( './sounds' ).playSound 'miss', @getPosition()
+                require( './animations' ).showAnimation @getPosition(),
+                    'miss',
+                    agent : this.name ? this.ID
+                    target : target.name ? target.ID
+        , =>
+            require( './sounds' ).playSound 'miss', @getPosition()
+            require( './animations' ).showAnimation @getPosition(),
+                'miss',
                 agent : this.name ? this.ID
                 target : target.name ? target.ID
-                strength : damage/50 + 0.5
-            target.changeHealth -damage, this
 
 ## Stats for Livings
 
