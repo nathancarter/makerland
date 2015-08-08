@@ -452,9 +452,21 @@ can run multiple times on multiple objects.
                             require( './player' ).playersNearPosition(
                                 position, radius ) );
                 }
+                function landscapeItemsNear ( position, radius ) {
+                    if ( typeof( radius ) == 'undefined' ) radius = 1;
+                    return require( './blocks' ).getItemsNearPoint(
+                        position[0], position[1], position[2], radius );
+                }
                 function confirm ( player, text, yesAction, noAction ) {
                     require( './ui' ).areYouSure( player, text, yesAction,
                         noAction );
+                }
+                function getCell ( plane, x, y ) {
+                    require( './blocks' ).getCell( plane, x, y );
+                }
+                function setCell ( plane, x, y, index ) {
+                    return require( './blocks' )
+                        .setCell( plane, x, y, index );
                 }
                 var loggedSetInterval = null;
                 var random = require( './random' );"

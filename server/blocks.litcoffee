@@ -100,6 +100,7 @@ block, as well as getting/setting just one cell at a time.
 
         getCells : ( plane, x, y ) => @getBlockData plane, x, y, 'cells'
         setCells : ( plane, x, y, array ) =>
+            @protected = yes # prevents deletion of landscape items
             @setBlockData plane, x, y, 'cells', array
         positionToBlockIndices : ( plane, x, y ) ->
             N = settings.mapBlockSizeInCells
@@ -200,12 +201,12 @@ deleting the old item.  Return true on success, false on failure.
             success
 
 This function checks all blocks touching the current one and finds all
-landscape items whose rectangle includes the given map coordinates.  The
+landscape items whose rectangle is near the given map coordinates.  The
 limitation here is that this can only be called on blocks that are visible
 to some player, because it returns actual `LandscapeItem` instances, which
 only exist in cached blocks, and only visible blocks are cached.
 
-        getItemsOverPoint : ( plane, x, y ) =>
+        getItemsNearPoint : ( plane, x, y, distance ) =>
             corner = ( parseInt i for i in \
                 @positionToBlockName( plane, x, y ).split ',' )
             corner = x : corner[1], y : corner[2]
@@ -216,10 +217,16 @@ only exist in cached blocks, and only visible blocks are cached.
                 for j in [corner.y-N,corner.y,corner.y+N]
                     bname = module.exports.positionToBlockName plane, i, j
                     for item in @landscapeItems[bname] ? [ ]
-                        if Math.abs( x - item.x ) < item.size/2 and \
-                           Math.abs( y - item.y ) < item.size/2
+                        if Math.abs( x - item.x ) < item.size/2+distance \
+                           and \
+                           Math.abs( y - item.y ) < item.size/2+distance
                             results.push item
             results
+
+The following is a special case of that function.
+
+        getItemsOverPoint : ( plane, x, y ) =>
+            @getItemsNearPoint plane, x, y, 0
 
 ## Planes
 
@@ -371,6 +378,11 @@ LandscapeItem class are constructed for all its landscape items.
         putIntoCache : ( entryName, entry, entrySize ) =>
             @landscapeItems ?= { }
             super entryName, entry, entrySize
+
+If this block kept its landscape items since its last cacheing (see
+`removeFromCache`, below) then don't recreate them.  Otherwise, do.
+
+            if @landscapeItems.hasOwnProperty entryName then return
             { LandscapeItem } = require './landscapeitems'
             for item in entry['landscape items'] or [ ]
                 [ plane, x, y ] =
@@ -385,10 +397,20 @@ instances that go with it.
 
         removeFromCache : ( entryName ) =>
             super entryName
-            for item in ( @landscapeItems ?= { } )[entryName] ? [ ]
-                require( './behaviors' ).clearIntervalSet \
-                    item.intervalSetIndex
-            delete ( @landscapeItems ?= { } )[entryName]
+
+If `@protected` is true, this `removeFromCache` call was only triggered by
+an update to the cells in this block, not any change to its landscape items,
+and the block will be immediately re-added to the cache in instants.  In
+that case, we skip the deletion of the landscape items, because editing the
+block's cells shouldn't renew its landscape items.
+
+            if @protected
+                @protected = no
+            else
+                for item in ( @landscapeItems ?= { } )[entryName] ? [ ]
+                    require( './behaviors' ).clearIntervalSet \
+                        item.intervalSetIndex
+                delete ( @landscapeItems ?= { } )[entryName]
 
 To reset a block to its initial state (reloading all landscape items and
 their behaviors) we just remove it from the cache and re-add it.
