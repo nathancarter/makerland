@@ -28,6 +28,8 @@ corners as well.
                 @type = tableEntry.type
                 @behaviors = tableEntry.behaviors or [ ]
                 @visible = tableEntry.visible ? yes
+                @capacity = tableEntry.capacity ? 0
+                @contents = tableEntry.contents ? [ ]
             @typeName = module.exports.get @type, 'name'
             N = require( './settings' ).mapBlockSizeInCells
             @localX = @x - N * Math.floor @x/N
@@ -56,6 +58,24 @@ landscape items.
                 @bottomRight.x, @bottomRight.y, topLeft.x, topLeft.y,
                 bottomRight.x, bottomRight.y
 
+Can manipulate contents in one of two ways:  Remove an item, which also
+causes the landscape item to save itself (safely) into the block it lives
+in, or append a new item (which also causes a safe save).  Thus although
+these two functions could be accomplished by direct manipulations to the
+`@contents` member, it's better to use this API, so that saving happens,
+and safely at that.  (Safe means that the block is not reset, which will
+mess up the expected functionality of most behaviors installed in that
+block.)
+
+        removeContentsItem : ( index ) =>
+            @contents.splice index, 1
+            require( './blocks' ).doNotCacheOnSet()
+            @save()
+        addContentsItem : ( item ) =>
+            @contents.push item?.serialize?() ? item
+            require( './blocks' ).doNotCacheOnSet()
+            @save()
+
 If a player inspects this landscape item, we give its basic information, and
 then check to see if there is any other way to interact with it.
 
@@ -75,6 +95,83 @@ then check to see if there is any other way to interact with it.
                     type : 'action'
                     value : name[0].toUpperCase() + name[1..]
                     action : => action.apply this, [ player ]
+            if @capacity > 0
+                refreshView = => @gotInspectedBy player
+                mi = require './movableitems'
+                controls.push
+                    type : 'text'
+                    value : "<h3>Contents of #{@typeName}:</h3>"
+                reified = ( mi.MovableItem.deserialize c \
+                    for c in @contents )
+                howFullIsItNow = 0
+                for item, index in reified
+                    do ( item, index ) =>
+                        howFullIsItNow += item.space
+                        controls.push [
+                            type : 'text'
+                            value : mi.normalIcon item.index
+                        ,
+                            type : 'text'
+                            value : item.typeName
+                        ,
+                            type : 'action'
+                            value : 'take out'
+                            action : =>
+                                if not player.canCarry item
+                                    player.showOK 'You cannot carry that
+                                        much.', refreshView
+                                    return
+                                item.attempt 'get', =>
+                                    item.move player
+                                    @emit 'item out', index
+                                    @removeContentsItem index
+                                    refreshView()
+                                , ( failReason ) =>
+                                    if typeof failReason isnt 'string'
+                                        failReason =
+                                            'You cannot pick it up!'
+                                    player.showOK failReason, refreshView
+                                , player
+                        ]
+                if @contents.length is 0
+                    controls.push
+                        type : 'text'
+                        value : '(no items)'
+                controls.push
+                    type : 'text'
+                    value : "<h3>Your inventory:</h3>"
+                for item in player.inventory
+                    do ( item ) =>
+                        controls.push [
+                            type : 'text'
+                            value : mi.normalIcon item.index
+                        ,
+                            type : 'text'
+                            value : item.typeName
+                        ,
+                            type : 'action'
+                            value : 'put in'
+                            action : =>
+                                if howFullIsItNow + item.space > @capacity
+                                    player.showOK "But the #{@typeName} is
+                                        too full, and that item will not
+                                        fit.", refreshView
+                                    return
+                                item.attempt 'drop', =>
+                                    @addContentsItem item
+                                    @emit 'item in', @contents.length - 1
+                                    item.destroy()
+                                    refreshView()
+                                , ( failReason ) =>
+                                    if typeof failReason isnt 'string'
+                                        failReason = 'You cannot drop it!'
+                                    player.showOK failReason, refreshView
+                                , player
+                        ]
+                if @contents.length is 0
+                    controls.push
+                        type : 'text'
+                        value : '(no items)'
             controls.push
                 type : 'action'
                 value : 'Done'

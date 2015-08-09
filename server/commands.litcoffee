@@ -1143,6 +1143,41 @@ the mouse on the map itself.
                         value : 'Copy behaviors to other items'
                         action : -> pasteBehaviorsFrom item
                     ,
+                        [
+                            type : 'text'
+                            value : "Capacity: #{item.capacity}"
+                        ,
+                            type : 'action'
+                            value : 'Change'
+                            action : ( event ) ->
+                                player.showUI
+                                    type : 'text'
+                                    value : '<h2>Change landscape
+                                            item capacity</h2>'
+                                ,
+                                    type : 'string input'
+                                    name : 'new capacity'
+                                ,
+                                    type : 'action'
+                                    value : 'Change capacity'
+                                    default : yes
+                                    action : ( event ) ->
+                                        newcap = event['new capacity']
+                                        if not /[0-9]+/.test newcap
+                                            return player.showOK 'New
+                                                capacity must be a
+                                                non-negative whole number.',
+                                                -> editItem item
+                                        item.capacity = parseInt newcap
+                                        item.save()
+                                        editItem item
+                                ,
+                                    type : 'action'
+                                    value : 'Cancel'
+                                    cancel : yes
+                                    action : -> editItem item
+                        ]
+                    ,
                         type : 'text'
                         value : 'Move the item with these buttons:'
                     ,

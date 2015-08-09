@@ -169,8 +169,17 @@ the `set(entryName,A,B)` form is used.
                 current[A] = B
                 A = current
             entryJSON = JSON.stringify A
-            @putIntoCache entryName, A, entryJSON.length
+            if not @noCacheOnSetFlag
+                @putIntoCache entryName, A, entryJSON.length
+            @noCacheOnSetFlag = no
             fs.writeFileSync ( @filename entryName ), entryJSON
+
+Some tables do not want the cache touched just because an entry was set in
+the table; for those, we provide the following function, which disables that
+feature just for the immediate next call to `set()`, as you can see in the
+implementation of `set`, above.
+
+        doNotCacheOnSet : => @noCacheOnSetFlag = yes
 
 The following are just convenience functions that use a field with the
 special name "__authors" (unlikely to collide with any actual database

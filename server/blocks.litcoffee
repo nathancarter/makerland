@@ -100,7 +100,7 @@ block, as well as getting/setting just one cell at a time.
 
         getCells : ( plane, x, y ) => @getBlockData plane, x, y, 'cells'
         setCells : ( plane, x, y, array ) =>
-            @protected = yes # prevents deletion of landscape items
+            @doNotCacheOnSet() # prevents deletion of landscape items
             @setBlockData plane, x, y, 'cells', array
         positionToBlockIndices : ( plane, x, y ) ->
             N = settings.mapBlockSizeInCells
@@ -169,7 +169,8 @@ item data within that block, then updates it to match the content of the
 object passed as parameter.
 
         setLandscapeItem : ( updatedItem ) =>
-            { plane, x, y, type, behaviors } = updatedItem
+            { plane, x, y, type, behaviors, capacity, contents } =
+                updatedItem
             items = @getBlockData plane, x, y, 'landscape items'
             N = settings.mapBlockSizeInCells
             blockx = x - N * Math.floor x/N
@@ -179,8 +180,10 @@ object passed as parameter.
                         blockx, blocky
                     item.position = [ blockx, blocky ]
                     item.type = type
+                    item.capacity = capacity
+                    item.contents = contents
                     item.behaviors =
-                        JSON.parse JSON.stringify( behaviors or [ ] )
+                        JSON.parse JSON.stringify( behaviors ? [ ] )
                     @setBlockData plane, x, y, 'landscape items', items
                     return yes
             no
@@ -397,20 +400,10 @@ instances that go with it.
 
         removeFromCache : ( entryName ) =>
             super entryName
-
-If `@protected` is true, this `removeFromCache` call was only triggered by
-an update to the cells in this block, not any change to its landscape items,
-and the block will be immediately re-added to the cache in instants.  In
-that case, we skip the deletion of the landscape items, because editing the
-block's cells shouldn't renew its landscape items.
-
-            if @protected
-                @protected = no
-            else
-                for item in ( @landscapeItems ?= { } )[entryName] ? [ ]
-                    require( './behaviors' ).clearIntervalSet \
-                        item.intervalSetIndex
-                delete ( @landscapeItems ?= { } )[entryName]
+            for item in ( @landscapeItems ?= { } )[entryName] ? [ ]
+                require( './behaviors' ).clearIntervalSet \
+                    item.intervalSetIndex
+            delete ( @landscapeItems ?= { } )[entryName]
 
 To reset a block to its initial state (reloading all landscape items and
 their behaviors) we just remove it from the cache and re-add it.
