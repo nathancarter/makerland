@@ -9,6 +9,8 @@ that is optional, and they themselves are not a prototype/class.
 This module defines several functions that support living things in the
 game, such as hit points, healing, and inventory.  Each is explained below.
 
+    animations = require './animations'
+
 ## The Mixing Operation
 
 Call one of the following functions to mix the "living" functionality into
@@ -136,21 +138,33 @@ living dies, trigger the death routine.
         if typeof delta isnt 'number' then return
         if not isFinite( delta ) or isNaN delta then return
         scope = @saveData ? this
+        originalValue = scope.hitPoints
         scope.hitPoints += delta
         if scope.hitPoints > scope.maximumHitPoints
             scope.hitPoints = scope.maximumHitPoints
+        showHealthBar = no
         if delta > @healRate ? 1
-            require( './animations' ).showAnimation @getPosition(),
-                'sparkle',
+            animations.showAnimation @getPosition(), 'sparkle',
                 target : this.name ? this.ID
                 color : '#ffff66'
             require( './sounds' ).playSound 'gentle bell', @getPosition()
-        if delta / scope.maximumHitPoints < 0
-            require( './animations' ).showAnimation @getPosition(),
-                'sparkle',
+            showHealthBar = yes
+        else if delta < 0
+            animations.showAnimation @getPosition(), 'sparkle',
                 target : this.name ? this.ID
                 color : '#cc0000'
             require( './sounds' ).playSound 'bone crack', @getPosition()
+            showHealthBar = yes
+        if showHealthBar
+            if @lastShownHealthBar
+                animations.stopAnimation @lastShownHealthBar
+            @lastShownHealthBar = animations.showAnimation @getPosition(),
+                'health bar',
+                target : this.name ? this.ID
+                previous : originalValue
+                current : scope.hitPoints
+                maximum : scope.maximumHitPoints
+            setTimeout ( => delete @lastShownHealthBar ), 2000
         if scope.hitPoints < 0 then @death agent else @updateStatus?()
 
 Livings have a heart beat, which heals them slowly, as long as they remain
@@ -167,8 +181,8 @@ sounds and animations.
     module.exports.methods.death = ( killer ) ->
         killer?.emit 'killed', this
         @emit 'died', killer
-        require( './animations' ).showAnimation @getPosition(),
-            'death', position : @getPosition()
+        animations.showAnimation @getPosition(), 'death',
+            position : @getPosition()
         require( './sounds' ).playSound 'death knell', @getPosition()
 
 If a player killed a creature, grant experience points.
@@ -350,8 +364,7 @@ missed, play a "miss" sound and animation, then stop.
         if not random.statCompetition( this,   'attack accuracy',
                                        target, 'dodging ability' )
             require( './sounds' ).playSound 'miss', @getPosition()
-            require( './animations' ).showAnimation @getPosition(),
-                'miss',
+            animations.showAnimation @getPosition(), 'miss',
                 agent : this.name ? this.ID
                 target : target.name ? target.ID
             this.emit 'missed target', target
@@ -383,8 +396,7 @@ be triggered by the change in health.
                 min = @getStat 'minimum damage'
                 max = @getStat 'maximum damage'
                 damage = random.uniformClosed min, max
-                require( './animations' ).showAnimation @getPosition(),
-                    'hit',
+                animations.showAnimation @getPosition(), 'hit',
                     agent : this.name ? this.ID
                     target : target.name ? target.ID
                     strength : damage/50 + 0.5
@@ -395,14 +407,12 @@ sound and animation instead.
 
             , =>
                 require( './sounds' ).playSound 'miss', @getPosition()
-                require( './animations' ).showAnimation @getPosition(),
-                    'miss',
+                animations.showAnimation @getPosition(), 'miss',
                     agent : this.name ? this.ID
                     target : target.name ? target.ID
         , =>
             require( './sounds' ).playSound 'miss', @getPosition()
-            require( './animations' ).showAnimation @getPosition(),
-                'miss',
+            animations.showAnimation @getPosition(), 'miss',
                 agent : this.name ? this.ID
                 target : target.name ? target.ID
 
