@@ -202,11 +202,7 @@ individual row in the table that populates that command pane.
                              data-toggle='tooltip' data-placement='left'
                              title='#{attributify data.help}'
                              onclick='uiCommandClicked(this)'>
-                        <img src='#{data.icon}'
-                             onclick='uiCommandClicked(
-                             document.getElementById(
-                             \"command_button_#{attributify data.name}\"))'
-                             />
+                        <img src='#{data.icon}'/>
                         #{data.name}
                      </button>"
                     "<p#{attrs}>#{data.shortInfo}</p>"
