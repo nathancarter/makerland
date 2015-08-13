@@ -318,12 +318,14 @@ merely tells the server that the client clicked a button.
         event.type = 'action taken'
         event.id = button.getAttribute( 'id' )[7..]
         socket.emit 'ui event', event
+        button.blur()
 
 We also need an event handler for commands added to the UI, much like the
 one above.
 
     window.uiCommandClicked = ( button ) ->
         socket.emit 'command', name : button.value.toLowerCase()
+        button.blur()
 
 We also need a handler for any change in any UI element, because sometimes
 the server wants to be notified about that.
