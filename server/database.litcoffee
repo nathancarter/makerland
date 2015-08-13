@@ -6,11 +6,9 @@ Thus clients can just import this module and get all the rest for free.
 
     module.exports.tables = tables = [
         'accounts', 'celltypes', 'blocks', 'landscapeitems', 'behaviors',
-        'logs', 'animations', 'sounds', 'movableitems', 'creatures'
+        'logs', 'animations', 'sounds', 'movableitems', 'creatures',
+        'abilities'
     ]
-
-    for table in tables
-        module.exports[table] = require "./#{table}"
 
 Also, clients can request files from the database.  So we have a function
 for testing whether a URL points to a file in the database or not, and if it
@@ -31,3 +29,10 @@ We also provide the inverse function.
 
     module.exports.createDatabaseURL = ( table, entry, key ) ->
         "/db/#{table}/#{entry}/#{key}?#{encodeURIComponent new Date}"
+
+The last thing this module does is install all the tables.  It does so last,
+because then the above functions will be defined, which some of those tables
+need in their initialization routines.
+
+    for table in tables
+        module.exports[table] = require "./#{table}"

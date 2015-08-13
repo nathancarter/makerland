@@ -331,25 +331,34 @@ given radius of the player.
             Math.sqrt( dx*dx + dy*dy ) <= radius
         ( enemy for enemy in @enemies when closeEnough enemy )
 
-The following routine is called every heartbeat in this living.  It
-implements a single step of combat.  Details below.
+We put the above routine together with a process for clearing out enemies
+that have died or logged out, and obtain the `reachableEnemies` utility.
 
-    module.exports.methods.fightEnemies = ->
+    module.exports.methods.reachableEnemies = ->
 
 First, we clean out our list of enemies so that it does not include anyone
-who has died or logged out.
+who has died or logged out.  Then we can return the list of enemies who are
+within 1 map cell of us.
 
         stillAround = ( enemy ) ->
             not enemy.saveData?.timeOfDeath \
             and not enemy.wasDestroyed?() and enemy.getPosition?()?
         @enemies = ( e for e in @enemies when stillAround e )
+        @enemiesWithin 1
 
-Next, we attempt to fight the highest-priority enemy within reach.
+The following routine is called every heartbeat in this living.  It
+implements a single step of combat.  Details below.
 
-        whereIAm = @getPosition()
-        reachableEnemies = @enemiesWithin 1
-        if reachableEnemies.length is 0 then return
-        target = reachableEnemies[0]
+    module.exports.methods.fightEnemies = ( whichEnemy = 0 )->
+
+Select which enemy to fight.  By default, this is the highest-priority one,
+at index zero.  (That is who the player attacks in ordinary combat.)  But
+abilities are free to give the player attacks against their lower-priority
+enemies, and thus can pass a nonzero index to this function.
+
+        if ( reachableEnemies = @reachableEnemies() ).length <= whichEnemy
+            return
+        target = reachableEnemies[whichEnemy]
 
 We have found the highest-priority enemy on our enemies list that's close
 enough to strike.  At this point, it doesn't matter whether our attack
@@ -418,11 +427,34 @@ sound and animation instead.
 
 ## Stats for Livings
 
+One living may have a different set of stats from another, because of
+differing access to learned abilities.  Thus we create a function for
+querying the set of stats a living has.  It equals the set of default stats
+defined at the top of this file, plus any stats the living has because of
+abilities it has learned (usually as a player).
+
+    module.exports.methods.getStatNames = ->
+        result = module.exports.statNames()
+        if @saveData?.commands instanceof Array
+            for own key, value of require( './commands' )
+                if value.ability and key in @saveData.commands
+                    result.push key
+                    if not @getBaseStat( key )? or \
+                       @getBaseStat( key ) <= 0 then @setBaseStat key, 1
+        result
+
 A living's base value for a statistic is stored in its stats mapping.  We
 can read and write it as follows.
 
     module.exports.methods.getBaseStat = ( key ) ->
-        ( @saveData ? this )?.stats?[key]
+        if @saveData?
+            if not result = @saveData.stats?[key]
+                commands = require './commands'
+                if commands[key]?.ability and key in @saveData.commands
+                    @setBaseStat key, result = 1
+            result
+        else
+            @stats?[key]
     module.exports.methods.setBaseStat = ( key, value ) ->
         scope = @saveData ? this
         scope.stats[key] = value

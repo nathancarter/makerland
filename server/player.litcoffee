@@ -557,17 +557,16 @@ access.
 
         showCommandUI : =>
             @showUI ( for command in @commands()
-                iconPath = if commands[command].icon?
-                    path.join settings.universePath( 'commandIconFolder' ),
-                        commands[command].icon
-                else
-                    undefined
+                icon = commands[command].icon
+                if icon? and icon[0] isnt '/'
+                    icon = path.join settings.universePath(
+                        'commandIconFolder' ), icon
                 type : 'command'
                 name : command[0].toUpperCase() + command[1..]
                 category : "#{commands[command].category} Commands"
                 shortInfo : commands[command].shortInfo
                 help : commands[command].help
-                icon : iconPath
+                icon : icon
             )
 
 ## Player Inventory
@@ -616,6 +615,32 @@ vision distance, which results in a call to `positionChanged`.
         teleport : ( destination ) =>
             @positionChanged destination, 10
             @socket.emit 'player position', destination
+
+## Support for Abilities
+
+Abilities usually have a cooldown period before they can be used again. Thus
+we add to the player object two functions for conveniently managing the
+player's cooldowns.  One tests to see if the player can use an ability yet,
+and another marks the ability as on cooldown for a given duration (in
+seconds).  Both are marked in temporary data in the player object, not saved
+with the player.  Thus very long cooldowns won't really work, because
+players can just quit and re-enter the game to get the cooldown to go
+faster.  This can be changed later if needed.
+
+        checkAbility : ( name ) =>
+            result = not @abilitiesOnCooldown?.hasOwnProperty name
+            if not result
+                @addStatusCondition "You cannot #{name} again yet.", 5
+            result
+        startAbilityCooldown : ( name, duration ) =>
+            @abilitiesOnCooldown ?= { }
+            @abilitiesOnCooldown[name] = yes
+            setTimeout =>
+                delete @abilitiesOnCooldown[name]
+                @addStatusCondition "You can #{name} again.", 5
+            , duration*1000
+
+## Module-level functions outside the Player class
 
 Get all players within a certain radius of the given position.
 
