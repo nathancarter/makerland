@@ -782,12 +782,15 @@ current bonuses, and thus their current totals.
                     ( header string \
                       for string in [ 'Name', 'Base', 'Bonus', 'Total' ] )
                 ]
-                for own key of player.saveData.stats
+                format = ( float ) ->
+                    result = Number( float ).toFixed 2
+                    if result[-3..] is '.00' then result[...-3] else result
+                for name in player.getStatNames()
                     toShow.push ( asText string for string in [
-                        "<b>#{key[0].toUpperCase() + key[1..]}:</b>"
-                        player.getBaseStat key
-                        player.getStatBonus key
-                        player.getStat key
+                        "<b>#{name[0].toUpperCase() + name[1..]}:</b>"
+                        format player.getBaseStat name
+                        format player.getStatBonus name
+                        format player.getStat name
                     ] )
                 experience = player.saveData.experience ? 0
                 toShow = toShow.concat [
