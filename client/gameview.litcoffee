@@ -788,3 +788,9 @@ the avatar attempt to walk there over time.
                 id : listeners.get( 0 ).getAttribute( 'id' )[6..]
         else
             setWhereIWantToGo mapcoords
+
+The server can also tell us to start walking towards a given point.
+
+    socket.on 'walk towards', ( data ) ->
+        console.log 'heard this whereIWantToGo data:', data
+        setWhereIWantToGo data
