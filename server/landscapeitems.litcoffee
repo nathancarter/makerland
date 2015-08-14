@@ -187,6 +187,12 @@ you.  Returns true on success, false on failure.
             require( './blocks' ).moveLandscapeItem this, @plane,
                 @x + dx, @y + dy
 
+A convenience function for getting a landscape item's icon.  This is useful
+in abilities and behaviors, which do not have access to the modules
+themselves.
+
+        icon : => module.exports.normalIcon @index
+
 Landscape items can also save themselves to disk, by writing to the block in
 which they sit.  This is done through a special method provided by the
 blocks table.  We just pass this object, and that method reads all the

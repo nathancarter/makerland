@@ -126,6 +126,11 @@ our holder's equipment mapping (if we have a holder).
                 return no
             @location.equipment?[@equipmentType] is this
 
+A convenience function for getting a movable item's icon.  This is useful in
+abilities and behaviors, which do not have access to the modules themselves.
+
+        icon : => module.exports.normalIcon @index
+
 Mix handlers into `MovableItem`s.
 
     require( './handlers' ).mixIntoClass MovableItem

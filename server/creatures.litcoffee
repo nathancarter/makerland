@@ -172,6 +172,11 @@ If a player inspects this creature, we show them our inventory.
                 action : -> player.showCommandUI()
             ]
 
+A convenience function for getting a creature's icon.  This is useful in
+abilities and behaviors, which do not have access to the modules themselves.
+
+        icon : => module.exports.normalIcon @index
+
 When creature objects need to be transmitted to the client, we do not want
 to fill up the network traffic with superfluous data (e.g., behavior
 definitions) nor include inventory items that may create circular
