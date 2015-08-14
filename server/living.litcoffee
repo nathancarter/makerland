@@ -143,7 +143,7 @@ living dies, trigger the death routine.
         if scope.hitPoints > scope.maximumHitPoints
             scope.hitPoints = scope.maximumHitPoints
         showHealthBar = no
-        if delta > @healRate ? 1
+        if delta > ( @healRate ? 1 )
             animations.showAnimation @getPosition(), 'sparkle',
                 target : this.name ? this.ID
                 color : '#ffff66'
