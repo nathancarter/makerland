@@ -155,6 +155,7 @@ living dies, trigger the death routine.
                 color : '#cc0000'
             require( './sounds' ).playSound 'bone crack', @getPosition()
             showHealthBar = yes
+            if agent? then @attackedBy agent
         if showHealthBar
             if @lastShownHealthBar
                 animations.stopAnimation @lastShownHealthBar
