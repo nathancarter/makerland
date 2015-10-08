@@ -321,7 +321,7 @@ one above.
 
     window.uiCommandClicked = ( button ) ->
         socket.emit 'command', name : button.value.toLowerCase()
-        button.blur()
+        ( $ '#gameview' ).focus()
 
 We also need a handler for any change in any UI element, because sometimes
 the server wants to be notified about that.
