@@ -320,7 +320,10 @@ also duplicated.
             @add player, ( newentry ) =>
                 for own key, value of @get entry
                     if key isnt '__authors'
-                        @set newentry, key, value
+                        valueCopy = value
+                        if valueCopy instanceof Object
+                            valueCopy = JSON.parse JSON.stringify valueCopy
+                        @set newentry, key, valueCopy
                 for key in @allFileKeys entry
                     @setFile newentry, key, @getFile entry, key
                 uiCallback()
