@@ -166,8 +166,10 @@ the given data into this player.
             else
                 { }
             count = 0
+            actions = [ ]
             installHandlers = ( piece ) =>
                 if piece.type in [ 'action', 'upload button', 'map click' ]
+                    if piece.type is 'action' then actions.push piece
                     if not piece.action instanceof Function
                         console.log "ERROR: Cannot install handler for
                             action #{piece.value} because its action is not
@@ -186,6 +188,15 @@ the given data into this player.
                     installHandlers entry for entry in piece
                 else
                     installHandlers piece
+
+If there is just one action button, and it's a cancel button, then it should
+also be the default action for the enter key.  This just makes it so that
+players don't have to look at the color of a button to move past a simple
+notification screen; they can just hit enter or escape, and either one
+works.
+
+            if actions.length is 1
+                if actions[0].cancel then actions[0].default = yes
 
 Send the modified data on to the client.
 
