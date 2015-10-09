@@ -53,13 +53,26 @@ Verify that the file exists.  If it does not, try to find the file in the
 universe folder itself.  If even that fails, give a 404 error.
 
         fs.exists filename, ( exists ) ->
+            settings = require './settings'
             if not exists
-                settings = require './settings'
                 alternateName = path.join settings.gameRoot, original
                 if fs.existsSync alternateName # sync to simplify code here
                     filename = alternateName
                 else
                     return sendErrorToClient response, 404, '404 Not Found'
+
+If the file is not in the client folder or universe folder, we refuse to
+serve it, or even to acknowledge that it exists, because that would be a big
+security hole.  We could send a 403 Forbidden here, but that would be to
+acknowledge that the requested file exists.
+
+            canonical = path.normalize filename
+            clientFolder =
+                path.normalize path.join __dirname, '..', 'client'
+            universeFolder = path.normalize settings.gameRoot
+            if canonical[...clientFolder.length] isnt clientFolder and \
+               canonical[...universeFolder.length] isnt universeFolder
+                return sendErrorToClient response, 404, '404 Not Found'
 
 Try to read the file.  If you cannot, give a 500 error.
 
