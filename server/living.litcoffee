@@ -367,6 +367,19 @@ succeeds, the enemy should be notified that we have attacked it.
 
         target.attackedBy this
 
+Also, if we are just trying to fight our highest-priority enemy (which is
+what's happening when `whichEnemy` is zero) but are forced to fight someone
+lower down on the list due to proximity, we will reorder the list so that
+our new target has become our highest priority enemy.  This allows player A
+to defend player B by staying near a common enemy while player B, the
+enemy's primary target, runs far enough away that the enemy begins hitting
+player A instead.  Then player A can return and help player B, without
+getting hit any more.
+
+        if whichEnemy is 0
+            i = @enemies.indexOf target
+            @enemies = [ target, @enemies[...i]..., @enemies[i+1..]... ]
+
 Now we test whether we randomly succeed in our attempt to strike it.  If we
 missed, play a "miss" sound and animation, then stop.
 
@@ -420,11 +433,13 @@ sound and animation instead.
                 animations.showAnimation @getPosition(), 'miss',
                     agent : this.name ? this.ID
                     target : target.name ? target.ID
+            , this, target
         , =>
             require( './sounds' ).playSound 'miss', @getPosition()
             animations.showAnimation @getPosition(), 'miss',
                 agent : this.name ? this.ID
                 target : target.name ? target.ID
+        , this, target
 
 ## Stats for Livings
 
