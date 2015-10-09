@@ -403,6 +403,7 @@ instances that go with it.
             for item in ( @landscapeItems ?= { } )[entryName] ? [ ]
                 require( './behaviors' ).clearIntervalSet \
                     item.intervalSetIndex
+                do ( item ) -> setTimeout ( -> item.emit 'destroyed' ), 0
             delete ( @landscapeItems ?= { } )[entryName]
 
 To reset a block to its initial state (reloading all landscape items and

@@ -81,6 +81,7 @@ object is destroyed.
                 @ID = null
             require( './behaviors' ).clearIntervalSet @intervalSetIndex
             if @walkInterval? then clearInterval @walkInterval
+            setTimeout ( => @emit 'destroyed' ), 0
         wasDestroyed : => not @ID?
 
 This function moves creatures to a new location.  It not only updates this

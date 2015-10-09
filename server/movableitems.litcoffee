@@ -68,6 +68,7 @@ object is destroyed.
                 MovableItem::allItems[@ID] = null
                 @ID = null
             require( './behaviors' ).clearIntervalSet @intervalSetIndex
+            setTimeout ( => @emit 'destroyed' ), 0
         wasDestroyed : => not @ID?
 
 This function moves items to a new location.  It not only updates this
