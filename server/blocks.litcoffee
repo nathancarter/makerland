@@ -465,6 +465,7 @@ in that block.
 
     module.exports.playerChangedAppearance = ( player ) ->
         pos = player.getPosition()
+        if not pos then return
         for playerName in playersWhoCanSeeBlock?[blockName pos] ? [ ]
             viewer = Player.nameToPlayer playerName
             if viewer then notifyAboutMovement viewer, player, pos
