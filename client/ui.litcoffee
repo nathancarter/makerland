@@ -167,7 +167,7 @@ individual row in the table that populates that command pane.
                     "<select class='form-control'
                              id='input_#{attributify data.name}'>
                     #{for own key, value of data.choices
-                        selected = if value is data.selected \
+                        selected = if "#{value}" is "#{data.selected}" \
                             then 'selected' else ''
                         "<option value='#{attributify value}' #{selected}
                          >#{key}</option>"}
