@@ -83,6 +83,20 @@ The UI for editing a cell type looks like the following.
         edit : ( player, entry, callback = -> player.showCommandUI() ) =>
             data = @get entry
             again = => @edit player, entry, callback
+            invert = ( object, value ) ->
+                for own key, val of object
+                    if "#{val}" is "#{value}" then return key
+            borderChoices =
+                none : 0
+                thin : 0.5
+                medium : 1
+                thick : 2
+                huge : 3
+            fadeChoices =
+                none : 0
+                narrow : 0.15
+                medium : 0.3
+                broad : 0.45
             player.showUI
                 type : 'text'
                 value : "<h3>Editing cell type #{entry}:</h3>"
@@ -162,7 +176,7 @@ The UI for editing a cell type looks like the following.
                     value : 'Fade amount:'
                 ,
                     type : 'text'
-                    value : @get entry, 'fade size'
+                    value : invert fadeChoices, @get entry, 'fade size'
                 ,
                     type : 'action'
                     value : 'Change'
@@ -173,12 +187,7 @@ The UI for editing a cell type looks like the following.
                             cells of a <i>different</i> type.
                             <i>A fade amount other than \"none\" will
                             override any border properties!</i>",
-                            {
-                                none : 0
-                                narrow : 0.15
-                                medium : 0.3
-                                broad : 0.45
-                            },
+                            fadeChoices,
                             @get( entry, 'fade size' ),
                             ( result ) =>
                                 if result
@@ -191,7 +200,7 @@ The UI for editing a cell type looks like the following.
                     value : 'Border size:'
                 ,
                     type : 'text'
-                    value : @get entry, 'border size'
+                    value : invert borderChoices, @get entry, 'border size'
                 ,
                     type : 'action'
                     value : 'Change'
@@ -202,13 +211,7 @@ The UI for editing a cell type looks like the following.
                             cells of a <i>different</i> type.
                             <i>Borders are completely ignored if the cell
                             also has a fade property!</i>",
-                            {
-                                none : 0
-                                thin : 0.5
-                                medium : 1
-                                thick : 2
-                                huge : 3
-                            },
+                            borderChoices,
                             @get( entry, 'border size' ),
                             ( result ) =>
                                 if result
