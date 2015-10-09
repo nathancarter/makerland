@@ -449,13 +449,28 @@ first we need the function we'll use to send the notification to clients.
 
     notifyAboutMovement = ( notifyThisPlayer, aboutThisPlayer, position ) ->
         if notifyThisPlayer is aboutThisPlayer then return
+        appearance = aboutThisPlayer.saveData?.avatar
+        if equipment = aboutThisPlayer.equipmentData
+            appearance ?= { }
+            appearance.equipment = JSON.parse JSON.stringify equipment
         notifyThisPlayer?.socket.emit 'movement nearby',
             type : 'player'
             name : aboutThisPlayer.name
-            appearance : aboutThisPlayer.saveData?.avatar
+            appearance : appearance
             position : position
 
-Now that we have that function, here's the bigger function that uses it.
+Also, if a player changes appearance, everyone who can see him/her must be
+notified.  So we have the following function for notifying every player
+in that block.
+
+    module.exports.playerChangedAppearance = ( player ) ->
+        pos = player.getPosition()
+        for playerName in playersWhoCanSeeBlock?[blockName pos] ? [ ]
+            viewer = Player.nameToPlayer playerName
+            if viewer then notifyAboutMovement viewer, player, pos
+
+Now that we have the `notifyAboutMovement` function, here's the big function
+that uses it.
 
     module.exports.updateVisibility =
     ( player, visionDistance, oldPosition ) ->

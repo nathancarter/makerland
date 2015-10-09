@@ -439,6 +439,7 @@ Now track player status.
             if @lastStatus? and currentStatus is @lastStatus then return
             @lastStatus = currentStatus
             @socket.emit 'status', currentStatus
+            require( './blocks' ).playerChangedAppearance this
 
 We now provide two functions, one for beginning a periodic status update
 query, and one for stopping that query.  The former is called at login, and
