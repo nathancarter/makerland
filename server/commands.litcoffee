@@ -490,7 +490,7 @@ so, to refresh the view.
                         for i in [0...compare.length]
                             if player.inventoryBeingDisplayed[i] isnt \
                                compare[i] then return refreshView()
-                        setTimeout maybeRefreshView, 500
+                        setTimeout maybeRefreshView, 300
                 maybeRefreshView()
                 contents = [
                     type : 'text'
@@ -603,12 +603,13 @@ so, to refresh the view.
                 if contents.length is lastLength
                     contents.push { type : 'text', value : '(none)' }
                 contents.push
+                    type : 'exit'
+                    action : -> delete player.inventoryBeingDisplayed
+                contents.push
                     type : 'action'
                     value : 'Done'
                     cancel : yes
-                    action : ->
-                        delete player.inventoryBeingDisplayed
-                        player.showCommandUI()
+                    action : -> player.showCommandUI()
                 player.showUI contents
 
 The inspect command allows the player to see other players' and creatures'

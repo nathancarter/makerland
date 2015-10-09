@@ -158,6 +158,12 @@ parameters, flatten it out.
             if pieces.length is 1 and pieces[0] instanceof Array
                 pieces = pieces[0]
 
+We are about to show the client some new UI.  First, send the exit event to
+any UI that's currently being shown.  This allows it to clean up after
+itself, including stopping any polling events, for example.
+
+            @uihandlers?.__exit?()
+
 Clear out any action handlers installed before, then move any handlers in
 the given data into this player.
 
@@ -183,6 +189,8 @@ the given data into this player.
                     @uihandlers.__watcher = piece.action
                 if piece.type is 'upload file'
                     @uihandlers.__uploaded = piece.action
+                if piece.type is 'exit'
+                    @uihandlers.__exit = piece.action
             for piece in pieces
                 if piece instanceof Array
                     installHandlers entry for entry in piece
