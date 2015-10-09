@@ -265,6 +265,9 @@ individual row in the table that populates that command pane.
                       rows=20>#{data.value or ''}</textarea></div>
                      <p align=right>F11 toggles full-screen editing.</p>"
                 ]
+            when 'exit'
+                # handled server-side
+                [ ]
             else
                 [ "<p#{attrs}>#{JSON.stringify data}</p>" ]
         result.focus = focus
