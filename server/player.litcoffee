@@ -519,7 +519,7 @@ item's serialization in an array in the player's `saveData`.
 
         saveInventory : =>
             @saveData.inventory =
-                for item in @inventory
+                for item in @inventory ? [ ]
                     serialization : item.serialize()
                     equipped : item.isEquipped()
             for item in ( @inventory ? [ ] ).slice()

@@ -97,7 +97,7 @@ doing so looks like the following.
                     value : '<b>Commands:</b>'
                 ,
                     type : 'text'
-                    value : @get( entry, 'commands' ).join ', '
+                    value : ( @get( entry, 'commands' ) ? [ ] ).join ', '
                 ,
                     type : 'action'
                     value : 'Change'
