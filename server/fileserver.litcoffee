@@ -86,21 +86,24 @@ option has been set.
                 extension = filename.split( '.' ).pop()
                 if extension2mimetype[extension] is 'text/HTML' and \
                    options['no-cdns']
-                    localCopies = fs.readdirSync path.join __dirname, '..',
-                        'client', 'from-cdns'
+                    cdnsFolder = path.join __dirname, '..', 'client',
+                        'from-cdns'
+                    localCopies = fs.readdirSync cdnsFolder
                     re = /// <
                         (script[^<]+src|link[^<]+href) # tag and attribute
                         (\s*=\s*)                      # ...equals...
                         ('[^']+'|"[^"]+")              # attribute value
                         ///
                     updated = ''
+                    prefix = path.relative path.dirname( filename ),
+                        cdnsFolder
                     while match = re.exec file
                         updated += file[...match.index]
                         resource = match[3][1...-1]
                         withoutPath = resource.split( path.sep ).pop()
                         updated += if withoutPath in localCopies
                             "<#{match[1]}#{match[2]}'#{path.join \
-                                'from-cdns', withoutPath}'"
+                                prefix, withoutPath}'"
                         else
                             match[0]
                         file = file[match.index+match[0].length..]
