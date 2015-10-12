@@ -809,6 +809,30 @@ current bonuses, and thus their current totals.
 
 ## Maker Commands
 
+The first one just links to the Maker Help pages.  This is an essential
+command, since being a maker is complex!
+
+        help :
+            category : 'maker'
+            icon : 'help.png'
+            shortInfo : 'Open Maker Help documentation'
+            help : 'This command will let you open, in a new tab in your
+                browser, extensive help on how to be a maker in this game.'
+            run : ( player ) ->
+                player.showUI [
+                    type : 'text'
+                    value : '<h2>Maker Help</h2>
+                        <p><a href="docs/index.html" target="_blank">Click
+                        here to open the main page of the Maker Help
+                        documentation in a new window or tab in your
+                        browser.</a></p>'
+                ,
+                    type : 'action'
+                    value : 'Done'
+                    cancel : yes
+                    action : -> player.showCommandUI()
+                ]
+
 The database command allows makers to browse the list of database tables,
 browse each table, and edit those tables which are editable, including
 adding, removing, and changing entries.
