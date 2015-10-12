@@ -9,7 +9,7 @@ and is poorly documented.  Try back later.
     ipc = require 'ipc'
     fs = require 'fs'
     path = require 'path'
-    ncp = require( 'ncp' ).ncp
+    tar = require 'tar-fs'
 
 And even though the following may seem out-of-place in a CoffeeScript file,
 it's necessary for launching CoffeeScript-based modules as child processes.
@@ -28,13 +28,13 @@ sample universe into it.
     try
         fs.mkdirSync myUniversesFolder
         sampleUniverse = path.resolve path.join __dirname, 'sampleuniverse'
-        ncp sampleUniverse, path.join( myUniversesFolder,
-        'Sample Universe' ), ( err ) ->
-            if err
-                console.log "Could not copy Sample Universe from
-                    #{sampleUniverse} to folder #{myUniversesFolder}:
-                    #{err}"
-            updateUniverseLists()
+        reader = tar.pack sampleUniverse
+        reader.on 'end', updateUniverseLists
+        reader.on 'error', ( err ) ->
+            console.log "Could not copy Sample Universe from
+                #{sampleUniverse} to folder #{myUniversesFolder}: #{err}"
+        reader.pipe tar.extract \
+            path.join myUniversesFolder, 'Sample Universe'
     catch e
         if e.code isnt 'EEXIST'
             console.log "My Universes folder does not exist, and could not
@@ -203,16 +203,16 @@ Listen for buttons clicked in windows we spawn.
                 folder = ( name ) -> path.join myUniversesFolder, name
                 name = makeName i = 1
                 while fs.existsSync folder name then name = makeName ++i
-                ncp folder( data.name ), folder( name ), ( err ) ->
-                    if err
-                        require( 'dialog' ).showMessageBox mainWindow,
-                            type : 'error'
-                            buttons : [ 'OK' ]
-                            title : 'Renaming error'
-                            message : 'An error was encountered, and the
-                                copy was not performed.'
-                    else
-                        updateUniverseLists()
+                reader = tar.pack folder data.name
+                reader.on 'end', updateUniverseLists
+                reader.on 'error', ( err ) ->
+                    require( 'dialog' ).showMessageBox mainWindow,
+                        type : 'error'
+                        buttons : [ 'OK' ]
+                        title : 'Renaming error'
+                        message : 'An error was encountered, and the
+                            copy was not performed.'
+                reader.pipe tar.extract folder name
             when 'rename'
                 fs.rename path.join( myUniversesFolder, data.name ),
                     path.join( myUniversesFolder, data.value ), ( err ) ->

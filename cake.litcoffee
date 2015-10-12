@@ -49,29 +49,36 @@ compiles, minifies, and generates source maps.
 
     build.asyncTask 'electron', 'Compile all electron .litcoffee sources',
     ( done ) ->
-
-The last thing it does is copy the entire client and server folders into the
-electron app folder.  We define a function here to do that, and we use that
-function below.
-
-        toCopy = [ 'client', 'server', 'sampleuniverse', 'node_modules' ]
-        copyEverything = ->
-            if not ( next = toCopy.shift() )? then return done()
-            ncp = require( 'ncp' ).ncp
-            console.log "Copying #{next} folder into electron folder..."
-            ncp "./#{next}", "./electron/#{next}", ( err ) ->
-                if err
-                    console.log "Error copying #{next} folder into electron
-                        folder:", err
-                    process.exit 1
-                copyEverything()
-
-The first thing it does is compile all the sources in the electron folder.
-It then defers to the above function at the end of that process.
-
         toBuild = build.dir './electron', /\.litcoffee$/
+        toCopy = [ 'client', 'server', 'sampleuniverse', 'node_modules' ]
+        tar = require 'tar-fs'
         do recur = ->
+
+If there are things to build, do those first.
+
             if ( next = toBuild.shift() )?
-                build.compile next, recur
-            else
-                copyEverything()
+                return build.compile next, recur
+
+If there are folders to copy, do those next.
+
+            if ( next = toCopy.shift() )?
+                console.log "Copying ./#{next} to ./electron/#{next}..."
+                reader = tar.pack "./#{next}"
+                reader.on 'end', ->
+                    console.log "Copied #{next}."
+                    recur()
+                reader.pipe tar.extract "./electron/#{next}"
+                return
+
+Finally, it prints a message to let the user know what they probably want to
+do next to actually build the electron app.
+
+            console.log '\n ** Electron app is prepared for building. **
+    \nnpm run electron           = run electron app without building
+    \nnpm run electron-unbuild   = run this before running the following
+    \nnpm run electron-rebuild   = after installing a new module, use this
+    \n                             to ensure that its binary version gets
+    \n                             built portably into the electron app (?)
+    \nnpm run electron-icon      = build electron.iconset -> electron.icns
+    \nnpm run electron-package   = build electron app -> Makerland-*-*/'
+            done()
