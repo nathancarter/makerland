@@ -186,7 +186,7 @@ structure specifying data such as leg color, body color, height, and so on.
         size = context.measureText name
         context.fillText name, head.x-size.width/2, head.y-20
         # draw equipment
-        for own bodyPart, imageIndex of appearance.equipment ? { }
+        for own bodyPart, imageIndex of appearance?.equipment ? { }
             if not ( image = getMovableItemIcon imageIndex ).complete
                 continue
             heightOverWidth = image.height / image.width
