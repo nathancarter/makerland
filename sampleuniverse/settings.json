@@ -9,7 +9,7 @@
         "mapBlockSizeInCells"
     ],
     "privateGame": false,
-    "gameTitle": "<h3>Sample Universe</h3><hr><h4>Log in or sign up</h4>",
+    "gameTitle": "<h3>Sample Universe</h3><hr><h4>Log in or sign up</h4><p><b><i>If this is your first time here,</i></b> the \"admin\" account has been pre-created for you, with password \"admin\".  Be sure to log in as the admin first, and change the password.</p>",
     "gameTitleImage": "./makerlandlogo.png",
     "port": 9900,
     "movableItemLifespanInSeconds": 600,
