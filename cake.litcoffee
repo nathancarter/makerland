@@ -75,10 +75,12 @@ do next to actually build the electron app.
 
             console.log '\n ** Electron app is prepared for building. **
     \nnpm run electron           = run electron app without building
-    \nnpm run electron-unbuild   = run this before running the following
     \nnpm run electron-rebuild   = after installing a new module, use this
     \n                             to ensure that its binary version gets
-    \n                             built portably into the electron app (?)
+    \n                             built portably into the electron app
+    \nnpm run electron-unbuild   = if you recently ran electron-rebuild, you
+    \n                             cannot use "npm start" until running this
+    \n                             to revert npm modules to correct versions
     \nnpm run electron-icon      = build electron.iconset -> electron.icns
     \nnpm run electron-package   = build electron app -> Makerland-*-*/'
             done()
