@@ -10,31 +10,23 @@
         <link rel="stylesheet" href="../codemirror.css">
         <script src="../codemirror.js"></script>
         <script src="../codemirror-javascript-mode.js"></script>
-        <title>MakerLand - Behavior Coding Documentation</title>
+        <title>MakerLand Help</title>
     </head>
     <body style='padding-top: 50px;'>
 
         <nav class="navbar navbar-inverse navbar-fixed-top">
           <div class="container">
             <div class="navbar-header">
-              <button type="button" class="navbar-toggle collapsed"
-                      data-toggle="collapse" data-target="#navbar"
-                      aria-expanded="false" aria-controls="navbar">
-                <span class="sr-only">MakerLand Coder Documentation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-              </button>
-              <a class="navbar-brand" href="index.html">MakerLand Docs</a>
+              <a class="navbar-brand" href="index.html">MakerLand Help</a>
             </div>
             <div id="navbar" class="collapse navbar-collapse">
               <ul class="nav navbar-nav">
-                <li><a href="overview.html">Overview</a></li>
-                <li><a href="teleportcommand.html">Teleport</a></li>
-                <li><a href="databasecommand.html">Database</a></li>
-                <li><a href="worldcommand.html">World</a></li>
-                <li><a href="resetcommand.html">Reset</a></li>
-                <li><a href="behaviorcoding.html">Behaviors</a></li>
-                <li><a href="animationcoding.html">Animations</a></li>
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><a href="commands.html">Commands</a></li>
+                <li><a href="ideas.html">Ideas</a></li>
+                <li><a href="coding.html">Coding</a></li>
+                <li><a href="reference.html">Reference</a></li>
+                <li><a href="challenges.html">Challenges</a></li>
               </ul>
             </div><!--/.nav-collapse -->
           </div>
@@ -47,92 +39,70 @@
                 <p class="lead">Making MakerLand what you want it to be</p>
             </div>
 
-            <p>There are many documentation pages you can read to help you
-                learn to be a maker.  They are organized roughly in the
-                order in which it makes sense to read them.
-                Click one to read it, or use the navigation bar at the top
-                of each page.</p>
-
-            <div class="list-group">
-                <a href="overview.html"
-                   class="list-group-item list-group-item-info">
-                    <h4 class="list-group-item-heading">Overview</h4>
-                    <p class="list-group-item-text">READ THIS FIRST.
-                        It is a thorough tutorial on all things related to
-                        being a MakerLand Maker.  When it needs to go into
-                        detail on a specific subject, it links to one of the
-                        other documents, listed below.</p>
-                </a>
-                <a href="teleportcommand.html"
-                   class="list-group-item list-group-item-success">
-                    <h4 class="list-group-item-heading">Teleport
-                        Command</h4>
-                    <p class="list-group-item-text">The Teleport command
-                        lets you memorize locations in the game, then later,
-                        immediately teleport back to a location that you
-                        have memorized.  This page is the
-                        complete reference on how to use the Telport
-                        command.</p>
-                </a>
-                <a href="databasecommand.html"
-                   class="list-group-item list-group-item-success">
-                    <h4 class="list-group-item-heading">Database
-                        Command</h4>
-                    <p class="list-group-item-text">The Database command
-                        lets you add new pictures, sounds, and code to the
-                        game's library of data (called a "database").  It
-                        does not let you place these types of things in the
-                        game world; that's what the World command (below)
-                        does.  This page is the
-                        complete reference on how to use the Database
-                        command.</p>
-                </a>
-                <a href="worldcommand.html"
-                   class="list-group-item list-group-item-success">
-                    <h4 class="list-group-item-heading">World
-                        Command</h4>
-                    <p class="list-group-item-text">The World command lets
-                        you take items from the game database (pictures,
-                        sounds, animations, behaviors, etc.) and place them
-                        into the game world.  You can only do so in an area
-                        that you have created.  This page is the complete
-                        reference on how to use the World command.</p>
-                </a>
-                <a href="resetcommand.html"
-                   class="list-group-item list-group-item-success">
-                    <h4 class="list-group-item-heading">Reset
-                        Command</h4>
-                    <p class="list-group-item-text">The Reset command lets
-                        you update all the objects near you.  This is only
-                        useful if you have changed some of the code loaded
-                        into those objects, and need them to reload it.
-                        This page is the complete reference on how to use
-                        the Reset command.</p>
-                </a>
-                <a href="behaviorcoding.html"
-                   class="list-group-item list-group-item-warning">
-                    <h4 class="list-group-item-heading">Coding
-                        Behaviors</h4>
-                    <p class="list-group-item-text">This page answers
-                        questions about how to write behavior code,
-                        such as these:  What is a behavior?
-                        How do behaviors get "attached" to items?
-                        When does behavior code get run?
-                        What can behaviors do?
-                        What events can they listen to?
-                        What functions can my behavior code
-                        (or event handler code) use?</p>
-                </a>
-                <a href="animationcoding.html"
-                   class="list-group-item list-group-item-warning">
-                    <h4 class="list-group-item-heading">Coding
-                        Animations</h4>
-                    <p class="list-group-item-text">This page answers
-                        questions about how to write animation code,
-                        such as these:  What is an animation?
-                        When does animation code get run?
-                        What functions can my animation code use?</p>
-                </a>
+            <div class='row'>
+              <div class='col-md-6'>
+                <div class='list-group'>
+                  <a href='getting-started.html'
+                     class='list-group-item list-group-item-success'>
+                    <h4 class='list-group-item-heading'>Getting Started
+                      - Read this first!</h4>
+                    <p class='list-group-item-text'>Learn the concepts and
+                      commands of making, in a natural order, with hands-on
+                      projects in the Sample Universe.  This documentation
+                      links to all the others on this page, tying them
+                      together into a sensible story, like a course of
+                      study.</p>
+                  </a>
+                </div>
+                <div class='list-group'>
+                  <a href='commands.html'
+                     class='list-group-item list-group-item-default'>
+                    <h4 class='list-group-item-heading'>Commands</h4>
+                    <p class='list-group-item-text'>Documentation on each of
+                      the Maker commands.</p>
+                  </a>
+                </div>
+                <div class='list-group'>
+                  <a href='ideas.html'
+                     class='list-group-item list-group-item-default'>
+                    <h4 class='list-group-item-heading'>Ideas</h4>
+                    <p class='list-group-item-text'>Ideas of projects you
+                      can do in the Sample Universe to help learn
+                      making.</p>
+                  </a>
+                </div>
+              </div>
+              <div class='col-md-6'>
+                <div class='list-group'>
+                  <a href='coding.html'
+                     class='list-group-item list-group-item-default'>
+                    <h4 class='list-group-item-heading'>Coding</h4>
+                    <p class='list-group-item-text'>How to write code in
+                      MakerLand, for abilities, animations, and behaviors,
+                      and where to look for reference documentation.</p>
+                  </a>
+                </div>
+                <div class='list-group'>
+                  <a href='ideas.html'
+                     class='list-group-item list-group-item-warning'>
+                    <h4 class='list-group-item-heading'>Reference</h4>
+                    <p class='list-group-item-text'>The Maker Encyclopedia,
+                      with coding API references, miscellaneous information,
+                      and anything that you don't read as a tutorial, but
+                      only look up when needed.</p>
+                  </a>
+                </div>
+                <div class='list-group'>
+                  <a href='coding.html'
+                     class='list-group-item list-group-item-danger'>
+                    <h4 class='list-group-item-heading'>Challenges</h4>
+                    <p class='list-group-item-text'>Coding challenges in
+                      increasing order of difficulty, for those who like to
+                      think of making as a game in and of itself, with
+                      a path of achievements.</p>
+                  </a>
+                </div>
+              </div>
             </div>
 
         </div>
