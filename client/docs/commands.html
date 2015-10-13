@@ -10,7 +10,7 @@
         <link rel="stylesheet" href="../codemirror.css">
         <script src="../codemirror.js"></script>
         <script src="../codemirror-javascript-mode.js"></script>
-        <title>MakerLand - Behavior Coding Documentation</title>
+        <title>MakerLand Help</title>
         <style type="text/css">
             ol.split { list-style-type: none; }
             ol.split li:before
@@ -171,7 +171,9 @@
                 <li>Sounds - sound effects that play when various events
                     occur in the game</li>
             </ul>
+
             <h3>Basic tables</h3>
+
             <p>A few of the tables in the database are quite
                 straightforward, and you can get begin editing them with
                 just the short introduction given in this section.</p>
@@ -341,6 +343,267 @@
                     the cell type to be non-walkable (like a wall, or an
                     ocean) then Change that field and set it to "none."</li>
                 </ol>
+              </div>
+            </div>
+
+            <h3>Intermediate tables</h3>
+
+            <div class="panel panel-default">
+              <div class="panel-heading">Landscape Items Table</div>
+              <div class="panel-body">
+                <p>This table contains the pictures and other data related
+                to the items you place on top of the map to give an area its
+                foreground.  Such objects have no impact on where players
+                can walk, but they may have behaviors attached to them that
+                take effect when players are nearby.</p>
+                <p>For example, all the trees, rocks, and potted plants you
+                see around the game world are landscape items.  If you've
+                ever stepped on a portal to be transported to a new area,
+                the portal was a landscape item with a teleportation
+                behavior attached to it.  And every sign in the game that
+                you can read is a landscape item with a behavior attached to
+                show text when you stand on it.</p>
+                <p>If you click the Landscape Items table button in the
+                Database table list, you will see a list of all landscape
+                items in the game, with their icons shown.  As before, you
+                will see "copy" buttons under most of the entries, but ones
+                for which you are an author will also have "remove" and
+                "edit" links.</p>
+              </div>
+            </div>
+            <div class='row'>
+              <div class='col-md-1'>
+              </div>
+              <div class='col-md-11'>
+                <div class="alert alert-success" role="alert"><b>Try it!</b>
+                To create a new landscape item, follow the instructions
+                below.</div>
+                <ol class="split start">
+                <li>Click the Database command button, then the Landscape
+                    Items table button.</li>
+                <li>Proceed exactly as in the previous two sections to
+                    create a new entry and begin editing it.  (Scroll down,
+                    click "Add entry", click OK, find the entry, click
+                    "edit.")</li>
+                <li>Choose its size (in cells).  Most landscape items are
+                    the same size as a cell (size 1).  All landscape items
+                    are square.</li>
+                <li>Change its icon in exactly the same way that you did for
+                    a cell type.
+                </ol>
+                <div class="alert alert-warning" role="alert"><b>Tip:</b>
+                    As with cell types, please use only small files.
+                    However, landscape items can have different sizes,
+                    so small ones should have small files, and larger
+                    ones larger files.  The game itself will suggest
+                    specific sizes when you choose to upload an
+                    icon.</div>
+                </li>
+                <ol class="split">
+                <li>Give the landscape item a name.</li>
+                <li>Last, you can choose whether the item is visible to
+                    players.  If you choose "no," then it will be visible
+                    only to makers.  This is useful for making areas where,
+                    if a player steps there, some specific behavior is
+                    triggered, but you do not want any visible evidence of
+                    this fact.  (E.g., some areas do something when you
+                    enter them, such as play a sound or bring a greeter;
+                    other places you may wish to position a trap.)</li>
+                </ol>
+                <p>You have created a new landscape item, but not yet placed
+                any copies of it in the game world.  See the section below
+                on the "World" command to learn how!</p>
+              </div>
+            </div>
+
+            <div class="panel panel-default">
+              <div class="panel-heading">Movable Items Table</div>
+              <div class="panel-body">
+                <p>This table contains the pictures and other data related
+                to the items carried by players and creatures.  This
+                includes things like food, equipment, treasure, books, and
+                more.  Such things may have behaviors attached to them; for
+                instance, a sword has the behavior that when you equip it,
+                you gain an increase in your attacking ability.  A book has
+                the behavior that when you look in your inventory, it will
+                let you read it.</p>
+                <p>If you click the Movable Items table button in the
+                Database table list, you will see a list of all movable
+                items in the game, with their icons shown.  As before, you
+                will see "copy" buttons under most of the entries, but ones
+                for which you are an author will also have "remove" and
+                "edit" links.</p>
+              </div>
+            </div>
+            <div class='row'>
+              <div class='col-md-1'>
+              </div>
+              <div class='col-md-11'>
+            <div class="alert alert-success" role="alert"><b>Try it!</b>
+                To create a new movable item, follow the instructions
+                below.</div>
+                <ol class="split start">
+                <li>Click the Database command button, then the Movable
+                    Items table button.</li>
+                <li>Proceed as above to create a new entry and begin editing
+                    it.  (Scroll down, click "Add entry", click OK, find the
+                    entry, click "edit.")</li>
+                <li>Choose the number of spaces it takes up in a player's
+                    inventory.  This should be a whole number.  Players can
+                    carry 10 items by default.  Small items usually have a
+                    size of 1, and something should only have a size of 10
+                    if it is so large that the player can carry nothing
+                    else.  Reasonable sizes for weapons and armor include 2,
+                    3, or 4 for very bulky items.</li>
+                <li>Change its icon in exactly the same way that you did for
+                    a cell type.</li>
+                </ol>
+                <div class="alert alert-warning" role="alert"><b>Tip:</b>
+                    As above, please use only small files.
+                    Movable items should all be rather small, since it is
+                    unrealistic to be able to carry around something very
+                    large.</div>
+                <ol class="split">
+                <li>Give the movable item a name.</li>
+                </ol>
+                <p>You have created a new movable item, but not yet placed
+                any copies of it in the game world.  To do so, you need to
+                use a behavior, covered below.  For instance, some creatures
+                have the behavior that they always spawn carrying an item,
+                which players can obtain by killing the creature.  Other
+                creatures will trade one item for another with players.  In
+                these ways (and others you may invent), players can obtain
+                movable items.</p>
+              </div>
+            </div>
+
+            <div class="panel panel-default">
+              <div class="panel-heading">Creatures Table</div>
+              <div class="panel-body">
+                <p>This table contains the pictures and other data related
+                to the creatures you encounter in the game.  This includes
+                both friendly creatures and hostile ones.</p>
+                <p>If you click the Creatures table button in the
+                Database table list, you will see a list of all creatures
+                in the game, with their icons shown.  As before, you
+                will see "copy" buttons under most of the entries, but ones
+                for which you are an author will also have "remove" and
+                "edit" links.</p>
+              </div>
+            </div>
+            <div class='row'>
+              <div class='col-md-1'>
+              </div>
+              <div class='col-md-11'>
+            <div class="alert alert-success" role="alert"><b>Try it!</b>
+                To create a new creature, follow the instructions
+                below.</div>
+                <ol class="split start">
+                <li>Click the Database command button, then the Creatures
+                    table button.</li>
+                <li>Proceed exactly as in the previous two sections to
+                    create a new entry and begin editing it.  (Scroll down,
+                    click "Add entry", click OK, find the entry, click
+                    "edit.")</li>
+                <li>Change its icon in exactly the same way that you did for
+                    a cell type.</li>
+                </ol>
+                <div class="alert alert-warning" role="alert"><b>Tip:</b>
+                    As with cell types, please use only small files.
+                    However, creatures can have different sizes,
+                    so small ones should have small files, and larger
+                    ones larger files.  The game itself will suggest
+                    specific sizes when you choose to upload an
+                    icon.</div>
+                <ol class="split">
+                <li>Give the creature a name.</li>
+                <li>The remainder of the creature's attributes are related
+                    to how it performs in combat.  The default values for
+                    these statistics are the same as they are for players
+                    who have just started playing the game and have not yet
+                    earned any kind of bonuses or increases.  Change them
+                    as you see fit.  To know what impact "dodging ability"
+                    or "attack accuracy" has at various values, create such
+                    creatures and experiment with them in combat!</li>
+                <li>"Experience" is the amount of experience earned for
+                    killing the creature, earned by the player who deals the
+                    final blow.  When you click Change, the game performs a
+                    very rudimentary computation to suggest a reasonable
+                    value based on the creature's other statistics.  Feel
+                    free to use it, or adjust it.</li>
+                </ol>
+                <p>You have created a new creature, but not yet placed
+                any copies of it in the game world.  To do so, you will need
+                to use a behavior, covered below.  For isntance, a landscape
+                item may have the behavior that every so often, it spawns
+                a creature.</p>
+              </div>
+            </div>
+
+            <h3>Advanced tables</h3>
+
+            <div class="panel panel-default">
+              <div class="panel-heading">Abilities Table</div>
+              <div class="panel-body">
+                <p>This table contains the descriptions, icons, and code for
+                abilities players can earn as they journey through your
+                universe.  These may be abilities for use in combat,
+                navigation, communication, or anything you create.</p>
+                <p>Abilities show up as new commands in the panel on the
+                right hand side of the player's screen.</p>
+                <p><a href='coding.html#abilities'>&#9193; Read about the
+                    Abilities table on the Coding page.</a></p>
+              </div>
+            </div>
+
+            <div class="panel panel-default">
+              <div class="panel-heading">Animations Table</div>
+              <div class="panel-body">
+                <p>This table contains the code for various animated effects
+                that appear in the world, such as the text that appears when
+                you read a sign, speech bubbles that appear when you talk,
+                and the lunging motions of your character during combat.</p>
+                <p>Animations are written in JavaScript and stored in this
+                table, to be played on screen when events in the game
+                require them.</p>
+                <p><a href='coding.html#animations'>&#9193; Read about the
+                    Animations table on the Coding page.</a></p>
+              </div>
+            </div>
+
+            <div class="panel panel-default">
+              <div class="panel-heading">Behaviors Table</div>
+              <div class="panel-body">
+                <p>This table contains the descriptions, parameters, and
+                code for behaviors makers can attach to various things in
+                the universe.  Examples:</p>
+                <ul>
+                    <li>To make a sign show text when you step on it, you
+                        attach that ability to the sign, and specify the
+                        text as a parameter.</li>
+                    <li>To make a location in the game world spawn a
+                        creature, you attach the spawning ability to a
+                        landscape item, and identify the creature in a
+                        parameter.</li>
+                    <li>To make a creature wander after it spawns, you
+                        attach the wandering behavior to the creature, and
+                        specify the rate and other parameters.</li>
+                </ul>
+                <p><a href='coding.html#behaviors'>&#9193; Read about the
+                    Behaviors table on the Coding page.</a></p>
+              </div>
+            </div>
+
+            <div class="panel panel-default">
+              <div class="panel-heading">Maker Error Logs Table</div>
+              <div class="panel-body">
+                <p>When you code, inevitably, sooner or later, errors arise.
+                You will want reports on those errors, so that you can fix
+                them.  The Maker Error Log is where errors are stored for
+                later reading by the maker who wrote the code that generated
+                the error.</p>
+                <p><a href='reference.html#error-logs'>&#9193; Read about
+                    the Maker Error Log table on the Reference page.</a></p>
               </div>
             </div>
 
