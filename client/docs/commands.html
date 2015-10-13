@@ -54,6 +54,7 @@
                 <ul>
                   <li><a href='#teleport'>Teleport</a></li>
                   <li><a href='#database'>Database</a></li>
+                  <li><a href='#world'>World</a></li>
                 </ul>
             </div>
 
@@ -604,6 +605,143 @@
                 the error.</p>
                 <p><a href='reference.html#error-logs'>&#9193; Read about
                     the Maker Error Log table on the Reference page.</a></p>
+              </div>
+            </div>
+
+            <a name='world'></a><hr>
+
+            <div class='alert alert-info'>
+              <h3>World</h3>
+              <p>Changing the things around you</p>
+            </div>
+            <div class="alert alert-danger" role="alert"><b>Warning!</b>
+                This command functions only in planes for which you are the
+                author.  If you're in a common area, it's probably authored
+                by the Admin character, and unles you're the Admin, you
+                can't edit it.  If you're in someone else's plane, they're
+                probably the only author, and you can't edit it.  To learn
+                more about authorship for a plane, read about
+                <a href='commands.html#database'>the Database command.</a>
+                For now, the easiest way to use this command is to make your
+                own plane (as described at that same location) and then use
+                the World command in that plane.</div>
+
+            <h3>Changing the cells of the map</h3>
+            <p>The base layer of
+                the map, underneath any trees, rocks, plants, signs,
+                pillars, and so on, is a grid of squares, called
+                cells.</p>
+            <p>The first thing you'll want to edit in a brand new plane
+                you've created is that grid of cells.  Here's how.</p>
+            <ol>
+                <li>As described above, be sure you're in a plane that you
+                    have permission to edit.</li>
+                <li>Click the World command button.</li>
+                <li>Click "Change cells in map."</li>
+                <li>Click the "Change" button to choose which kind of cells
+                    you want to be placing on the map.  Scroll down the
+                    list until you find the one you want to use, then click
+                    its "Choose" button.</li>
+                <li>Click "Place individual cells".</li>
+                <li>When you aim the mouse over the map itself, you should
+                    now see a crosshair cursor (like a plus), indicating
+                    that you're able to edit the map.  Anywhere you click,
+                    you will place a copy of your chosen cell.</li>
+                <li>When you're done placing that type of cell, click
+                    "Done."</li>
+                <li>You can then pick another type of cell, or click "Done"
+                    if you're finished editing the map cells.</li>
+            </ol>
+            <div class='row'>
+              <div class='col-md-3'>
+                <div class="alert alert-warning" role="alert"><b>Tip:</b>
+                    If you don't see the type of cells you want, return to
+                    <a href='databasecommand.html'>the page on the database
+                    command</a> and follow its directions to add new cell
+                    types to the game!</div>
+              </div>
+              <div class='col-md-3'>
+                <div class="alert alert-success" role="alert"><b>Try it!</b>
+                    Enjoy some time editing your own private part of the
+                    game world!  Shape it to your own desires!</div>
+              </div>
+              <div class='col-md-6'>
+                <div class="alert alert-warning" role="alert"><b>Tip:</b>
+                    You probably noticed two other buttons in the "Editing
+                    map cells" screen.  Each is there to make it easier to
+                    edit large areas of cells all at once.  They function as
+                    follows:
+                    <ul>
+                        <li>Fill rectangles of cells - after choosing this
+                            option, click the top left cell of the area you
+                            want to fill, then the bottom right.  The entire
+                            rectangular area between your two click points
+                            will be filled with the same type of cell.</li>
+                        <li>Rectangular border of cells - same as the
+                            previous, but does not fill the interior of the
+                            rectangular region, only its outer border (one
+                            cell thick)</li>
+                    </ul>
+                </div>
+              </div>
+            </div>
+
+            <h3>Decorating with items</h3>
+            <p>The upper layer of
+                the game map consists of objects that sit on top of the
+                map cells.  These objects need not be one-cell-by-one-cell
+                in size, and they need not be images that fill a
+                square.  They're called "landscape items."
+                Examples include plants, rocks, furniture, signs,
+                and more.</p>
+            <p>Here's how to add landscape items to your plane.</p>
+            <ol>
+                <li>As described above, be sure you're in a plane that you
+                    have permission to edit.</li>
+                <li>Click the World command button.</li>
+                <li>Click "Put landscape items on map."</li>
+                <li>As you did when placing cells on the map, begin by
+                    choosing a landscape item to place on the map.
+                    Click "Change," then find one you want to use, then
+                    click "Choose."
+                <li>Click "Place landscape items".</li>
+                <li>When you aim the mouse over the map itself, you should
+                    now see a crosshair cursor (like a plus), indicating
+                    that you're able to edit the map.  Anywhere you click,
+                    you will place a copy of your chosen landscape item.
+                    The item will be centered on your click point.</li>
+                <li>When you're done placing that type of item, click
+                    "Done."</li>
+                <li>You can then pick another type of landscape item, or
+                    click "Done" if you're finished adding landscape
+                    items to the map.</li>
+            </ol>
+            <div class='row'>
+              <div class='col-md-3'>
+                <div class="alert alert-warning" role="alert"><b>Tip:</b>
+                    If you don't see the type of cells you want, return to
+                    <a href='databasecommand.html'>the page on the database
+                    command</a> and follow its directions to add new cell
+                    types to the game!</div>
+              </div>
+              <div class='col-md-3'>
+                <div class="alert alert-success" role="alert"><b>Try it!</b>
+                    Enjoy some time decorating your part of the
+                    game world!</div>
+              </div>
+              <div class='col-md-6'>
+                <div class="alert alert-warning" role="alert"><b>Tip:</b>
+                    You can also edit landscape items once you've placed
+                    them.  The most common use of this is if you placed
+                    something in the wrong location.  Choose "Edit landscape
+                    items on map," then click on an item on the map.
+                    Assuming you clicked on just one item, you will then
+                    have the option to delete it or
+                    <a href='behaviorcoding.html'>edit its behaviors</a> (an
+                    advanced topic).  If you clicked a spot where more than
+                    one item is stacked on top of one another, then the game
+                    will prompt you with a list, from which you can choose
+                    the item you meant.</div>
               </div>
             </div>
 
