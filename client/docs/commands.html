@@ -17,24 +17,16 @@
         <nav class="navbar navbar-inverse navbar-fixed-top">
           <div class="container">
             <div class="navbar-header">
-              <button type="button" class="navbar-toggle collapsed"
-                      data-toggle="collapse" data-target="#navbar"
-                      aria-expanded="false" aria-controls="navbar">
-                <span class="sr-only">MakerLand Coder Documentation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-              </button>
-              <a class="navbar-brand" href="index.html">MakerLand Docs</a>
+              <a class="navbar-brand" href="index.html">MakerLand Help</a>
             </div>
             <div id="navbar" class="collapse navbar-collapse">
               <ul class="nav navbar-nav">
-                <li><a href="overview.html">Overview</a></li>
-                <li class="active"><a href="#">Teleport</a></li>
-                <li><a href="databasecommand.html">Database</a></li>
-                <li><a href="worldcommand.html">World</a></li>
-                <li><a href="resetcommand.html">Reset</a></li>
-                <li><a href="behaviorcoding.html">Behaviors</a></li>
-                <li><a href="animationcoding.html">Animations</a></li>
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li class="active"><a href="#">Commands</a></li>
+                <li><a href="ideas.html">Ideas</a></li>
+                <li><a href="coding.html">Coding</a></li>
+                <li><a href="reference.html">Reference</a></li>
+                <li><a href="challenges.html">Challenges</a></li>
               </ul>
             </div><!--/.nav-collapse -->
           </div>
@@ -43,10 +35,20 @@
         <div class="container">
 
             <div class="starter-template">
-                <h1>The Teleport Command</h1>
-                <p class="lead">Leaping around the game world</p>
+                <h1>Commands</h1>
+                <p class="lead">All the Maker commands explained</p>
+                <p>Table of contents:</p>
+                <ul>
+                  <li><a href='#teleport'>Teleport</a></li>
+                </ul>
             </div>
 
+            <hr>
+
+            <div class='alert alert-info'>
+              <h3><a name='teleport'></a>Teleport</h3>
+              <p>Leaping around the game world</p>
+            </div>
             <h3>Memorizing a destination</h3>
             <p>When you're standing at a location to which you'll want to
                 be able to teleport later, you should take a moment to add
@@ -64,19 +66,27 @@
                     among your memorized teleportation destinations, at the
                     top of that same screen.</li>
             </ol>
-            <div class="alert alert-danger" role="alert"><b>Warning!</b>
-                You can't teleport somewhere unless you've already
-                memorized that location.  So think ahead and memorize an
-                important place before you leave it!</div>
-            <div class="alert alert-warning" role="alert"><b>Tip:</b>
-                If you memorize dozens of teleportation destinations,
-                your list will get long and it will be hard to find one
-                when you're looking for it.  So choose wisely what you
-                add to your list.</div>
-            <div class="alert alert-success" role="alert"><b>Try it!</b>
-                Walk to one of your favorite locations in the game world
-                and memorize it in that way.  Then walk somewhere else,
-                and use the instructions below to teleport back.</div>
+            <div class='row'>
+              <div class='col-md-4'>
+                <div class="alert alert-danger" role="alert"><b>Warning!</b>
+                    You can't teleport somewhere unless you've already
+                    memorized that location.  So think ahead and memorize an
+                    important place before you leave it!</div>
+              </div>
+              <div class='col-md-4'>
+                <div class="alert alert-warning" role="alert"><b>Tip:</b>
+                    If you memorize dozens of teleportation destinations,
+                    your list will get long and it will be hard to find one
+                    when you're looking for it.  So choose wisely what you
+                    add to your list.</div>
+              </div>
+              <div class='col-md-4'>
+                <div class="alert alert-success" role="alert"><b>Try it!</b>
+                    Walk to one of your favorite locations in the game world
+                    and memorize it in that way.  Then walk somewhere else,
+                    and use the instructions below to teleport back.</div>
+              </div>
+            </div>
 
             <h3>Teleporting to a destination</h3>
             <p>When you want to teleport somewhere, you use the same
@@ -89,14 +99,25 @@
                 <li>Your avatar will immediately be transported to that
                     loaction.</li>
             </ol>
-            <div class="alert alert-success" role="alert"><b>Try it!</b>
-                Walk a little distance from one of your memorized
-                teleportation destinations, then use the steps above to
-                teleport back.</div>
-            <div class="alert alert-warning" role="alert"><b>Tip:</b>
-                If you click "Go here" and nothing seems to happen, the
-                most likely reason is that you've already teleported to
-                that destination, and you're already there!</div>
+            <div class='row'>
+              <div class='col-md-4'>
+                <div class="alert alert-success" role="alert"><b>Try it!</b>
+                    Walk a little distance from one of your memorized
+                    teleportation destinations, then use the steps above to
+                    teleport back.</div>
+              </div>
+              <div class='col-md-4'>
+                <div class="alert alert-warning" role="alert"><b>Tip:</b>
+                    If you click "Go here" and nothing seems to happen, the
+                    most likely reason is that you've already teleported to
+                    that destination, and you're already there!</div>
+              </div>
+              <div class='col-md-4'>
+              </div>
+            </div>
+
+            <hr>
+
         </div>
     </body>
     <script src='codemirror-for-textareas.js'></script>
