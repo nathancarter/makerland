@@ -1,0 +1,171 @@
+<html>
+    <head>
+        <script src='https://code.jquery.com/jquery-1.11.2.min.js'></script>
+        <script src='https://code.jquery.com/jquery-migrate-1.2.1.min.js'>
+        </script>
+        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css'/>
+        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css'/>
+        <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js'>
+        </script>
+        <link rel="stylesheet" href="../codemirror.css">
+        <script src="../codemirror.js"></script>
+        <script src="../codemirror-javascript-mode.js"></script>
+        <title>MakerLand Help</title>
+    </head>
+    <body style='padding-top: 50px;'>
+
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+          <div class="container">
+            <div class="navbar-header">
+              <a class="navbar-brand" href="index.html">MakerLand Help</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+              <ul class="nav navbar-nav">
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><a href="commands.html">Commands</a></li>
+                <li class="active"><a href="#">Ideas</a></li>
+                <li><a href="coding.html">Coding</a></li>
+                <li><a href="reference.html">Reference</a></li>
+                <li><a href="challenges.html">Challenges</a></li>
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </nav>
+
+        <div class="container">
+
+            <div class="starter-template">
+                <h1>Ideas</h1>
+                <p class="lead">Projects to get your creative juices
+                flowing</p>
+            </div>
+
+            <a name='basic-behaviors'></a><hr>
+
+            <div class='alert alert-info'>
+              <h3>Basic Behaviors</h3>
+              <p>Projects you can do if you know how to attach behaviors to
+              landscape items, movable items, and creatures</p>
+            </div>
+            <div class="alert alert-warning" role="alert"><b>Tip:</b>
+                These projects are intended for use in the Sample
+                Universe, and require only the behaviors defined in that
+                universe initially.  You can do more sophisticated projects
+                if you add more behaviors (and you can't even do these
+                projects at first if you started with an empty
+                universe!).</div>
+            <div class='row'>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <div class="panel-heading">1. New Player Tutorial</div>
+                  <div class="panel-body">
+                    <p>When a player first logs into the game, they appear
+                    at the point [0,0,0], and have access to only one
+                    command, Quit.  (<a href='reference.html#locations'>What
+                    does [0,0,0] mean?</a>)  Let's create a
+                    tutorial area that gives the player all the basic
+                    commands and explains each.</p>
+                    <ul>
+                      <li>Teleport to "the origin," [0,0,0].  In the Sample
+                      Universe, it is the hallway where you first
+                      spawned.</li>
+                      <li>Rework that plane to be a much longer
+                      hallway with more signs, plus some landscape
+                      items that grant the player new commands as they walk.
+                      Each command should be granted after
+                      the player has passed a sign explaining it.
+                      (Use the "Gives a player a command" behavior.
+                      Invisible square landscape items work great for this
+                      -- only makers can see them.)</li>
+                      <li>The basic commands you should give are Settings,
+                      Inspect, Inventory, Players, Talk, Attack, Stats.</li>
+                      <li>End with a portal that sends the
+                      player to the island.</li>
+                      <li>Create a new character and test your
+                      tutorial area.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <div class="panel-heading">2. Tutorial Improvements</div>
+                  <div class="panel-body">
+                    <p>Take the New Player Tutorial from Idea 1 and make it
+                    more aesthetically pleasing, as follows.</p>
+                    <ul>
+                      <li>Create new cell types and use them to create a
+                      nicer environment, so that the hallway is not
+                      just gray stone, dark stone walls, and blackness.</li>
+                      <li>Create new landscape items and use them to
+                      decorate the hallway, so that it is not composed
+                      exclusively of square tiles, but has some
+                      decoration.</li>
+                      <li>Upload a "new command access" sound to the Sounds
+                      table, so that players hear a pleasant sound that
+                      cues them to the receiving of each new command.</li>
+                      <li>End the tutorial area with a portal that sends the
+                      player to the island.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <div class="panel-heading">3. New Maker Tutorial</div>
+                  <div class="panel-body">
+                    <p>Imagine you have opened your
+                    universe to a friend, and you want to promote them to be
+                    a maker.  Create a tutorial area to which
+                    you could take them that will grant them all the maker
+                    commands, explaining each as it appears, just like the
+                    New Player Tutorial in Idea 1.</p>
+                    <ul>
+                      <li>Create a new plane to house the Maker
+                      Tutorial.</li>
+                      <li>Create a pathway with signs and command-granting
+                      landscape items, just as in Idea 1,
+                      but instead of basic abilities, grant the Maker
+                      abilities Help, Database, World, Teleport, and Reset.
+                      Be brief, and refer the readers to these very help
+                      pages!</li>
+                      <li>At the end, don't include a
+                      portal.  Have a sign tell them to use
+                      the teleport command!</li>
+                    </ul>
+                    <p>To grant a player the privilege of
+                    being a maker, you as the admin visit that tutorial
+                    plane (open it in the database, click its teleport
+                    button), and bring the prospective maker
+                    to you (view the players list, click their teleport
+                    button).  Then let them walk the road!</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class='row'>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <div class="panel-heading">4. Beyond the Island</div>
+                  <div class="panel-body">
+                    <p>**TO DO**</p>
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <div class="panel-heading">5. Portals, Caves, Stairs</div>
+                  <div class="panel-body">
+                    <p>**TO DO**</p>
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+            </div>
+          </div>
+
+        </div>
+    </body>
+    <script src='codemirror-for-textareas.js'></script>
+</html>

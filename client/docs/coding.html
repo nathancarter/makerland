@@ -41,18 +41,175 @@
 
             <hr>
 
-            <p>No content on this page yet.
-                Sections we'll need eventually:</p>
-
             <h2><a name='behaviors'></a>Behaviors</h2>
 
             <h3><a name='what-are-behaviors'></a>What are behaviors?</h3>
 
+            <p>In MakerLand, a "behavior" is a piece of code that can be
+                attached to something that lives in the game world, so that
+                the thing "behaves" in a specific way, as defined by the
+                code.</p>
+            <p>For example, if you wanted to make a portal that teleports
+                players to a new location in the game world, you would begin
+                by placing a landscape item on the map that looks like a
+                portal.  At first, it would do nothing when players stepped
+                on it; without a behavior that defines what it means for it
+                to teleport players, it is just a decoration.  When the
+                teleportation behavior is attached to it, it then becomes an
+                active portal.</p>
+            <p>MakerLand supports behaviors for landscape items, movable
+                items, and creatures.</p>
+
             <h3><a name='attaching-behaviors'></a>Attaching behaviors</h3>
+
+            <p>A single behavior in the database can be attached to many
+                objects in the game world.  The process for attaching it to
+                any one item is given here.</p>
+            <p>This section assumes that you are working in the Sample
+                Universe, or a universe that you created by extending the
+                Sample Universe.  In particular, we will be attaching the
+                "Shows text (like a sign)" behavior to a landscape item, so
+                your universe must have that behavior.  Also, you should go
+                stand near a landscape item, such as one of the tree in the
+                Sample Universe, to use in the following steps.</p>
+            <ol>
+                <li>Move your avatar near the landscape item to which you
+                    wish to attach the behavior.</li>
+                <li>Click the World command button, then the "Edit landscape
+                    items on map" button.</li>
+                <li>Click the landscape item you wish to edit.
+                    (If there are many items on top of one another,
+                    it will list them all and ask you to choose the one you
+                    intended to click.)</li>
+                <li>Click the "Edit behaviors" button for that item.</li>
+                <li>Browse the list of behaviors until you
+                    find "Shows text (like a sign)".  Click its Attach
+                    button and it will appear on the list of attached
+                    behaviors, at the top.</li>
+                <li>Click the Edit button on the newly-attached behavior.
+                    It shows you that it has exactly one parameter, "text."
+                    It also explains to you what that parameter means.  Go
+                    ahead and fill in some simple text, such as "Hello" and
+                    then save.</li>
+            </ol>
+            <p>The behavior has been attached to the landscape item.  Take a
+                step away from the landscape item (if you're standing on top
+                of it) and then back onto it.  The behavior should activate,
+                and you should be able to see the text, as if the item were
+                a sign.</li>
+            <p>To un-attach a behavior, follow the same sequence of steps as
+                above, but instead of clicking Attach, click Remove.</p>
 
             <h3><a name='many-opportunities'></a>Many opportunities</h3>
 
+            <p>Although the example above just shows you how to make a
+                landscape item show text like a sign, there are many more
+                things you can do with behaviors.  The Sample Universe comes
+                with built-in behaviors that do all of the following.</p>
+            <ul>
+                <li>Shows text (as introduced above)</li>
+                <li>Teleports a player (which is how the portal transports a
+                    player from the introductory hallway to the island)</li>
+                <li>Spawns a creature (which makes landscape items
+                    periodically spawn copies of a creature)</li>
+                <li>Wanders near spawn point (which you attach to a
+                    creature to make it wander near its spawn point)</li>
+                <li>Gives a player a new command (which you use to grant
+                    brand new players access to all the basic commands, and
+                    new makers all the maker commands, as described below)
+                    </li>
+            </ul>
+            <p>In addition to these examples, you can create new behaviors,
+                as discussed in the next section.  But even without just the
+                behaviors in the Sample Universe, you can already create
+                some very interesting things.  If you're in the Sample
+                Universe, the Getting Started page suggests several projects
+                you can now accomplish, using what you know about behaviors.
+                </p>
+
             <h3><a name='writing-behaviors'></a>Writing behaviors</h3>
+
+            <div class="alert alert-danger" role="alert"><b>Warning!</b>
+                This section assumes that you know how to program in
+                JavaScript.  If you do not, you will need someone to help
+                you learn to code in that language before you will be able
+                to understand and/or complete this tutorial.</div>
+
+            <p>If you are a maker looking to create a behavior, the
+                following examples can give you some idea of how to do so.
+                They begin with very trivial behaviors that are mostly
+                useless, except that they function well as small examples to
+                get you started.  Building on those small examples, we
+                create larger and larger examples, until we've built the
+                teleportation behavior described earlier on this page.</p>
+
+                <h3>Example 1</h3>
+                <p>Behaviors can trigger animations by a single call to the
+                    <code>showAnimation()</code> global function.  To learn
+                    what animations are and how to build them,
+                    <a href='animationcoding.html'>see the animation
+                    documentation</a>.</p>
+                <p>A call to that function looks like the following, with
+                    the parameters explained below.</p>
+                <textarea class='code'>
+                    showAnimation( location, name, optionalParameterObj );
+                </textarea>
+                <p>The <code>location</code> parameter must be a location in
+                    the game world, <a href='foundations.html'>as documented
+                    on this page</a>.  All players that can see the location
+                    given will have their browsers notified of the
+                    animation, so that the game can draw it on their
+                    screens.</p>
+                <p>The <code>name</code> parameter must be either a string
+                    name of an animation in the animations database, or the
+                    numerical index of one.  It specifies which animation to
+                    run.</p>
+                <p>The final parameter is optional, and if given, must be an
+                    object whose key-value pairs will be copied into the
+                    scope of the animation's code before it gets run.  This
+                    is how you can transmit any data specific to the
+                    animation to the client for use during the animation.
+                    For instance, if you are triggering a shower of sparks
+                    animation, it might accept a color parameter, and you
+                    would make this final parameter
+                    <code>{ color : '#ff0000' }</code>.  Because this will
+                    be transmitted to the client, it must be JSON data; no
+                    player objects or landscape item object can be
+                    included.  (Names, however, can be.)</p>
+                <p>But if the short piece of code above were included alone
+                    in a behavior definition, it would only be run every
+                    time the landscape item were reset.  This has very
+                    limited utility.  For that reason, the following example
+                    is by far the most common type of behavior code.</p>
+
+                <h3>Example 2</h3>
+                <p>Most behaviors modify how a landscape item
+                    <i>behaves,</i> and they do so by installing in it
+                    event handlers.  They do so using the common convention
+                    shown in the following code.</p>
+                <textarea class='code'>
+                    this.on( "event name", function ( eventData ) {
+                        // write here code that handles the event
+                    } );
+                </textarea>
+                <p>In the above code, the <code>this</code> object is
+                    the object to which the behavior is attached.  That
+                    object is guaranteed to have an events system installed,
+                    and you can install handlers using the standard "on"
+                    convention common in HTML applications.</p>
+                <p>The "on" function installs an event handler that is
+                    triggered <i>on</i> each occurrence of the given event.
+                    Events are specified by name, and the available event
+                    names are given in the next section.</p>
+                <p>The second parameter is the function that should be run
+                    whenever an event of the given type takes place.  The
+                    function will be passed some data about the event, as
+                    documented in the following section, and may do whatever
+                    it likes in response.</p>
+                <p>For instance, when a player enters a landscape item, it
+                    might teleport the player to a new location.  Or while
+                    a player stays inside the landscape item, it might harm
+                    or heal the player.</p>
 
             <h2><a name='animations'></a>Animations</h2>
 
