@@ -529,6 +529,164 @@
               </div>
             </div>
 
+            <a name='abilities'></a><hr>
+
+            <div class='alert alert-info'>
+              <h3>Abilities</h3>
+              <p>Projects you can do once you've read
+              <a href='coding.html#abilities'>the help on how to code your
+              own abilities</a></p>
+            </div>
+            <div class='row'>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='ability-increase-stat'></a>
+                  <div class="panel-heading">1. Increase a stat</div>
+                  <div class="panel-body">
+                    <p>There are all sorts of reasons you might give for
+                    increasing a stat in a player.  For instance, perhaps
+                    a player is a tumbler who can invest effort in
+                    increasing their dodging capability.  Or another player
+                    may be a wizard who can increase his healing rate.  And
+                    so on.</p>
+                    <p>The code for doing so will use the same
+                    <code>addStatBonus()</code> function described in
+                    <a href='#stat-drink'>this behavior idea</a>, but should
+                    otherwise be extremely similar to the sample code in the
+                    <a href='coding.html#abilities'>lessons on writing
+                    abilities</a>.</p>
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='ability-speed-attack'></a>
+                  <div class="panel-heading">2. Speed attack</div>
+                  <div class="panel-body">
+                    <p>You can call the function <code>fightEnemies()</code>
+                    in a creature, passing no parameters, and the creature
+                    will immediately execute an attack on its primary
+                    enemy, if one is within range.  This is in addition to
+                    any attacks it would normally get through time.</p>
+                    <p>You could create a speed attack ability that would,
+                    when executed, call <code>fightEnemies()</code> a few
+                    times, scattered over the next few seconds, thus giving
+                    the user several extra attacks, and increasing their
+                    average attack speed over that time period.</p>
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='ability-offense'></a>
+                  <div class="panel-heading">3. Direct damage</div>
+                  <div class="panel-body">
+                    <p>You saw one example of a direct damage ability in
+                    <a href='coding.html#abilities'>the lessons on how to
+                    write abilities</a>, but you can surely come up with
+                    more.  For example, perhaps you want to send the direct
+                    damage not to the user's primary enemy, but to a random
+                    enemy, or a random creature nearby, or to the closest
+                    creature, or only to nearly-dead creatures, or to all
+                    of the user's enemies or, ...  Many options, each of
+                    which may have a cool explanation or animation to go
+                    with it.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class='row'>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='ability-defense'></a>
+                  <div class="panel-heading">4. Damage prevention</div>
+                  <div class="panel-body">
+                    <p>When a creature gets hit, the "got hit" event is
+                    emitted for that creature, and in particular, the
+                    "before got hit" and "after got hit" events are as
+                    well.  The "before got hit" event handler will receive
+                    two parameters, the attacker and the target.  It must
+                    return either false (to mean that the attack was not
+                    blocked) or a text string (to mean that the attack was
+                    blocked, and to explain why).</p>
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='ability-heal'></a>
+                  <div class="panel-heading">5. Healing</div>
+                  <div class="panel-body">
+                    <p>See Idea 3, but simply pass positive numbers to
+                    <code>changeHealth()</code> rather than negative
+                    numbers, and the effect will be a healing instead.
+                    Consider ways this might show up in your universe, such
+                    as a soldier trained in medicine, a wizard with a
+                    healing spell, a vampiric power that drains enemy life,
+                    etc.</p>
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='ability-navigation'></a>
+                  <div class="panel-heading">6. Navigation</div>
+                  <div class="panel-body">
+                    <p>Get creative about abilities that can be useful for
+                    navigation.  Perhaps a woodsman character can hunt down
+                    nearby creatures by name.  Or a warrior can follow its
+                    current enemy automatically without the player using
+                    the arrow keys.  Or a magician can mark certain places
+                    and then teleport back to them later, as long as they
+                    are not too far away.  Be creative!  The key coding tool
+                    you need is that you move a player to a new location
+                    by calling <code>player.teleport([plane,x,y])</code>,
+                    where the coordinates are as described in
+                    <a href='reference.html#locations'>this reference
+                    documentation</a>.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class='row'>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='ability-information'></a>
+                  <div class="panel-heading">7. Information</div>
+                  <div class="panel-body">
+                    <p>What kind of informational abilities could you
+                    create?  What about a mind-reading ability that can
+                    report the stats of another creature or player?
+                    What about a magical vision ability that can report
+                    how far away a certain character is?  What about a
+                    telepathy ability that can send a message to a specific
+                    player by name, no matter how far away they are?  Or
+                    an ability that can be placed in a certain location,
+                    and will report whenever some other creature passes
+                    through that location, like a silent alarm.  Information
+                    can often be very valuable, and can come in magical and
+                    non-magical forms.</p>
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='ability-infinity'></a>
+                  <div class="panel-heading">8. Infinite possibilities</div>
+                  <div class="panel-body">
+                    <p>The ideas above are just scratching the surface.
+                    Get creative and add your own.  They key facts to keep
+                    in mind are that the ability should be cool enough to
+                    get players excited, but not so over-powered that it
+                    dominates all other abilities and throws your game out
+                    of balance.  Have at it!</p>
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+              </div>
+            </div>
+
           </div>
         </div>
     </body>
