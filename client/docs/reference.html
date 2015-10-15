@@ -38,10 +38,862 @@
                 <h1>Reference</h1>
                 <p class="lead">Things you'll probably want to look up
                     later...or now</p>
+                <p>Table of contents:</p>
+                <ul>
+                  <li><a href='#behavior-globals'>Global behavior
+                      functions</a></li>
+                  <li><a href='#animation-globals'>Global animation
+                      functions</a></li>
+                  <li><a href='#ability-globals'>Global ability
+                      functions</a></li>
+                  <li><a href='#player-objects'>Player objects</a></li>
+                  <li><a href='#creature-objects'>Creature objects</a></li>
+                  <li><a href='#landscape-item-objects'>Landscape Item
+                      objects</a></li>
+                  <li><a href='#movable-item-objects'>Movable Item
+                      objects</a></li>
+                  <li><a href='#behavior-examples'>Example Behavior
+                      code</a></li>
+                  <li><a href='#misc-ref'>Miscellaneous References</a></li>
+                </ul>
             </div>
 
             <hr>
 
+            <a name='behavior-globals'></a>
+            <h2>Global functions available to Behaviors</h2>
+
+            <a name='animation-globals'></a>
+            <h2>Global functions available to Animations</h2>
+
+            <a name='ability-globals'></a>
+            <h2>Global functions available to Abilities</h2>
+
+            <a name='player-objects'></a>
+            <h2>Using Player objects</h2>
+
+            <a name='creature-objects'></a>
+            <h2>Using Creatuer objects</h2>
+
+            <a name='landscape-item-objects'></a>
+            <h2>Using Landscape Item objects</h2>
+
+            <a name='movable-item-objects'></a>
+            <h2>Using Movable Item objects</h2>
+
+            <h2>What events can my behaviors listen to?</h2>
+            <p>Other events are coming later, but for now, there are
+                these.</p>
+
+            <h3>"entered" for a Landscape Item</h3>
+            <p>Whenever a player steps from the outside of a landscape
+                item's boundary rectangle to the inside, the "entered"
+                event is triggered.  The <code>eventData</code>
+                parameter is the player object who entered.</p>
+            <p>Example:</p>
+            <textarea class='code'>
+                this.on( "entered", function ( player ) {
+                    log( "The player " + player.name + " stepped on your front doorstep!" );
+                } );
+            </textarea>
+
+            <h3>"exited" for a Landscape Item</h3>
+            <p>Same as the previous, except when a player steps from
+                the inside of the item's rectangle to its outside.</p>
+
+            <h3>No need for create/reset events</h3>
+            <p>There are not events for when landscape items are loaded
+                or reset, because if you want to react to those events,
+                you simply put the event handler code in the behavior
+                directly.</p>
+
+            <h2>What functions can my behavior code
+                (or event handler code) use?</h2>
+            <p>More to come later, but these are available now.</p>
+
+            <h3>Landscape Item member functions</h3>
+            <p>Assume <code>L</code> is a landscape item.  Then it
+                has the following member functions and variables.</p>
+            <h4>Fields in <code>L</code>:</h4>
+            <textarea class='code'>
+                L.position // length-3 array of map coordinates of item center
+                L.plane // first entry of L.position
+                L.x // second entry of L.position
+                L.y // third entry of L.position
+                L.localX // distance from top-left corner of its block to L.x
+                L.localY // same as previous, but for L.y
+                L.topLeft.x // x coordinate of left side of item
+                L.topLeft.y // y coordinate of top of item
+                L.bottomRight.x // x coordinate of right side of item
+                L.bottomRight.y // y coordinate of bottom of item
+
+                L.type // integer index of its type in the landscape items database table
+                L.behaviors // list of behaviors taken from its definition in the database
+                L.visible // boolean: visible to non-makers?
+                L.size // how many cells wide and high is this item? (all items are square)
+            </textarea>
+
+            <h4>Functions in <code>L</code>:</h4>
+            <textarea class='code'>
+                // Whether the item collides with a rectangle from topLeft to bottomRight:
+                // (topLeft must be of the form {x:number,y:number},
+                // and bottomRight must also)
+                L.collides( topLeft, bottomRight )
+                // Install an event handler, as documented earlier:
+                // (returns a unique id which can be used to uninstall
+                // the handler later if necessary)
+                L.on( eventName, handlerFunction );
+                // Uninstall a handler, given its unique ID:
+                L.remove( handlerID );
+                // Trigger an event:
+                // (zero or more eventData parameters are acceptable)
+                L.emit( eventName, eventData );
+                // Attempt an event, triggering before and after event handlers:
+                // (not fully documented here)
+                L.attempt( eventName, runHandler, failHandler, eventData );
+            </textarea>
+
+            <h3>Player object member functions</h3>
+            <p>Assume <code>P</code> is a player object.  Then it
+                has the following member functions and variables.</p>
+            <h4>Fields in <code>P</code>:</h4>
+            <textarea class='code'>
+                P.name // lower case name of the player, as a string
+                P.saveData // large object containing all data saved in the player object, e.g.:
+                P.saveData.age // integer
+                P.saveData.avatar.headColor // string, e.g. '#ff0000'
+                // ...and many other saveData contents
+                // Note: Don't manipulate the fields in P.saveData unless you know what you're doing!
+            </textarea>
+            <p>You may also store data in the player object, in one of
+                two ways.  You can store permanent data by writing into
+                new (as yet unused) fields of the player's
+                <code>saveData</code> member.  You can store temporary
+                data by writing into other (new and unused) fields of
+                the player object.</p>
+            <p>Here are two examples.  In both cases, we assume the
+                maker's avatar is named Eileen and she's creating a fair
+                within the game.</p>
+            <textarea class='code'>
+                // When someone enters the fair, we might use code like
+                // this to mark them as a new arrival, so that the
+                // nearby fair workers know to greet them.
+                playerObject.justEnteredEileensFair = true;
+                // When someone plays one of the minigames, perhaps
+                // Eileen wants to keep their cumulative score, and it
+                // should be stored across logins.  She could do so like
+                // this:
+                playerObject.saveData.scoreAtEileensFair += 100;
+            </textarea>
+            <p>You could be more sophisticated, by keeping an object for
+                the fair, and just manipulating its members, like in the
+                following example, but how sophisticated you need to be
+                depends upon the complexity of what you're bulidng.</p>
+            <textarea class='code'>
+                if ( !playerObject.saveData.hasOwnProperty( 'EileensFair' ) )
+                    playerObject.saveData.EileensFair = { minigameScore : 0 };
+                // then later...
+                playerObject.saveData.EileensFair.minigameScore += 100;
+            </textarea>
+
+            <h4>Functions in <code>P</code>:</h4>
+            <p>(There are many others not listed here that are for
+                internal use only.)</p>
+            <textarea class='code'>
+                // Get list of commands to which the player has access:
+                // (returns a list of lower-case strings)
+                P.commands();
+                // Whether the player is a maker, as a boolean:
+                P.isMaker();
+                // Where the player is on the game map:
+                // (returns a [plane,x,y] triple)
+                P.getPosition();
+                // Move the player to a new location:
+                // (parameter must be a [plane,x,y] triple)
+                P.teleport( destination );
+            </textarea>
+
+            <h3>Global functions</h3>
+            <textarea class='code'>
+                // Documented below:
+                showAnimation( location, name, optionalParameterObject );
+                // Documented above already:
+                // (arguments get concatenated into strings with a space between,
+                // as with console.log in the browser)
+                log( any, sequence, of, zero, or, more, things );
+            </textarea>
+
+            <textarea class='code'>
+                showAnimation( location, name, optionalParameterObj );
+            </textarea>
+            <p>The <code>location</code> parameter must be a location in
+                the game world, <a href='foundations.html'>as documented
+                on this page</a>.  All players that can see the location
+                given will have their browsers notified of the
+                animation, so that the game can draw it on their
+                screens.</p>
+            <p>The <code>name</code> parameter must be either a string
+                name of an animation in the animations database, or the
+                numerical index of one.  It specifies which animation to
+                run.</p>
+            <p>The final parameter is optional, and if given, must be an
+                object whose key-value pairs will be copied into the
+                scope of the animation's code before it gets run.  This
+                is how you can transmit any data specific to the
+                animation to the client for use during the animation.
+                For instance, if you are triggering a shower of sparks
+                animation, it might accept a color parameter, and you
+                would make this final parameter
+                <code>{ color : '#ff0000' }</code>.  Because this will
+                be transmitted to the client, it must be JSON data; no
+                player objects or landscape item object can be
+                included.  (Names, however, can be.)</p>
+
+            <p>About event handler code...</p>
+            <p>Most behaviors modify how a landscape item
+                <i>behaves,</i> and they do so by installing in it
+                event handlers.  They do so using the common convention
+                shown in the following code.</p>
+            <textarea class='code'>
+                this.on( "event name", function ( eventData ) {
+                    // write here code that handles the event
+                } );
+            </textarea>
+            <p>In the above code, the <code>this</code> object is
+                the object to which the behavior is attached.  That
+                object is guaranteed to have an events system installed,
+                and you can install handlers using the standard "on"
+                convention common in HTML applications.</p>
+            <p>The "on" function installs an event handler that is
+                triggered <i>on</i> each occurrence of the given event.
+                Events are specified by name, and the available event
+                names are given in the next section.</p>
+            <p>The second parameter is the function that should be run
+                whenever an event of the given type takes place.  The
+                function will be passed some data about the event, as
+                documented in the following section, and may do whatever
+                it likes in response.</p>
+            <p>For instance, when a player enters a landscape item, it
+                might teleport the player to a new location.  Or while
+                a player stays inside the landscape item, it might harm
+                or heal the player.</p>
+
+            <a name='behavior-examples'></a>
+            <h2>Example Behavior Code</h2>
+
+            <a name='whispers-secret'></a>
+            <h3>Example 1: Whispers a Secret</h3>
+            <p>If a player inspects the creature to which this behavior is
+            attached, and clicks the "Whisper to [creature name]" button,
+            then the creature will respond by whispering the given text to
+            the player.  It will not be shown in a speech bubble for all to
+            see, but just whispered to the player.</p>
+            <p>In this sample, notice that to add a "use" to an object,
+            you assign a function to a key in <code>theObject.uses</code>.
+            A creature's "uses" are visible when the player inspects the
+            creature, and are presented as buttons.</p>
+            <p>The creature's type is its entry in the Creatures table, so
+            its <code>typeName</code> will be whatever name is in the
+            database.</p>
+            <p>The <code>showOK</code> function in the player object takes
+            a string parameter and shows it to the player in the right-hand
+            panel of their user interface, with an OK button.</p>
+            <p>This behavior must have a parameter called <code>text</code>,
+            which will be the text that the creature whispers when the
+            player clicks the "Whisper to __" button.</p>
+            <textarea class='code'>
+// install function that responds when a player whispers with the creature
+this.uses['Whisper to ' + this.typeName] = function ( player ) {
+    // it just shows the player the text
+    player.showOK( "In response, " + this.typeName + " whispers: " + text );
+};            </textarea>
+
+            <a name='occasionally-speaks'></a>
+            <h3>Example 2: Occasionally Speaks</h3>
+            <p>Every so often (as chosen by the frequency parameter) the
+            creature will decide whether or not to speak a phrase (with
+            probability given by the probability parameter).  The phrase is
+            given by the phrase parameter.  If spoken, it will show up in a
+            speech bubble.</p>
+            <p>The code below introduces two new ideas.  First, there is the
+            <code>setInterval</code> function, which works just as it does
+            in JavaScript in the browser, which you can look up online.
+            Second, creatures and players have the <code>say</code> method,
+            which causes them to speak the given text.</p>
+            <p>This behavior must have a parameter called
+            <code>phrase</code>, which will be the text that the creature
+            speaks.  It must also have a parameter called
+            <code>frequency</code>, which is how long in seconds to delay
+            between times when it considers speaking.  Finally, it must
+            have a parameter <code>probability</code>, between 0 and 1,
+            the likelihood that it will speak every time the timer is
+            up.</p>
+            <p>Note that for both the probability and frequency parameters,
+            we must use the built-in JavaScript <code>parseFloat</code>
+            function, because all parameters come to us as strings, even if
+            they are intended to be viewed as numbers.</p>
+            <textarea class='code'>
+// remember the creature object, so that later we don't need to use the "this" object...
+var creature = this;
+// every so often...
+setInterval( function () {
+    // the creature will decide whether or not to speak...
+    if ( Math.random() < parseFloat( probability ) )
+        // and if it does, it will speak the phrase it's been assigned...
+        creature.say( phrase );
+}, parseFloat( frequency*1000 ) );            </textarea>
+
+            <a name='gives-item'></a>
+            <h3>Example 3: Gives an Item</h3>
+            <p>This behavior makes a creature or a landscape item so that
+            you can interact with it and get a movable item from it.  For
+            example, maybe you can pick an apple from a tree, or order a
+            glass of water from a waiter.</p>
+            <p>The code below introduces three new ideas, the
+            <code>Item</code> constructor, the <code>canCarry</code> method
+            in the player object, and the <code>move</code> method in a
+            movable item.  Each of these is documented elsewhere on this
+            reference page, so I do not repeat their information here.</p>
+            <p>Parameters this behavior takes are <code>actionName</code>,
+            the name of the action the player will see when inpecting the
+            landscape item or creature that gives the item,
+            <code>itemGiven</code>, an index in the Movable Items table of
+            the item the player can get, and <code>text</code>, to show to
+            the player when the action is complete.</p>
+            <p>For instance, you might attach this action to an apple tree
+            and make the action name "pick an apple," and the text say,
+            "You pick an apple from the tree."</p>
+            <textarea class='code'>
+// install a new "use" in this landscape item
+this.uses[actionName] = function ( player ) {
+    // create a new item and move it into the player's inventory, if there's room
+    var item = Item( itemGiven );
+    if ( player.canCarry( item ) ) {
+        item.move( player );
+        // show the player the text and wait for them to click OK
+        player.showOK( text );
+    } else {
+        // there was no room, so explain that
+        player.showOK( 'But you cannot carry that much.' );
+    }
+};            </textarea>
+
+            <a name='is-drinkable'></a>
+            <h3>Example 4: Is drinkable</h3>
+            <p>Giving an object this behavior makes it drinkable by the
+            player, which consumes it (removing it from the player's
+            inventory).  This does not do anything else except consume the
+            item.  In order for consuming the item to have some other effect
+            (healing, harming, etc.) then you must add that effect as a
+            separate behavior.</p>
+            <p>The code below introduces two new ideas.  The first is the
+            <code>destroy</code> method in a movable item, which destroys
+            it.  The second is the <code>emit</code> method, which fires an
+            event that can be listened to by other code, using the
+            <code>on</code> method we've seen in other behaviors.</p>
+            <textarea class='code'>
+// make this object drinkable
+this.uses.drink = function () {
+    // the drinker is the thing holding the item (a player)
+    var drinker = this.location;
+    // handle any events attached to the drinking of this thing by this drinker
+    // (the second parameter to "emit" will be sent to all event listeners)
+    this.emit( 'drunk', drinker );
+    // drinking this item uses it up
+    this.destroy();
+};            </textarea>
+
+            <a name='heal-drink'></a>
+            <h3>Example 5: Heals/harms when drunk</h3>
+            <p>Drinking it increases the player's hit points by the number
+            specified in the "hp" parameter.  A positive number constitutes
+            a heal, a negative number a harm.  Using zero is just a waste of
+            time.  This requires that you have already attached the "is
+            drinkable" behavior, defined immediately above, to the same
+            item.</p>
+            <p>The code below listens for the event emitted by the previous
+            behavior, defined immediately above.  It uses the
+            <code>changeHealth</code> method of players and
+            creatures to change the drinker's health.  The drink will be
+            destroyed by the previous behavior.</p>
+            <p>The <code>drinker</code> is given to us by the
+            <code>emit</code> call from the previous behavior, and the
+            <code>hp</code> parameter is how much to change the drinker's
+            hit points (positive for heal, negative for harm), and must be
+            a parameter to this behavior.</p>
+            <textarea class='code'>
+this.on( 'drunk', function ( drinker ) {
+    // give the drinker the change in hit points specified in the hp parameter
+    drinker.changeHealth( parseFloat( hp ) );
+} );</textarea>
+
+            <a name='equipment-bonus'></a>
+            <h3>Example 6: Gives a stat bonus while equipped</h3>
+            <p>This behavior grants a player a stat bonus when the player
+            has this item equipped.  The bonus will be to whichever stat you
+            choose as a parameter, and in whatever amount, positive or
+            negative.  It lasts until the item is unequipped.</p>
+            <p>Things that can be equipped have two events, one for when
+            a creature puts the itemn on, and one for when it takes it off.
+            When the first occurs, we give a stat bonus.  When the second
+            occurs, we remove that bonus.  We use the same function
+            <code>addStatBonus</code> introduced
+            <a href='ideas.html#stat-drink'>here</a>, but we do not pass
+            the "duration" parameter, meaning that we will manually remove
+            the bonus ourselves later, and thus it should not time out on
+            its own.</p>
+            <textarea class='code'>
+// when this object is worn...
+this.on( 'equipped by', function ( creature ) {
+    // ...grant the creature a stat bonus
+    creature.addStatBonus( statName, parseFloat( bonus ) );
+} );
+// when this object is taken off...
+this.on( 'unequipped by', function ( creature ) {
+    // ...remove the same stat bonus
+    creature.addStatBonus( statName, -parseFloat( bonus ) );
+} );</textarea>
+
+            <a name='equips-item'></a>
+            <h3>Example 7: Equips an item it's carrying</h3>
+            <p>This behavior causes a creature that's carrying a specified
+            item to equip that item (that is, use it as a weapon or armor or
+            clothing) immediately after the creature has spawned.
+            (Technically it equips the item one half second after
+            spawning.)</p>
+            <p>This behavior does <i>not</i> give the creature the item.
+            Makers must use <a href='ideas.html#spawns-with-item'>a separate
+            behavior</a> to put the item in the
+            creature's inventory in the first place.  This behavior just
+            causes the creature to equip it.</p>
+            <p>It uses <code>setTimeout</code> to delay the equipping by
+            0.5 seconds, to ensure that the creature has been constructed,
+            given all its possessions by other behaviors, and placed into
+            the game world by any relevant spawning behavior.  It calls
+            <code>searchInventory</code> to find an item in the creature's
+            inventory with the given index, then calls <code>equip</code>
+            in the creature to equip the item.</p>
+            <textarea class='code'>
+// remember this creature object for use later (one half second later)
+var creature = this;
+// we do the equipping one half second after right now, when the creature just spawned
+setTimeout( function () {
+    // see if the creature has the item that it should equip
+    var itemToEquip = creature.searchInventory( itemIndex );
+    // if the item is not found, we have nothing to do and can stop here
+    if ( !itemToEquip ) return;
+    // but if the item was found in the creature's inventory, equip it
+    creature.equip( itemToEquip );
+}, 500 ); // 500 milliseconds is 0.5 seconds</textarea>
+
+            <a name='heal-harm-touch'></a>
+            <h3>Example 8: Heals/harms creatures touching it</h3>
+            <p>This behavior causes a landscape item to harm those touching
+            it.  For example, makers might create a pool of lava, or a bed
+            of nails, which may harm players, and use it as an obstacle in a
+            maze.  On the healing side, perhaps a bed in a hospital with a
+            nurse nearby will grant hit points to players who place their
+            avatar there and wait.</p>
+            <p>The following code uses only functions and events we have
+            already seen in other code above, or on <a href='ideas.html'>the
+            Ideas page</a>, but it assembles that code in new ways.  It also
+            uses the <code>name</code> member of the player object.</p>
+            <textarea class='code'>
+// object in which we'll track the players we want to heal/harm
+var targets = { }
+// when a player steps onto the object, keep track of that player; forget them when they leave
+this.on( 'entered', function ( player ) { targets[player.name] = player; } );
+this.on( 'exited', function ( player ) { delete targets[player.name]; } );
+// every so often...
+setInterval( function () {
+    // change the hit points of everyone we currently know is touching us
+    for ( var name in targets )
+       	if ( targets.hasOwnProperty( name ) )
+            targets[name].changeHealth( parseFloat( hitPoints ) );
+}, parseFloat( frequency )*1000 );</textarea>
+
+            <a name='aggression'></a>
+            <h3>Example 9: Aggression</h3>
+            <p>Causes the creature to attack things nearby, be they
+            creatures or players or both.  "Nearby" can be specified as a
+            radius, in units of blocks.  Makers can specify the
+            <code>whatToAttack</code> parameter as "creatures", "players",
+            or "all", to narrow the aggression to a specific group.</p>
+            <p>Several new API elements appear below.  First, there is a
+            global <code>livingsNear</code> function that takes a position
+            and a radius and returns an array of living things in it.
+            Second, every living thing has a <code>enemies</code> member,
+            an array of all things it's currently fighting.  Third, it has
+            an <code>attack</code> function to initiate combat against a new
+            enemy.  Finally, you can tell whether a living thing is a player
+            or not based on whether it contains a <code>saveData</code>
+            member, because creatures do not have database accounts from
+            which they load "save data."</p>
+            <textarea class='code'>
+// save the creature for use in the function below (where "this" will be different)
+var creature = this;
+// every second, the creature looks around for things to attack
+setInterval( function () {
+    // get a list of nearby creatures and players
+    var all = livingsNear( creature.getPosition(), radius );
+    // consider each one
+    for ( var i = 0 ; i < all.length ; i++ ) {
+        // if it's THIS creature itself, ignore it.
+        if ( all[i] == creature ) continue;
+        // if it's a player, but we're supposed to only consider creatures, ignore it.
+        if ( ( 'saveData' in all[i] ) &amp;&amp; ( whatToAttack == 'creatures' ) ) continue;
+        // if it's a creature, but we're supposed to only consider players, ignore it.
+        if ( !( 'saveData' in all[i] ) &amp;&amp; ( whatToAttack == 'players' ) ) continue;
+        // if we're already fighting it, we don't need to start
+        if ( creature.enemies.indexOf( all[i] ) > -1 ) continue;
+        // we need to attack it
+   	    creature.attack( all[i] );
+    }
+}, 1000 );</textarea>
+
+            <a name='refills-with-items'></a>
+            <h3>Example 10: Refills with a list of items</h3>
+            <p>Makes a landscape item occasionally fill itself (as a
+            container) with a given list of items.  It takes two parameters,
+            the first being a list of indices into the movable items table,
+            separated by commas.  For example, to have the container refill
+            with two copies of item 3 and one copy of item 9, a maker would
+            provide the list 3,3,9.  The second parameter is a time, in
+            seconds, between refills (for example, 300 seconds to mean 5
+            minutes).  The container only refills if it is completely
+            empty.</p>
+            <p>The only new concepts that appear below are the
+            <code>contents</code> array of a landscape item, which is an
+            array of serialized movable items.  To serialize a movable item
+            <code>M</code> for placement into a landscape item as its
+            container, use <code>M.serialize()</code>.  Note that a
+            landscape item can only function as a container if the maker
+            has given it a "capacity" when editing it.</p>
+            <textarea class='code'>
+// save this landscape item in a variable, for use in the function below
+var container = this;
+// define the function that refills the container
+function refill () {
+    // if the container is not empty, do nothing
+    if ( container.contents.length > 0 ) return;
+    // get the list of item indices we should add to the container
+    var list = itemIndexList.split( ',' );
+    // loop through that list
+    for ( var i = 0 ; i < list.length ; i++ ) {
+        // convert each one into an actual item object
+        var item = Item( parseInt( list[i] ) );
+        // if that failed, move on
+        if ( !item ) continue;
+        // serialize it and add it to the container's contents
+        container.contents.push( item.serialize() );
+    }
+}
+// fill it right now, at spawn time
+refill();
+// refill it periodically, as per the delayInSeconds parameter
+setInterval( refill, parseInt( delayInSeconds )*1000 );</textarea>
+
+            <a name='makes-a-door'></a>
+            <h3>Example 11: Makes the cell beneath it a door</h3>
+            <p>Place this on an invisible landscape item that's sitting on
+            top of a cell that you want to act as a door that can open and
+            close.  The landscape item should reach outside the cell, so
+            that it can be stepped on to open the door.</p>
+            <p>Parameters exist for how the door should look when open
+            (openIndex) and when shut (shutIndex, each as an index into the
+            cell types table), how long it stays open when no one is near
+            (timeOpen, in seconds), and what sounds to play when
+            opening/shutting (openSound, shutSound, each an index into the
+            sounds table).</p>
+            <p>New concepts below include the fact that landscape items have
+            attributes for the 3 components of their position
+            (<code>plane</code>, <code>x</code>, and <code>y</code>) and
+            there is a global function for changing cells in the map
+            (<code>setCell(plane,x,y,cellTypeIndex)</code>).  Another new
+            global function is <code>playSound(index)</code>.  Note also
+            that <code>setTimeout</code> returns a timer ID that can be used
+            to clear the timeout, just as JavaScript usually does
+            (with <code>clearTimeout</code>).</p>
+            <textarea class='code'>
+// remember this object and its location for later use in a timeout function
+var item = this;
+var plane = this.plane;
+var x = this.x;
+var y = this.y;
+// we must count how many people are inside the square near the door
+var numPeopleInside = 0;
+// we must also store our timer for how long until the door auto-shuts
+var timerId = null;
+// now we install in the landscape item a function for opening the door,
+// and another for closing it, so that not only can we call those from this behavior,
+// but also other things (like an unlocking behavior) can call these same functions.
+item.openDoor = function ( forWhom )
+{
+    // change the appearance
+    setCell( plane, x, y, parseInt( openIndex ) );
+    // play the opening sound
+    playSound( openSound, [ plane, x, y ] );
+    // and emit an event that others can listen to
+    item.emit( 'opened', forWhom );
+}
+item.closeDoor = function ( whoLeft )
+{
+    // otherwise, close the door, starting by changing its appearance
+	setCell( plane, x, y, parseInt( shutIndex ) );
+    // then by playing the shut sound
+    playSound( shutSound, [ plane, x, y ] );
+    // and emit an event that others can listen to
+	item.emit( 'closed', whoLeft );
+}
+// when the landscape item is first created, ensure it is on top of a closed door
+//setCell( this.plane, this.x, this.y, parseInt( shutIndex ) );
+// when someone comes near it, open the door
+this.on( 'entered', function ( player ) {
+    // count this person and open the door
+    numPeopleInside++;
+    item.openDoor();
+} );
+// when someone exits, see if they are the last person out of this landscape item
+this.on( 'exited', function ( player ) {
+    // count this person
+    numPeopleInside--;
+    // if they were the last one out
+    if ( numPeopleInside <= 0 ) {
+        // (re)start the timer to shut the door
+	    if ( timerId != null ) clearTimeout( timerId );
+	    timerId = setTimeout( function () {
+	        // if there is no one nearby, close the door
+	        if ( numPeopleInside == 0 ) item.closeDoor();
+	    }, 1000*parseFloat( timeOpen ) ); // time in seconds to delay, as a parameter
+    }
+} );</textarea>
+
+            <a name='makes-a-lock'></a>
+            <h3>Example 12: Makes a door lockable</h3>
+            <p>If a maker attaches to a landscape item the behavior called
+            "Makes the cell beneath it a door," then he/she can also attach
+            this behavior to make that door lockable.  This behavior will do
+            nothing without first adding that other behavior, defined above,
+            to make the cell a door in the first place.</p>
+            <p>Makers provide a secret code that will unlock the door, and
+            then should also create a movable item that is the key, and give
+            it the same secret code, so that it knows how to unlock the
+            door.  Players don't need to know the secret code; it's stored
+            inside the key, so that the key can know which door(s) it
+            unlocks.  More than one key and more than one door can share the
+            same code, if makers so desire.</p>
+            <p>(The key behavior is Example 13, below.)</p>
+            <p>This behavior takes only two parameters, secretCode, which is
+            any text, as described above, and initiallyLocked, which must be
+            either the text "true" or the text "false," to choose whether
+            the door should be locked initially.</p>
+            <p>No new API appears in the code below, but the organization of
+            the code is intricate enough to warrant providing it as an
+            example.</p>
+            <textarea class='code'>
+// remember this landscape item for use in later timeout functions
+var item = this;
+// this function does nothing, and will be used to replace the door's usual
+// open function when the door is locked (so that opening it will fail)
+var doNothing = function () {};
+// the following functions lock and unlock the doors; they are used further below
+function lock ( whoDidIt ) {
+    // don't do this if it's already been done
+    if ( item.openDoor != doNothing ) {
+	    // move the openDoor() function off to another name for safe keeping
+	    item.locked_openDoor = item.openDoor;
+	    // now replace its original version with a function that does nothing
+	    item.openDoor = doNothing;
+	    // and emit an event that others can listen to
+	    item.emit( 'locked', whoDidIt );
+    }
+}
+function unlock ( whoDidIt ) {
+    // reverse the process of the lock function
+    item.openDoor = item.locked_openDoor;
+    // and emit an event that others can listen to
+    item.emit( 'unlocked', whoDidIt );
+}
+// if the door is supposed to start out locked, call lock().
+// but do so after a zero timer, to be sure the open function has been installed.
+if ( initiallyLocked.toLowerCase() == 'true' ) setTimeout( lock, 0 );
+// now install lock and unlock functions in the item itself,
+// which can be called by keys.  this behavior goes hand-in-hand with
+// an unlocking behavior for movable items that makes them keys.
+// that behavior knows to call these functions when trying to unlock doors.
+item.lockDoor = function ( code, player ) {
+    // if the key's does not match this door's code,
+    // tell the caller they failed to unlock the door
+    if ( ''+code != secretCode ) return false;
+    // otherwise, call the lock() function defined above,
+    // and tell the caller they succeeded at locking this door.
+    lock( player );
+    return true;
+}
+item.unlockDoor = function ( code, player ) {
+    // exact same pattern as lockDoor(), but for unlocking.
+    // one difference: unlocking also opens the door for you.
+    // this is so that you don't have to exit this landscape item
+    // and step back into it in order to get the door to open.
+    if ( ''+code != secretCode ) return false;
+    unlock( player );
+    item.openDoor( player );
+    return true;
+}</textarea>
+
+            <a name='makes-a-key'></a>
+            <h3>Example 13: Makes an item a door key</h3>
+            <p>This makes a movable item into a key.  The maker provides as
+            the secretCode parameter the secret code for the door the key
+            should unlock.  The maker should know this, because he/she
+            should be the one who created the door (and thus the door's
+            secret code) if he/she is making a key for it.  Then this
+            behavior gives the key the action for unlocking the door.</p>
+            <p>(The lock behavior is Example 12, above.)</p>
+            <p>The only new API used below is the global function
+            <code>landscapeItemsNear</code>, which returns a list of
+            landscape items near a given position.</p>
+            <textarea class='code'>
+// remember this item for later use in calls to the function below
+var key = this;
+// the following function attempts to lock/unlock doors near this item's holder
+function toggleDoors ( lockOrUnlock ) { // parameter should be string 'lock' or 'unlock'
+    // we will record whether we've succeeded at finding/unlocking any doors
+    var oneWasADoor = false;
+    var anySucceeded = false;
+    // the key's current location is the person holding it
+    var holder = key.location;
+    // get the place on the map is where that person is standing
+    var whereOnMap = holder.getPosition();
+    // find all landscape items nearby, which may be doors
+    var possibleDoors = landscapeItemsNear( whereOnMap );
+    // now let's try unlocking each of those things
+    for ( var i = 0 ; i < possibleDoors.length ; i++ ) {
+        // if it has no (un)locking function, it's not even a door
+        if ( !possibleDoors[i][lockOrUnlock+'Door'] ) continue;
+        // otherwise, we found a door
+        oneWasADoor = true;
+        // if its (un)locking function succeeds, record success
+        if ( possibleDoors[i][lockOrUnlock+'Door']( secretCode, holder ) )
+            anySucceeded = true;
+    }
+    // if there were no doors nearby, tell the player that
+    if ( !oneWasADoor )
+        holder.showOK( 'There are no doors here to '+lockOrUnlock+'.' );
+    // if none succeeded, tell the player it's probably the wrong key
+    else if ( !anySucceeded )
+        holder.showOK( 'That does not seem to be the right key.' );
+    // if some succeeded, tell the player so
+    else if ( lockOrUnlock == 'unlock' )
+        holder.showOK( 'Successfully unlocked and opened!' );
+    else
+       	holder.showOK( 'Successfully locked!  Doors close when you walk away from them.' );
+};
+// now give the item locking and unlocking actions, which call the above function
+this.uses['unlock door'] = function () { toggleDoors( 'unlock' ); }
+this.uses['lock door'] = function () { toggleDoors( 'lock' ); }</textarea>
+
+            <a name='prevent-get'></a>
+            <h3>Example 14: Can be picked up only by certain people</h3>
+            <p>The parameter "owners" is a comma-separated list of names
+            that must be lower-case.  This behavior makes an object so that
+            it cannot be picked up except by someone whose name is on that
+            list.  Thus the item functions like Thor's hammer Mjolnir, which
+            only Thor can pick up.</p>
+            <p>This introduces the idea of events that come in pairs, and
+            fire before/after the actual event to which they refer.  The
+            "before" event can return a text string that prevents the event,
+            and includes an explanation why.  Thus we define a "before get"
+            event handler for the movable item, and prevent some people
+            from picking it up.</p>
+            <textarea class='code'>
+this.on( 'before get', function ( player ) {
+    // get list of names who are permitted to pick it up
+    var permitted = owners.split( ',' );
+    // see if the player who's trying to pick it up is on the list
+    for ( var i = 0 ; i < permitted.length ; i++ )
+        if ( player.name.toLowerCase() == permitted[i] )
+            return false; // do not block the "get" action -- the player is allowed
+    // the player was not on the permitted list, so return a non-false value to block the action;
+    // you can include a reason as a string, like this:
+    return "You do not own the object, and it will not let you pick it up!"
+} );</textarea>
+
+            <a name='stat-trainer'></a>
+            <h3>Example 15: Trains players in a stat</h3>
+            <p>This behavior makes a creature or a landscape item so that
+            players can interact with it to spend experience points training
+            a stat.  For example, maybe players can meet a gymnast who will
+            increase their dodging ability, or can use a weight bench to
+            increase their maximum damage.</p>
+            <p>The cost is equal to the square of the current stat's value.
+            This formula is built into the behavior and is not negotiable,
+            but as you re-use this code in your own game, you can replace
+            that formula with one you prefer.</p>
+            <p>Parameters include statToTrain (the name of the stat that
+            can be trained here), minimum (the minimum value the player
+            needs to already have in the stat), maximum (the highest that
+            this thing can train you in the stat), and trainingMessage (some
+            text that is shown when you use the trainer).</p>
+            <p>Although the code below is long, it uses only concepts you've
+            already seen in earlier examples (or
+            <a href='ideas.html'>ideas</a>), plus the following functions.
+            Players have a <code>getBaseStat(name)</code> function and a
+            <code>incrementBaseStat(name)</code> function, and their
+            <code>saveData</code> object has an <code>experience</code>
+            member.  Also, players have a
+            <code>checkIncrementBaseStat()</code> function that returns
+            false if it's okay to increment it, or some explanatory text if
+            it is not okay.  (For instance, you can't upgrade minimum damage
+            past your current value of maximum damage.)</p>
+            <textarea class='code'>
+// install a new "use" in this landscape item
+this.uses['Train ' + statToTrain] = function ( player ) {
+    // ensure the player is within the [min,max] range that can be trained here
+    var currentStat = player.getBaseStat( statToTrain ) || 0;
+    // are they below the minimum?
+    if ( currentStat < parseInt( minimum ) ) {
+        // they are below the minimum; notify them and stop
+        player.showOK( 'You must have at least ' + minimum + ' ' + statToTrain + ' to train here.' );
+        return;
+    }
+    // are they above the maximum?
+    if ( currentStat > parseInt( maximum ) ) {
+        // they are above the minimum; notify them and stop
+        player.showOK( 'You are above ' + maximum + ' ' + statToTrain + ', and are too advanced to train here.' );
+        return;
+    }
+    // see if the player has enough experience
+    var costToTrain = currentStat * currentStat; // cost formula hard-coded into this game
+    var currentExperience = player.saveData.experience;
+    if ( currentExperience < costToTrain ) {
+        // the player does not have what's required, so inform him/her and stop here
+        player.showOK( 'You do not have the required ' + costToTrain + ' experience points.' );
+        return;
+    }
+    // see if the stat can be increased
+	var errorMessage = player.checkIncrementBaseStat( statToTrain );
+    if ( errorMessage ) {
+        // then there is some reason why the player cannot, and we must report it and stop here
+        player.showOK( 'You cannot train ' + statToTrain + ' now.  ' + errorMessage );
+        return;
+    }
+    // the training can occur.  Let's ask if they're sure they want to spend the experience points.
+    confirm( player, 'train ' + statToTrain + '.  This will cost ' + costToTrain + ' experience.',
+        function () { // this function gets run if they say yes
+		    // take their experience points and give them the stat increase
+		    player.saveData.experience -= costToTrain;
+		    player.incrementBaseStat( statToTrain );
+		    // finally, display the message.
+		    player.showOK( 'You train ' + statToTrain + '!  ' + trainingMessage );
+	    },
+        function () { // this function gets run if they say no
+        	player.showOK( 'Okay, you did not train.' );
+    	}
+    );
+};</textarea>
+
+            <a name='misc-ref'></a>
             <h2>Miscellaneous references</h2>
 
             <h3><a name="locations"></a>How are locations in the game world

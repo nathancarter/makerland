@@ -162,9 +162,273 @@
                 </div>
               </div>
               <div class='col-md-4'>
+              </div>
             </div>
-          </div>
 
+            <a name='new-behaviors'></a><hr>
+
+            <div class='alert alert-info'>
+              <h3>New Behaviors</h3>
+              <p>Behaviors you may want to build</p>
+              <p>(This assumes you've read the documentation on
+                  <a href='coding.html#writing-behaviors'>Writing
+                  Behaviors</a>.)</p>
+            </div>
+            <div class="alert alert-warning" role="alert"><b>Tip:</b>
+                These behaviors are very helpful in extending the Sample
+                Universe to support much richer gameplay.  Some of them are
+                given to you, fully coded, in the reference documentation.
+                You can freely copy and paste the code into your universe!
+                Others are given as challenges, and you will need to solve
+                them on your own.</div>
+
+            <div class='row'>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='wanders-randomly'></a>
+                  <div class="panel-heading">1. Wanders randomly</div>
+                  <div class="panel-body">
+                    Duplicate the "Wanders randomly near spawn point"
+                    behavior for creatures and rename it to just "Wanders
+                    randomly."  Go through the code and remove the check
+                    that prevents the creature from walking too far from its
+                    spawn point.  (No new coding required!  Just copying and
+                    deleting.)
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='is-readable'></a>
+                  <div class="panel-heading">2. Is readable</div>
+                  <div class="panel-body">
+                    To make a movable item readable, like a book or a note,
+                    you will write code very similar to that for
+                    <a href='reference.html#whispers-secret'>making a
+                    creature whisper a secret</a>.  Movable items can have
+                    "uses," just like creatures do in that code.
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='gives-item'></a>
+                  <div class="panel-heading">3. Extending "Gives an
+                      item"</div>
+                  <div class="panel-body">
+                    <a href='reference.html#gives-item'>View the code for a
+                    "gives an item" behavior here.</a>  Can you extend it
+                    with these new features?
+                    <ul>
+                      <li>Add a new parameter for how often the player can
+                          do the action to get the item.  If it's too soon,
+                          say so and don't give the item.</li>
+                      <li>Add a new parameter for the maximum number the
+                          player can already have.  If they have too many,
+                          tell them they've reached their current
+                          limit.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class='row'>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='stat-drink'></a>
+                  <div class="panel-heading">4. Gives a stat bonus when
+                    drunk</div>
+                  <div class="panel-body">
+                    <p>Duplicate the
+                    <a href='reference.html#heal-drink'>Heals/harms when
+                    drunk</a> behavior, and instead of changing the
+                    drinker's hit points by a specified amount, change one
+                    of their stats (temporarily) by a specified amount.</p>
+                    <p>This requires the function
+                    <code>C.addStatBonus(name,amount,time)</code> defined in
+                    living things, which increases or decreases the named
+                    stat in the creature <code>C</code> by the given amount
+                    (positive or negative) for the given amount of time
+                    (in milliseconds).  Your new behavior will need
+                    additional parameters, the name of the stat and the
+                    duration of the bonus.</p>
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='status-drink'></a>
+                  <div class="panel-heading">5. Gives a status conditio
+                    when drunk</div>
+                  <div class="panel-body">
+                    <p>Same as Idea 4, except give a "status condition".
+                    This is a message that temporarily appears beneath
+                    the player's name, in the top right of the game view
+                    (just to the left of the commands pane).  It's useful
+                    for telling the player things like, "You feel a surge of
+                    strength from your energy drink!" or "That tasted
+                    terrible...Was it poison!?"</p>
+                    <p>The function
+                    <code>P.addStatusCondition(text,time)</code> is defined
+                    in each player object <code>P</code>, and shows the
+                    given text (which should be short) for the given time
+                    (in seconds).</p>
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='spawns-with-item'></a>
+                  <div class="panel-heading">6. Spawns holding an item</div>
+                  <div class="panel-body">
+                    Create a behavior that takes a single parameter, and
+                    index into the movable items table.  Pass that index to
+                    the globally-defined <code>Item</code> function to
+                    construct an actual movable item from the index.  Then
+                    call the <code>move</code> function in that item to move
+                    it to the creature that just spawned, by passing the
+                    creature as the parameter to <code>move</code>.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class='row'>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='spawns-with-item-sometimes'></a>
+                  <div class="panel-heading">7. Extending "Spawns holding an
+                      item"</div>
+                  <div class="panel-body">
+                    Extend Idea 6 so that it takes a second parameter, a
+                    probability between 0 and 1, and only gives the creature
+                    the item if <code>Math.random()</code> is less than the
+                    given probability.  Thus a creature might spawn carrying
+                    a valuable treasure only 10% of the time, for example.
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='chases-enemies'></a>
+                  <div class="panel-heading">8. Chases enemies</div>
+                  <div class="panel-body">
+                    Some creatures that are aggressive may want to chase you
+                    if you fight them and then run away.  Implement this
+                    behavior.  Here are some functions you can call in any
+                    creature <code>C</code>, which may help with this idea:
+                    <ul>
+                        <li><code>C.getPosition()</code> gives the
+                            creature's position,
+                            <a href='reference.html#locations'>as documented
+                            here</a>.</li>
+                        <li><code>C.enemiesWithin(r)</code> gives an array
+                            of the creature's current enemies that are
+                            within a radius of <code>r</code> map cells of
+                            the creature.</li>
+                        <li><code>C.moveBy(dx,dy,dt)</code> moves the
+                            creature horizontally by <code>dx</code> steps,
+                            vertically by <code>dy</code> steps, and
+                            animates that over <code>dt</code> seconds
+                            (which can be 0 to mean instantly).</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='flees-enemies'></a>
+                  <div class="panel-heading">9. Flees enemies</div>
+                  <div class="panel-body">
+                    Copy Idea 8 and alter its logic to make the creature
+                    flee from its enemies rather than pursue them.  Or, if
+                    you prefer, you can extend Idea 8 with a new parameter
+                    that specifies chase/flee, so that you can keep the code
+                    in one behavior, rather than copied into two.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class='row'>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='trades-items'></a>
+                  <div class="panel-heading">10. Trades items with the
+                    player</div>
+                  <div class="panel-body">
+                    This behavior makes a creature or a landscape item so
+                    that you can interact with it and trade one item for
+                    another.  For example, maybe you can bring an old woman
+                    flowers and she'll give you a loaf of bread.  Or you can
+                    put coins into a vending machine to get a soda.  Let the
+                    maker specify parameters for what item the player must
+                    give, what item the player will receive, what text will
+                    be shown when they receive it, and what the name will be
+                    of the action you will add to the landscape item or
+                    creature to initiate the trade.  As a starting point,
+                    see the code for
+                    <a href='reference.html#gives-item'>Gives an item</a>.
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='walks-a-path'></a>
+                  <div class="panel-heading">11. Walks a set path</div>
+                  <div class="panel-body">
+                    The Sample Universe comes with the "Wanders near spawn
+                    point" behavior, and Idea 1 suggests an enhancement you
+                    can make to it.  Consider a new behavior that takes a
+                    parameter describing a set path (in whatever format you
+                    like, such as "N N E E E E E S S W W W W") and has the
+                    creature to which the behavior is attached walk that
+                    path at some given rate.  This is useful for creating
+                    creatuers that patrol an area.
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='lucky-item'></a>
+                  <div class="panel-heading">12. An item that is lucky to
+                    carry</div>
+                  <div class="panel-body">
+                    <a href='reference.html#prevent-get'>See this code</a>
+                    for how to make an event listener for before an item is
+                    picked up.  You can also use "after get" or "before
+                    drop" or "after drop" events for before/after an item
+                    is gotten/dropped.  Use these to make an item that gives
+                    stat bonuses when it is picked up, and removes them when
+                    dropped.  You may wish to reference
+                    <a href='reference.html#equipment-bonus'>the code for
+                    how equipment gives bonuses</a>.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class='row'>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <a name='silences-holder'></a>
+                  <div class="panel-heading">13. Silences its holder</div>
+                  <div class="panel-body">
+                    This behavior makes a landscape item prevent its holder
+                    from speaking.  Use the "after get" and "after drop"
+                    events described in Idea 12, together with the
+                    "before speak" event.  It can prevent the speech event
+                    by returning text explaining why it's blocking the
+                    speech event, just like the "before get" event handler
+                    does in <a href='reference.html#prevent-get'>this
+                    code</a>.
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+              </div>
+              <div class='col-md-4'>
+              </div>
+            </div>
+
+          </div>
         </div>
     </body>
     <script src='codemirror-for-textareas.js'></script>

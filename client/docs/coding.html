@@ -129,89 +129,166 @@
 
             <h3><a name='writing-behaviors'></a>Writing behaviors</h3>
 
-            <div class="alert alert-danger" role="alert"><b>Warning!</b>
-                This section assumes that you know how to program in
-                JavaScript.  If you do not, you will need someone to help
-                you learn to code in that language before you will be able
-                to understand and/or complete this tutorial.</div>
-
-            <p>If you are a maker looking to create a behavior, the
+            <div class='row'>
+              <div class='col-md-6'>
+                <p>If you are a maker looking to create a behavior, the
                 following examples can give you some idea of how to do so.
                 They begin with very trivial behaviors that are mostly
                 useless, except that they function well as small examples to
                 get you started.  Building on those small examples, we
                 create larger and larger examples, until we've built the
                 teleportation behavior described earlier on this page.</p>
+              </div>
+              <div class='col-md-6'>
+                <div class="alert alert-danger" role="alert"><b>Warning!</b>
+                This section assumes that you know how to program in
+                JavaScript.  If you do not, you will need to learn to code
+                in that language before you will be able
+                to understand and/or complete this tutorial.</div>
+              </div>
+            </div>
 
-                <h3>Example 1</h3>
-                <p>Behaviors can trigger animations by a single call to the
-                    <code>showAnimation()</code> global function.  To learn
-                    what animations are and how to build them,
-                    <a href='animationcoding.html'>see the animation
-                    documentation</a>.</p>
-                <p>A call to that function looks like the following, with
-                    the parameters explained below.</p>
-                <textarea class='code'>
-                    showAnimation( location, name, optionalParameterObj );
-                </textarea>
-                <p>The <code>location</code> parameter must be a location in
-                    the game world, <a href='foundations.html'>as documented
-                    on this page</a>.  All players that can see the location
-                    given will have their browsers notified of the
-                    animation, so that the game can draw it on their
-                    screens.</p>
-                <p>The <code>name</code> parameter must be either a string
-                    name of an animation in the animations database, or the
-                    numerical index of one.  It specifies which animation to
-                    run.</p>
-                <p>The final parameter is optional, and if given, must be an
-                    object whose key-value pairs will be copied into the
-                    scope of the animation's code before it gets run.  This
-                    is how you can transmit any data specific to the
-                    animation to the client for use during the animation.
-                    For instance, if you are triggering a shower of sparks
-                    animation, it might accept a color parameter, and you
-                    would make this final parameter
-                    <code>{ color : '#ff0000' }</code>.  Because this will
-                    be transmitted to the client, it must be JSON data; no
-                    player objects or landscape item object can be
-                    included.  (Names, however, can be.)</p>
-                <p>But if the short piece of code above were included alone
-                    in a behavior definition, it would only be run every
-                    time the landscape item were reset.  This has very
-                    limited utility.  For that reason, the following example
-                    is by far the most common type of behavior code.</p>
+            <h4>When does behavior code get run?</h4>
+            <p>Behavior code gets run whenever the object to which it is
+            attached gets loaded.  Examples:</p>
+            <ul>
+                <li>When you create a movable item in your inventory, any
+                    behaviors attached to that item will have their code
+                    run.</li>
+                <li>When a player enters an area for the first time since
+                    your game has loaded, all landscape items in that area
+                    are created and their behavior code is run.</li>
+                <li>If such landscape items have a behavior that spawns a
+                    creature, that creature will therefore also be created,
+                    and so any behaviors attached to it will be run.</li>
+                <li>If players stay away from an area for a long time, its
+                    contents will be unloaded to save memory.  When they
+                    come back later, it will be reloaded, and the events
+                    above will happen again.</li>
+            </ul>
+            <p>So when you're writing behavior code, think of it as code
+            that <i>sets up</i> the object to which it's attached.  Assume
+            the object was just loaded, and you need to add some new
+            functionality to it.</p>
 
-                <h3>Example 2</h3>
-                <p>Most behaviors modify how a landscape item
-                    <i>behaves,</i> and they do so by installing in it
-                    event handlers.  They do so using the common convention
-                    shown in the following code.</p>
-                <textarea class='code'>
-                    this.on( "event name", function ( eventData ) {
-                        // write here code that handles the event
-                    } );
-                </textarea>
-                <p>In the above code, the <code>this</code> object is
-                    the object to which the behavior is attached.  That
-                    object is guaranteed to have an events system installed,
-                    and you can install handlers using the standard "on"
-                    convention common in HTML applications.</p>
-                <p>The "on" function installs an event handler that is
-                    triggered <i>on</i> each occurrence of the given event.
-                    Events are specified by name, and the available event
-                    names are given in the next section.</p>
-                <p>The second parameter is the function that should be run
-                    whenever an event of the given type takes place.  The
-                    function will be passed some data about the event, as
-                    documented in the following section, and may do whatever
-                    it likes in response.</p>
-                <p>For instance, when a player enters a landscape item, it
-                    might teleport the player to a new location.  Or while
-                    a player stays inside the landscape item, it might harm
-                    or heal the player.</p>
+            <h4>What does behavior code look like?</h4>
+            <p>You can see the code by browsing the Behaviors table in the
+            game database, clicking "edit" on an entry, and then clicking
+            "Edit implementation."  Let's look at the shortest example in
+            the Sample Universe, the behavior that gives a player a new
+            command.  Its code is the following.</p>
+            <textarea class='code'>
+// Listen for when a player enters this landscape item:
+this.on( 'entered', function ( player ) {
+    // Try to grant them the new command.  The following function will return true if the
+    // player got the command, or false if they already had it.
+    if ( player.grantCommand( command ) ) {
+        // They just got the command, so we show them some text, with an OK button after it.
+        player.showOK( "<h1>You learned a new command!</h1>"
+                     + "<p>You can now use the \"" + command + "\" command.  "
+                     + "When you click OK below, you will see it on your commands list.</p>"
+                     + "<p>" + message + "</p>" );
+        // We also play the "new command access" sound effect from the sounds table.
+        playSound( 'new command access', player );
+    }
+} );</textarea>
+            <p>Wow, there's a lot to notice there!  Let's consider each
+            of the many things we can learn from this code.  (Keep in
+            mind that I assume you already speak some JavaScript.)</p>
+            <ul>
+                <li>Behavior code in the Sample Universe is carefully
+                commented to explain what's going on.</li>
+                <li>The <code>this</code> keyword is defined in all
+                behaviors.  It refers to the object to which the
+                behavior is attached.  The behavior shown above is
+                designed to be attached to a landscape item, so
+                <code>this</code> will be that landscape item.</li>
+                <li>Various objects have useful methods that it helps to
+                know.  For instance, the <code>on</code> method is
+                called in the landscape item, the
+                <code>grantCommand</code> and <code>showOK</code>
+                methods are called in a player, and the global
+                <code>playSound</code> method is used.  There is reference
+                documentation for all such methods, discussed below.</li>
+                <li>This function works by installing an <i>event
+                handler.</i>  The first line of code effectively says,
+                "upon a player's entering this landscape item, do the
+                following..."  Event handlers are very common in all
+                kinds of coding, especially on the web, and we will use
+                them a lot in MakerLand behaviors.</li>
+            </ul>
+
+            <h4>What kinds of behaviors can I write?</h4>
+            <p>TONS!  Here is a sample list, in an order that makes sense to
+                try to read through and learn from, one at a time.  Those
+                marked "reference" are links to the reference page, which
+                gives full source code you can re-use immediately, with full
+                explanations of what each of its parts does.  Those marked
+                "idea" are links to the ideas page, which gives some clues
+                as to how to build the behavior, but leaves the coding to
+                you, as a learning exercise.</p>
+            <ul>
+                <li><a href='ideas.html#wanders-randomly'>Wanders
+                    randomly</a> (idea)</li>
+                <li><a href='reference.html#whispers-secret'>Whispers a
+                    secret</a> (reference)</li>
+                <li><a
+                    href='reference.html#occasionally speaks'>Occasionally
+                    speaks</a> (reference)</li>
+                <li><a href='ideas.html#is-readable'>Is readable</a>
+                    (idea)</li>
+                <li><a href='reference.html#gives-item'>Gives an item</a>
+                    (reference)</li>
+                <li><a href='ideas.html#more-gives-item'>Extending the
+                    "gives an item" behavior</a> (idea)</li>
+                <li><a href='reference.html#is-drinkable'>Is drinkable</a>
+                    (reference)</li>
+                <li><a href='reference.html#heal-drink'>Heals/harms when
+                    drunk</a> (reference)</li>
+                <li><a href='ideas.html#stat-drink'>Gives a stat bonus when
+                    drunk</a> (idea)</li>
+                <li><a href='ideas.html#status-drink'>Gives a status
+                    condition when drunk</a> (idea)</li>
+                <li><a href='reference.html#equipment-bonus'>Gives a stat
+                    bonus when equipped</a> (reference)</li>
+                <li><a href='ideas.html#spawns-with-item'>Spawns holding an
+                    item</a> (idea)</li>
+                <li><a href='ideas.html#spawns-with-item-sometimes'>Spawns
+                    holding an item sometimes</a> (idea)</li>
+                <li><a href='reference.html#equips-item'>Equips an item it's
+                    carrying</a> (reference)</li>
+                <li><a href='reference.html#heal-harm-touch'>Heals/harms
+                    creatures touching it</a> (reference)</li>
+                <li><a href='reference.html#aggression'>Aggression (makes a
+                    creature attack things nearby)</a> (reference)</li>
+                <li><a href='ideas.html#chases-enemies'>Chases enemies</a>
+                    (idea)</li>
+                <li><a href='ideas.html#flees-enemies'>Flees enemies</a>
+                    (idea)</li>
+                <li><a href='reference.html#refills-with-items'>Refills with
+                    items from a list</a> (reference)</li>
+                <li><a href='reference.html#makes-a-door'>Makes the cell
+                    beneath it a door</a> (reference)</li>
+                <li><a href='reference.html#makes-a-lock'>Makes a door
+                    lockable</a> (reference)</li>
+                <li><a href='reference.html#makes-a-key'>Makes an item a
+                    door key</a> (reference)</li>
+                <li><a href='ideas.html#trades-items'>Trades items with the
+                    player</a> (idea)</li>
+                <li><a href='ideas.html#walks-a-path'>Walks a set path</a>
+                    (idea)</li>
+                <li><a href='reference.html#prevent-get'>Can be picked up
+                    only by certain people</a> (reference)</li>
+                <li><a href='ideas.html#lucky-item'>An item that is lucky to
+                    carry</a> (idea)</li>
+                <li><a href='reference.html#stat-trainer'>Trains players in
+                    a stat</a> (reference)</li>
+            </ul>
 
             <h2><a name='animations'></a>Animations</h2>
+
+            Remember for later:  The "Makes an item a launchable firework"
+            behavior might be discussed here.
 
             <h3><a name='what-are-animations'></a>What are animations?</h3>
 
@@ -225,6 +302,9 @@
             <h3><a name='giving-abilities'></a>Giving players abilities</h3>
 
             <h3><a name='writing-abilities'></a>Writing abilities</h3>
+
+            Remember for later:  The "Acts as a magic beacon" behavior might
+            be discussed here.
 
         </div>
     </body>
