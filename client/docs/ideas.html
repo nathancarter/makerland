@@ -428,6 +428,67 @@
               </div>
             </div>
 
+            <a name='animations'></a><hr>
+
+            <div class='alert alert-info'>
+              <h3>Animations</h3>
+              <p>Projects you can do once you've read
+              <a href='coding.html#animations'>the help on how to code your
+              own animations</a></p>
+            </div>
+            <div class='row'>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <div class="panel-heading">1. Useless Firework</div>
+                  <div class="panel-body">
+                    <p>Create a behavior that can be attached to movable
+                    items and that makes them a launchable firework.  They
+                    should have an action called "launch" that just does two
+                    things: runs the "firework" animation and destroys the
+                    firework.</p>
+                    <p>Then create an animation called "firework" that just
+                    dumps a message to the JavaScript console.  Create a
+                    firework with this behavior, launch it, and verify that
+                    the messages show up in your browser's console.</p>
+                    <p>This is not yet a firework...we'll extend it in the
+                    next few ideas.</p>
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <div class="panel-heading">2. Uninteresting Firework</div>
+                  <div class="panel-body">
+                    <p>Extend Idea 1 as follows.  When you call
+                    <code>showAnimation()</code>, be sure to pass as the
+                    third parameter the location of the player who launched
+                    the firework.</p><p>Change your animation to use this
+                    parameter, even if in a trivial way, such as drawing a
+                    circle or rectangle around the launching location, to be
+                    sure that your animation is capable of drawing to the
+                    canvas.</p>
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <div class="panel-heading">3. Ultimate Firework</div>
+                  <div class="panel-body">
+                    <p>Extend Idea 2 as follows.  Change your animation to
+                    launch some colored particles upward from the player.
+                    Find a sound file with an explosion noise in it and add
+                    it to the game database.</p><p>Then change your behavior
+                    so that in addition to calling
+                    <code>showAnimation()</code>, it also calls
+                    <code>playSound()</code>, passing the index of your
+                    explosion sound as the only parameter.  Test your
+                    firework now and verify that both the animation and the
+                    sound occur.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
     </body>
