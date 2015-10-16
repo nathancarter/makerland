@@ -363,15 +363,17 @@ log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
                 maker's avatar is named Eileen and she's creating a fair
                 within the game.</p>
             <textarea class='code'>
-                // When someone enters the fair, we might use code like
-                // this to mark them as a new arrival, so that the
-                // nearby fair workers know to greet them.
-                playerObject.justEnteredEileensFair = true;
-                // When someone plays one of the minigames, perhaps
-                // Eileen wants to keep their cumulative score, and it
-                // should be stored across logins.  She could do so like
-                // this:
-                playerObject.saveData.scoreAtEileensFair += 100;
+            // When someone enters the fair, we might use code like this to
+            // mark them as a new arrival, so that the nearby fair worker
+            // know to greet them.
+            playerObject.justEnteredEileensFair = true;
+            // When someone plays one of the minigames, perhaps Eileen wants
+            // to keep their cumulative score, and it should be stored
+            // across logins.  She could do so like this:
+            playerObject.saveData.scoreAtEileensFair += 100;
+            // Note that in both cases, we include EileensFair in the
+            // identifier names to make it highly unlikely that they
+            // will clash with identifiers used anywhere else in the game.
             </textarea>
             <p>You could be more sophisticated, by keeping an object for
                 the fair, and just manipulating its members, like in the
@@ -387,12 +389,33 @@ log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
             <h4>Functions in <code>P</code>:</h4>
             <p>(There are many others not listed here that are for
                 internal use only.)</p>
+            <h5>Health and combat</h5>
             <textarea class='code'>
-                // Get list of commands to which the player has access:
-                // (returns a list of lower-case strings)
-                P.commands();
-                // Whether the player is a maker, as a boolean:
-                P.isMaker();
+                // Get current hit points, and their maximum:
+                P.getHealth()
+                P.getMaxHealth()
+                // Heal or harm the player (using positive/negative parameters):
+                // (If it's harming, use the attacker as the second parameter,
+                // so that the harmed creature may respond by attacking.)
+                P.changeHealth( delta, whoDidIt );
+                // Attack another player/creature:
+                P.attack( enemy );
+                // Find a list of enemies nearby:
+                P.enemiesNearby( radius )
+                // Find those within the creature's attacking radius,
+                // and who are still alive and have not logged out:
+                P.reachableEnemies()
+                // Execute an attack against a specific enemy:
+                // (index defaults to 0, meaning the primary enemy)
+                P.fightEnemies( index );
+                // The previous function attempts to attack the enemy, but
+                // it may fail/miss.  To bypass the attack/dodge skill check,
+                // use the following function.  Event handlers installed by
+                // defensive spells may still prevent the hit, however.
+                P.hitEnemy( creatureToHit );
+            </textarea>
+            <h5>Position</h5>
+            <textarea class='code'>
                 // Where the player is on the game map:
                 // (returns a [plane,x,y] triple)
                 P.getPosition();
@@ -400,6 +423,79 @@ log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
                 // (parameter must be a [plane,x,y] triple)
                 P.teleport( destination );
             </textarea>
+            <h5>Inventory and Equipment</h5>
+            <textarea class='code'>
+                // Check whether the player can carry an item,
+                // on top of what they're already carrying:
+                P.canCarry( movableItem )
+                // Find item(s) in the player's inventory:
+                // P.searchInventory() returns the first found item,
+                // but if you want an array of all matched items,
+                // pass "true" as the optional second parameter.
+                P.searchInventory( number ) // returns items with that index
+                P.searchInventory( string ) // returns items with that name
+                P.searchInventory( regexp ) // matches it against that name
+                // Make the player equip/unequip an item:
+                P.equip( itemInInventory );
+                P.unequip( anEquippedItem );
+            </textarea>
+            <h5>Stats</h5>
+            <textarea class='code'>
+                // Get a list of all stats the player has:
+                P.getStatNames()
+                // Get/set the base (without bonuses) value for a stat:
+                P.getBaseStat( 'name' )
+                P.setBaseStat( 'name', value );
+                // Ask if it's possible to increment a certain base stat:
+                // (sometimes you can't increment one, e.g., if minimum
+                // damage == maximum damage, you can't increment the minimum
+                // until you've incremented the maximum first)
+                // This returns false if you CAN, and a string explanation
+                // why if you CANNOT.
+                P.checkIncrementBaseStat( 'name' )
+                // Increment it if you can:
+                P.incrementBaseStat( 'name' )
+                // Get/set bonuses on top of the base value for a stat:
+                // (use negative numbers to give penalties)
+                P.getStatBonus( 'name' )
+                P.setStatBonus( 'name', bonus ); // SEE COMMENTS BELOW
+                // You almost never want to call setStatBonus(), because it
+                // will overwrite bonuses done by other code.  Instead, do
+                // this:
+                // (duration optional, defaults to 0, meaning it lasts until
+                // the player logs out, or until you undo it with other
+                // code later)
+                P.addStatBonus( 'name', delta, duration );
+                // Get a final stat value, including base plus bonus:
+                P.getStat( 'name' )
+            </textarea>
+            <h5>User interace</h5>
+            <textarea class='code'>
+                // Get list of commands to which the player has access:
+                // (returns a list of lower-case strings)
+                P.commands();
+                // Give the player a new command:
+                P.grantCommand( 'command name' );
+                // Whether the player is a maker, as a boolean:
+                P.isMaker();
+                // Show some text to the player in their command pane, and
+                // let them read it, then click OK.  The text will be shown
+                // in HTML format, and thus may contain tables, images, etc.
+                P.showOK( text );
+                // Ask the player to click on the map, and get the location
+                // on which they clicked in a callback.
+                P.mapClickMode( 'prompt text here', function ( x, y ) {
+                    ... do stuff with x and y, then ...
+                    P.showCommandUI(); // to give them back their regular command pane
+                } );
+            </textarea>
+            <p>For more information on <code>mapClickMode()</code>, see the
+                example use of it in
+                <a href='coding.html#writing-abilities'>the documentation on
+                writing abilities</a>.  That documentation also introduces
+                the two member functions <code>checkAbility()</code> and
+                <code>startAbilityCooldown()</code> not documented above,
+                because they are specific to abilities.</p>
 
             <a name='creature-objects'></a>
             <h2>Using Creature objects</h2>
