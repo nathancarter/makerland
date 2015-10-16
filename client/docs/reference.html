@@ -258,6 +258,61 @@ log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
             <a name='animation-globals'></a>
             <h2>Global functions available to Animations</h2>
 
+            <p>Animation code, as you know from
+                <a href='coding.html#animations'>the documentation on how to
+                code animations</a>, is run on the client side, not the
+                server side.  That is, animations run in the user's browser.
+                Consequently, all the usual browser functionality is
+                available.  But most of it you should avoid using.</p>
+            <p>For instance, it would be malicious (and annoying) for an
+                animation to navigate the user to a new page, to manipulate
+                the DOM, to pop up <code>alert</code> dialogs, and so on.
+                If one of your users has these kind of malicious intents,
+                don't make them a maker in the first place.</p>
+            <p>The rest of this section only reviews briefly the global
+                functions available for use in animations, because they are
+                all introduced thoroughly in the documentation just linked
+                to, above.</p>
+            <h3>HTML5 Canvas Context Members</h3>
+            <p>The HTML5 Canvas is
+                <a href='http://www.w3schools.com/tags/ref_canvas.asp'
+                >documented thoroughly here</a>.  The MakerLand game view is
+                one big canvas.  Animations can draw on it after the game
+                map, landscape items, creatures, players, etc. have been
+                drawn.</p>
+            <p>As you'll note in that documentation, you draw on a canvas by
+                first getting a drawing "context," and then executing
+                methods within it.  When animation code is executed, a
+                context has already been obtained and all of its methods
+                brought into the local scope.  So for instance if the above
+                documentation talks about a method <code>canvas.arc()</code>
+                or a property <code>canvas.globalAlpha</code>, you can
+                access those in your animation code by simply writing
+                <code>arc()</code> or <code>globalAlpha</code>.</p>
+            <p>To know the size of the canvas, you can get the canvas object
+                itself; it is stored in the variable
+                <code>gameview</code>.</p>
+            <h3>Locations and Sizes of In-Game Objects</h3>
+            <p>To find the location on-screen of a player, call
+                <code>POS(n)</code>, where n is the player's name as a
+                string.  The same works for creatures, but passing the
+                creature's ID to <code>POS</code>.  The results are in
+                map coordinates (<a href='#locations'>documented
+                here</a>).</p>
+            <p>To convert map coordinates <code>mc</code> to canvas
+                coordinates, use either <code>X(mc)</code> to get the x
+                coordinate, <code>Y(mc)</code> to get the y coordinate, or
+                <code>XY(mc)</code> to get both as an object together,
+                of the form <code>{ x : number, y : number }</code>.</p>
+            <p>Putting the previous two paragraphs together, it is very
+                common to write code like <code>XY(POS(playerName))</code>,
+                for example.</p>
+            <p>The size on screen of a map cell is stored in the variable
+                <code>CELL</code>, and is 80 by default in most
+                universes.</p>
+            <p><a href='coding.html#animations'>Read more about animations
+                here.</a></p>
+
             <a name='ability-globals'></a>
             <h2>Global functions available to Abilities</h2>
 
