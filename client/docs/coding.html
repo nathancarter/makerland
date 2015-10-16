@@ -736,12 +736,304 @@ this.on( 'entered', function ( player ) {
 
             <h3><a name='what-are-abilities'></a>What are abilities?</h3>
 
+            <p>Players have many commands they can use, all of which appear
+                on the right hand side of the screen as buttons (e.g.,
+                Quit, Players, Settings, Talk, etc.).  An ability is a
+                special type of command, one that is associated with a
+                skill that can be trained.</p>
+            <p>Typically players earn them in some way, out in the game
+                world, and then train them over time, by spending experience
+                points.  There can be many kinds of abilities, but typical
+                kinds include combat, healing, navigating, and so on.</p>
+            <p>Here are some examples.  A player may find an army camp and
+                find there a trainer that teaches him a parrying ability
+                that increases his defensive skills when used.  A player
+                may visit a local witch doctor and learn from her abilities
+                related to healing allies and harming enemies with magic.
+                After we see how to make abilities, we'll see a list of many
+                such ideas, together with tips on how to code them.</p>
+
             <h3><a name='giving-abilities'></a>Giving players abilities</h3>
 
-            <h3><a name='writing-abilities'></a>Writing abilities</h3>
+            <p>To create a new ability that players can earn, follow a
+                two-step process.</p>
+            <ol>
+                <li>Create the ability in the database.</li>
+                <ul>
+                    <li>Click the Database command, then the Abilities
+                        table button, then the "Add entry" button at the
+                        bottom.</li>
+                    <li>After the confirmation message, find the new entry
+                        and click its "edit" button.</li>
+                    <li>Set the basic information about the ability.  Here
+                        is what each piece of information means.</li>
+                    <ul>
+                        <li>The Name is the text that will appear on the
+                            button in the player's command pane.  It should
+                            be short, so it fits on the button.</li>
+                        <li>The Icon will appear on the button to the left
+                            of the text, as in all the other command
+                            buttons.  It should be of size 32x32.</li>
+                        <li>The Category is the heading that will appear
+                            above the ability.  For instance, Basic Commands
+                            and Maker Commands are two categories.  Your
+                            universe might have Magic Commands, Soldier
+                            Commands, and so on.</li>
+                        <li>The Short Info is the text that will appear to
+                            the right of the button.  It can be a bit longer
+                            than the text on the button, but just 5-10
+                            words, so that it does not get too tall and
+                            space out the command buttons too much.</li>
+                        <li>The Help Text will show up if the player hovers
+                            their mouse pointer over the button.  This can
+                            be a few sentences long.</li>
+                    </ul>
+                    <li>Then you must edit the implementation of the
+                        ability, but we have not yet covered how to do so.
+                        For now, you can ignore this, and the ability will
+                        do nothing when used.  We'll cover how to code an
+                        ability further below.</li>
+                </ul>
+                <li>Create a landscape item in the game that players can
+                    visit to gain the new ability, as a command.</li>
+                <ul>
+                    <li>The Sample Universe comes with a behavior called
+                        "Gives a player a new command," which can be
+                        attached to landscape items so that when players
+                        step on them, they gain a new command.  You may have
+                        used this when creating the New Player and New Maker
+                        tutorials, if you have followed
+                        <a href='getting-started.html'>the Getting Started
+                        tutorial</a>.</li>
+                    <li>You can re-use that same thing here
+                        to make certain locations in your game (such as a
+                        wizard's classroom or a general's office) be a place
+                        where a player learns a new ability.  The ability
+                        name is the command that the behavior should
+                        grant to players.</li>
+                    <li>For simple abilities, you may want to place the
+                        landscape item that grants them somewhere easy to
+                        access, so that players can get the ability easily.
+                        For powerful abilities, you may want to place the
+                        landscape item at the end of a difficult quest, or
+                        an area filled with tough enemies, so that players
+                        need to work hard for the reward.</li>
+                </ul>
+            </ol>
 
-            Remember for later:  The "Acts as a magic beacon" behavior might
-            be discussed here.
+            <h3><a name='writing-abilities'></a>Implementing abilities</h3>
+
+            <p>An ability's code is run with the player executing the
+                ability as the <code>this</code> object.  So you could make
+                your very first ability just give the player a message,
+                like so:</p>
+            <textarea class='code'>
+this.showOK( "This ability just shows a message; that's all." );</textarea>
+
+            <p>Feel free to try that out right now.  Create such an ability,
+                create a landscape item that grants it to you, get the
+                ability yourself as a maker, and then run it.  You should
+                see that message in your command pane.</p>
+            <p>You'll probably want to make sure that an ability is only
+                executed every so often, so that a player can't just spam
+                an ability and be all-powerful.  (Some games call this a
+                "cooldown" period.)  The game facilitates this by providing
+                you two functions in the player object.</p>
+            <p>Call <code>this.checkAbility('ability name here')</code>
+                function to see if an ability is ready to use.  This will
+                return true if it is, and false otherwise.  Furthermore, if
+                the check fails, that method will also show the player a
+                status message saying that they can't use the ability again
+                yet.  (So you don't have to bother showing any message in
+                your code.)</p>
+            <p>Call
+                <code>this.startAbilityCooldown('ability name',time)</code>
+                when your ability code has been run, to start the cooldown
+                time.  The <code>time</code> parameter is in seconds.  This
+                will also automatically notify the player when the cooldown
+                period has ended, so that you don't have to.  (It shows in
+                the player's status messages.)</p>
+            <p>Therefore the code for many abilities will take the following
+                form:</p>
+            <textarea class='code'>
+// ensure the ability is not on cooldown
+if ( !this.checkAbility( 'example ability' ) ) return;
+// do the actual ability, which is still just this one line for now
+this.showOK( "This ability just shows a message; that's all." );
+// start the ability on cooldown
+this.startAbilityCooldown( 'example ability', 5 );</textarea>
+
+            <p>Now let's see how to make a non-example ability.  Let's just
+                make it damage the user's current primary enemy immediately.
+                We'll use the function built into living things
+                <code>living.changeHealth( amount, whoDidIt )</code>,
+                in which <code>amount</code> can be positive (heal) or
+                negative (harm), and in which <code>whoDidIt</code> is the
+                player or creature who performed the heal/harm.  We also
+                use <code>living.reachableEnemies()</code> which returns an
+                array containing exactly what you'd expect.</p>
+            <textarea class='code'>
+// ensure the ability is not on cooldown
+if ( !this.checkAbility( 'whack' ) ) return;
+// find out if we have a primary enemy to whack
+var targets = this.reachableEnemies();
+if ( targets.length == 0 ) {
+    // no enemy nearby, so tell the player that as a 5-second status message
+    this.addStatusCondition( 'No enemy nearby!', 5 );
+    // then be done
+    return;
+}
+// whack the primary enemy
+targets[0].changeHealth( -20, this );
+// start the ability on cooldown
+this.startAbilityCooldown( 'whack', 10 );</textarea>
+
+            <p>You would not, however, expect that the "whack" ability
+                should always take exactly 20 hit points.  You'd expect to
+                be able to train it, and improve its power, or decrease its
+                cooldown.  In fact, each ability a player gains
+                automatically adds itself to that player's list of stats,
+                and has value 1.  You should provide a location in the game
+                where players can train that stat.  (Recall the
+                <a href='reference.html#stat-trainer'>free sample code</a>
+                that shows you how to create such a training place.)</p>
+            <p>We should therefore write code that takes the stat value into
+                account, using <code>player.getStat( 'whack' )</code>.  We
+                could do so by changing one line of code in the above
+                example, as follows.</p>
+            <textarea class='code'>
+// whack the primary enemy
+targets[0].changeHealth( -20, this );</textarea>
+
+            <p>But that's got a serious problem.  First of all, it means
+                that a player who just learned the "whack" ability will only
+                do 1 damage with it at first, which is nearly useless.
+                Second, if you let players train stats higher and higher
+                indefinitely, they could train the "whack" ability to do
+                an awful lot of damage.  You might want a maximum on it.</p>
+            <p>To solve these problems, abilities provide a global function
+                <code>asymptotic(low,high,mid,stat)</code> you can use to
+                compute the impact of an ability's stat value.  When you
+                call <code>asymptotic</code>, provide these values:</p>
+            <ul>
+                <li>For <code>low</code> use the lowest output value
+                    possible, for when the stat is near zero.</li>
+                <li>For <code>high</code> use the highest output value
+                    possible, which will never actually be obtained, but
+                    will be asymptotically approached as the stat is
+                    increased without limit.</li>
+                <li>For <code>mid</code> provide the stat value at which
+                    the player should expect to receive output half way
+                    between <code>low</code> and <code>high</code>.</li>
+                <li>For <code>stat<code>, provide the actual current value
+                    of the player's stat.</li>
+            </ul>
+            <p>For example, let's say we wanted "whack" to do somewhere
+                between 10 and 50 damage, and that the half-way point (30)
+                should be achieved when the player has trained his/her
+                "whack" stat up to level 75.  We could change the line of
+                code mentioned above into the following.</p>
+            <textarea class='code'>
+// what is our current whacking skill level?
+var stat = this.getStat( 'whack' );
+// how much damage will that let us do?
+var damage = asymptotic( 10, 50, 75, stat );
+// whack the primary enemy
+targets[0].changeHealth( -damage, this );</textarea>
+
+            <p>You might also like to decrease the cooldowin as the player
+                trains the stat.  Perhaps it should start with a slow
+                cooldown (20 sec) and end up with a fast cooldown (8 sec),
+                reaching the midpoint (14 sec) when the stat is at level 50.
+                The following code will do that.</p>
+            <textarea class='code'>
+// how long of a cooldown, given my "whack" stat level computed above?
+var cooldown = asymptotic( 20, 8, 50, stat );
+// start the ability on cooldown
+this.startAbilityCooldown( 'whack', cooldown );</textarea>
+
+            <p>You now know enough to make some pretty cool abilities.  Take
+                the pattern introduced above and consider the various things
+                you can do using code you learned at the top of this page,
+                when learning to code behaviors, or any of the many
+                functions documented on <a href='reference.html'>the
+                reference page</a>.  There are many ideas of possible
+                abilities you could create <a href='ideas.html#abilities'>on
+                this page</a>.  But before you do, here are a few final
+                tips that fall into the "miscellaneous" category.</p>
+
+            <p><b>Include animations.</b>  The player using the ability will
+                want to see visual feedback that the ability happened.  Thus
+                you should almost always create an animation to go along
+                with each ability you create, and fire it from within your
+                ability code, using <code>showAnimation()</code>.  This is
+                especially important for abilities that impact other players
+                nearby, because they will need to see the animation to know
+                what's going on, or that an ability was even used in the
+                first place.</p>
+
+            <p><b>Map click mode.</b>  Some abilities may require targeting
+                a specific area of the map.  To do so, you will want to
+                prompt the player to click somewhere on the map, give them a
+                target-shaped mouse cursor, and find out where on the map
+                they clicked.  This can all be done with just one function
+                in your code.  It is defined in the player object, and is
+                summarized by the code below.</p>
+            <textarea class='code'>
+// recall that "this" is the player executing the ability.
+var player = this;
+// the following call initiates map click mode.
+player.mapClickMode( 'Click on the map where you want to place the bomb.',
+    // (or whatever prompt you want them to see)
+    function ( x, y ) {
+        // this callback function will only be called if the player actually
+        // clicks on the map.  the player may instead cancel the action.
+        // if this callback is called, then the x and y values will be in
+        // map coordinates, and to form an actual [plane,x,y] location from
+        // them, you will need to use the player's current plane, which you
+        // can extract from this.getPosition().
+        // YOU ABSOLUTELY MUST end this function with a call like this,
+        // which gives the player back their ordinary user interface:
+        player.showCommandUI();
+        // (well, okay, instead of that, you could call mapClickMode again,
+        // if you wanted to re-enter map click mode, but you have to show
+        // *some* UI)
+    } );</textarea>
+
+            <p>Finally, it is sometimes sensible to run a test of the user's
+                ability level against some stat of an opponent.  For example
+                the "whack" ability above should perhaps take into account
+                the opponent's dodging ability.  To do so, you can run a
+                "stat competition" between two creatures.</p>
+            <p>To have a competition between stat S1 in creature C1 against
+                stat S2 in creature C2, do the following.  The function
+                <code>random.statCompetition()</code> returns true if the
+                first player wins the competition or false if the second
+                player does.  We might integrate this into the "whack" code
+                as follows.</p>
+            if (random.statCompetition(A,'stat',B,'stat')) then_A_won();
+            <textarea class='code'>
+// what is our current whacking skill level?
+var stat = this.getStat( 'whack' );
+// can the enemy dodge our whack?
+if ( random.statCompetition( targets[0], 'dodging ability',
+                             this,       'whack' ) ) {
+    // the enemy won the stat competition, so we show that we missed
+    showAnimation( this.getPosition(), 'miss',
+        { agent : this, target : targets[0] } );
+    playSound( 'miss', this.getPosition() );
+    return;
+}
+// how much damage will that let us do?
+var damage = asymptotic( 10, 50, 75, stat );
+// whack the primary enemy
+targets[0].changeHealth( -damage, this );</textarea>
+
+            <p>Go check out the <a href='ideas.html#abilities'>many ideas
+                for making your own abilities</a>, or ignore our ideas
+                entirely and get creative on your own!  Your players will
+                thank you for it, and love your universe better for its
+                depth.</p>
 
         </div>
     </body>
