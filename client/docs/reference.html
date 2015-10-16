@@ -583,6 +583,12 @@ log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
                 // only fails if the item has some behavior that prevents
                 // this, which is unusual):
                 C.drop( item );
+                // To add an action that a player can take when inspecting
+                // the creature, add to the creature's "uses" object:
+                C.uses['Shake its hand'] = function ( player ) {
+                    player.showOK( 'You shake the devil\'s hand.  Bad idea.' );
+                    player.changeHealth( -666, C );
+                }
             </textarea>
             <h5>Cleanup</h5>
             <textarea class='code'>
@@ -618,10 +624,26 @@ log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
                 L.behaviors // list of behaviors taken from its definition in the database
                 L.visible // boolean: visible to non-makers?
                 L.size // how many cells wide and high is this item? (all items are square)
+                L.contents // array of serialized movable items inside L
+                // (assuming L is a container, or the empty array otherwise)
+
+                // To add an action that a player can take when inspecting
+                // the landscape item, add to the landscape item's "uses" object:
+                L.uses['Activate the reactor'] = function ( player ) {
+                    player.showOK( 'You power the reactor up!' );
+                    L.globalThermonuclearWar.start();
+                }
             </textarea>
 
             <h4>Functions in <code>L</code>:</h4>
             <textarea class='code'>
+                // Move the item to a new spot on the map:
+                L.setPosition( position );
+                L.moveBy( dx, dy );
+                // If the item is a container, you can put things in and
+                // take them out:
+                L.removeContentsItem( index );
+                L.addContentsItem( item ); // optionally serialized
                 // Whether the item collides with a rectangle from topLeft to bottomRight:
                 // (topLeft must be of the form {x:number,y:number},
                 // and bottomRight must also)
