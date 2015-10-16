@@ -331,6 +331,12 @@ this.on( 'entered', function ( player ) {
                     <code>showAnimation()</code> are built-in.  I list those
                     cases later on this page.</li>
             </ol>
+            <p>In your behavior code, if you call
+                <code>showAnimation()</code>, you can provide a duration of
+                zero, which will run the animation indefinitely.  In that
+                case, you should store the return value from that call, and
+                later pass it to <code>stopAnimation()</code>, when you want
+                to cancel the animation.</p>
 
             <h2>Who creates animations?</h2>
             <p>Any maker can create them.  Here's how to create a very
