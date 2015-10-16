@@ -482,6 +482,21 @@ log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
                 // Get a final stat value, including base plus bonus:
                 P.getStat( 'name' )
             </textarea>
+            <h5>Installing/handling events</h5>
+            <textarea class='code'>
+                // Install an event handler, as documented elsewhere:
+                // (returns a unique id which can be used to uninstall
+                // the handler later if necessary)
+                P.on( eventName, handlerFunction );
+                // Uninstall a handler, given its unique ID:
+                P.remove( handlerID );
+                // Trigger an event:
+                // (zero or more eventData parameters are acceptable)
+                P.emit( eventName, eventData );
+                // Attempt an event, triggering before and after event handlers:
+                // (not fully documented here)
+                P.attempt( eventName, runHandler, failHandler, eventData );
+            </textarea>
             <h5>User interface</h5>
             <textarea class='code'>
                 // Get list of commands to which the player has access:
@@ -600,6 +615,9 @@ log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
                 // collected, because your code still has a reference to it):
                 C.wasDestroyed() // returns a boolean
             </textarea>
+            <h5>Installing/handling events</h5>
+            <p>All are exactly the same as for Players, as documented
+                above.</p>
 
             <a name='landscape-item-objects'></a>
             <h2>Using Landscape Item objects</h2>
@@ -636,31 +654,26 @@ log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
             </textarea>
 
             <h4>Functions in <code>L</code>:</h4>
+            <h5>Position</h5>
             <textarea class='code'>
                 // Move the item to a new spot on the map:
                 L.setPosition( position );
                 L.moveBy( dx, dy );
-                // If the item is a container, you can put things in and
-                // take them out:
-                L.removeContentsItem( index );
-                L.addContentsItem( item ); // optionally serialized
                 // Whether the item collides with a rectangle from topLeft to bottomRight:
                 // (topLeft must be of the form {x:number,y:number},
                 // and bottomRight must also)
                 L.collides( topLeft, bottomRight )
-                // Install an event handler, as documented earlier:
-                // (returns a unique id which can be used to uninstall
-                // the handler later if necessary)
-                L.on( eventName, handlerFunction );
-                // Uninstall a handler, given its unique ID:
-                L.remove( handlerID );
-                // Trigger an event:
-                // (zero or more eventData parameters are acceptable)
-                L.emit( eventName, eventData );
-                // Attempt an event, triggering before and after event handlers:
-                // (not fully documented here)
-                L.attempt( eventName, runHandler, failHandler, eventData );
             </textarea>
+            <h5>Contents (if it is a container)</h5>
+            <textarea class='code'>
+                // If the item is a container, you can put things in and
+                // take them out:
+                L.removeContentsItem( index );
+                L.addContentsItem( item ); // optionally serialized
+            </textarea>
+            <h5>Installing/handling events</h5>
+            <p>All are exactly the same as for Players, as documented
+                above.</p>
 
             <h3>Landscape Item events</h3>
             <h4>entered</h4>
@@ -687,6 +700,55 @@ log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
 
             <a name='movable-item-objects'></a>
             <h2>Using Movable Item objects</h2>
+
+            <h3>Movable Item member functions</h3>
+            <p>Assume <code>M</code> is a movable item.  Then it
+                has the following member functions and variables.</p>
+            <h4>Fields in <code>M</code>:</h4>
+            <textarea class='code'>
+                M.ID // unique ID for this movable item object, an integer
+                M.location // can be one of three values:
+                // A creature/player object: that's who's carrying it
+                // An array of 3 integers: a position on the game map
+                // null: the item is not in the game world right now
+
+                M.type // integer index of its type in the movable items database table
+                M.behaviors // list of behaviors taken from its definition in the database
+                M.space // how many units of space are required to carry this?
+                M.equipmentType // string saying where it should be equipped, or null if it is not equipment
+                // e.g., head, hands, body, ..., or weapon
+
+                // To add an action that a player can take when holding
+                // the movable item, add to the movable item's "uses" object:
+                M.uses['Wave the wand'] = function ( player ) {
+                    player.showOK( 'You wave the wand and are healed!' );
+                    player.changeHealth( 10 );
+                }
+            </textarea>
+
+            <h4>Functions in <code>M</code>:</h4>
+            <h5>Position and use</h5>
+            <textarea class='code'>
+                // Move the item somewhere:
+                // (destination can be a spot on the game map, or a creature/player
+                // who will carry the item, or null to move it out of the game world)
+                M.move( destination );
+                // Check whether the item is currently equipped by its holder:
+                M.isEquipped()
+            </textarea>
+            <h5>Installing/handling events</h5>
+            <p>All are exactly the same as for Players, as documented
+                above.</p>
+            <h5>Destroying the item</h5>
+            <p>All are exactly the same as for creatures, as documented
+                above.</p>
+
+            <h3>Movable Item events</h3>
+            <h4>no create/reset events</h4>
+            <p>There are not events for when movable items are loaded
+                or reset, because if you want to react to those events,
+                you simply put the event handler code in the behavior
+                directly.</p>
 
             <a name='behavior-examples'></a>
             <h2>Example Behavior Code</h2>
