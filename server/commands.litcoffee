@@ -440,14 +440,11 @@ upon the contents of the animations database.
                                 { text : text, speaker : player.name }
                             require( './sounds' ).playSound 'speech bling',
                                 position
-                            player.emit 'spoke', text
                             hearers = require( './blocks' ) \
                                 .whoCanSeePosition position
                             for otherThing in hearers
                                 if otherThing isnt player
-                                    otherThing.emit 'heard',
-                                        speech : text
-                                        speaker : player
+                                    otherThing.emit 'heard', text, player
                             again()
                         , ( failReason ) ->
                             if typeof failReason isnt 'string'

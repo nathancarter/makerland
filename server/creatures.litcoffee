@@ -136,13 +136,10 @@ it is flexible enough to handle creature speakers.  The maximum text size is
                 require( './animations' ).showAnimation @location, 'speak',
                     { text : text, speaker : @ID }
                 require( './sounds' ).playSound 'speech bling', @location
-                @emit 'spoke', text
                 hearers = require( './blocks' ).whoCanSeePosition @location
                 for otherThing in hearers
                     if otherThing isnt player
-                        otherThing.emit 'heard',
-                            speech : text
-                            speaker : player
+                        otherThing.emit 'heard', text, player
 
 Creatures are able to carry things.  Use these methods to have the creature
 attempt to pick things up or put them down.  Note that the `get` method

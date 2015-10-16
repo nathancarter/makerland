@@ -40,6 +40,7 @@
                     later...or now</p>
                 <p>Table of contents:</p>
                 <ul>
+                  <li><a href='#misc-ref'>Miscellaneous References</a></li>
                   <li><a href='#behavior-globals'>Global behavior
                       functions</a></li>
                   <li><a href='#animation-globals'>Global animation
@@ -54,9 +55,112 @@
                       objects</a></li>
                   <li><a href='#behavior-examples'>Example Behavior
                       code</a></li>
-                  <li><a href='#misc-ref'>Miscellaneous References</a></li>
                 </ul>
             </div>
+
+            <hr>
+
+            <a name='misc-ref'></a>
+            <h2>Miscellaneous references</h2>
+
+            <h3><a name="locations"></a>How are locations in the game world
+                stored?</h3>
+            <p>The game map is made up of many "planes," each of which is a
+                flat surface that extends arbitrarily far in all
+                directions.  The first plane in the game is numbered 0, and
+                each additional plane created by makers within the game is
+                numbered successively, 1, 2, 3, etc.</p>
+            <p>The location of a player or item within the plane is a pair
+                of real numbers (x,y), just like when plotting points on the
+                plane in an algebra class.  The only difference is that the
+                values follow the standard computer-screen convention that
+                larger y values are further <i>down</i> the screen, rather
+                than the convention in high school algebra, in which larger
+                y values are further <i>up</i>.</p>
+            <p>Each plane is a grid of cells, and each cell is 1 unit wide
+                and 1 unit high.  So as a player walks from one square block
+                on the map to the next one to the right, say, his or her x
+                coordinate increases by 1.  Players' x and y coordinates
+                can be fractional, because players may be, for example, 15%
+                of the way into a block at any point in time.</p>
+            <p>Thus a player's location is made up of three parts:  The
+                number of the plane he or she is in (0, 1, 2, ...) and then
+                his or her coordinates within that plane (e.g., (2.6,-1.0)).
+                In the game, a location is an array of these three itmes,
+                in <code>[ plane, x, y ]</code> form.  All new players log
+                into the game initially at position
+                <code>[ 0, 0, 0 ]</code>, which is called the "origin."</p>
+            <p>If a new player began walking up and to the right, their
+                coordinates might become, for example,
+                <code>[ 0, 1.5, -1.5 ]</code>, after they had walked one and
+                a half cells up and to the right.  Each maker can see his or
+                her own position beneath the avatar's name on the top right
+                of the game map.  Non-makers cannot see their position in
+                that way.</p>
+            <p>The initial value (the 0 indicating which plane they are on)
+                cannot change as players walk around normally.  They would
+                need to enter some kind of teleportation device to change
+                planes.</p>
+            <p>The game is first created with just one plane, plane 0.
+                Makers can create new planes using the Database command
+                button, and choosing the Blocks table within it.  It is
+                common for a maker to begin his or her time as a maker by
+                creating a new plane to have as their own private home, and
+                then experimenting with their maker capabilities on that
+                plane, where no one else can interfere, nor be harmed by any
+                mistakes the maker might make during experimentation.</p>
+
+            <h3><a name="editing-code"></a>How do I edit code?</h3>
+            <p>There are a few places as a maker where you will find
+                yourself viewing a code editor.  One is when you are
+                <a href='coding.html#animations'>editing the implementation
+                of an animation</a>; another is when
+                <a href='coding.html#behaviors'>editing the implementation
+                of a behavior</a>; there will be others.  In each situation,
+                the game shows you a small code editor that is initially
+                blank, and which you must fill with code.</p>
+            <p>There are two things you need to know in order to be able to
+                write the code that goes in that blank.  First, how does one
+                use the editor itself?  Second, how does one figure out what
+                code to write?</p>
+            <p>As far as using the editor itself, that is fairly
+                straightforward.  Here are a few highlights:</p>
+            <ul>
+                <li>You will be coding in JavaScript, and the editor does
+                    syntax hightlight for JavaScript automatically.</li>
+                <li>The editor is smart enough to allow you to use tabs
+                    (without it shifting focus out of the editor) and it
+                    will often indent automatically for you (for example,
+                    after you type a { and press enter).</li>
+                <li>You can use keyboard shortcuts for Cut (Ctrl/Cmd+X),
+                    Copy (Ctrl/Cmd+C), Paste (Ctrl/Cmd+V), Undo
+                    (Ctrl/Cmd+Z), and possibly others.</li>
+                <li>Pressing F11 when your cursor is in the code window will
+                    cause the code editor to fill your browser.  This helps
+                    you see your code better and removes the distractions of
+                    the game map on the left.  When you are done editing,
+                    you must press F11 again to return to the small size
+                    editor, then click the appropriate "save" button to save
+                    your work.</li>
+            </ul>
+            <p>As far as the question about how to figure out what code to
+                write, follow one of the links above to learn about coding
+                animations or behaviors.</p>
+
+            <h3><a name="error-logs"></a>What is my maker error log and
+                where can I find it?</h3>
+            <p>Each maker has a personal error log.  It will contain any
+                messages logged when code you write executes the
+                <code>log()</code> command.  It will also contain a record
+                of any errors thrown by code you write.</p>
+            <p>To see your maker log, click the Database command button,
+                then click the Maker Error Logs table.  You can browse the
+                messages in the log or clear the log out.</p>
+            <p>If something isn't working as you expect, you should check
+                your maker error log to see if there's helpful debugging
+                information there.  Even if everything seems to be working
+                fine, it's a good idea to look there now and again, to see
+                if any otherwise-undetected errors are taking place.</p>
 
             <hr>
 
@@ -525,6 +629,72 @@ log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
                 <code>startAbilityCooldown()</code> not documented above,
                 because they are specific to abilities.</p>
 
+            <h3>Player events</h3>
+            <h4>before/after speak</h4>
+            <p>When a player attempts to speak, they emit "before speak" and
+                "after speak" events, which receive one parameter, the text
+                attempting to be spoken.  You can thus prevent speech by
+                handling the "before speak" event and returning a blocking
+                message, or react to speech as in the example below.</p>
+            <textarea class='code'>
+                player.on( "after speak", function ( text ) {
+                    if ( /higgles/.test( text ) )
+                        player.addStatusCondition( 'You said "higgles!"  That\'s funny.', 10 );
+                } );
+            </textarea>
+            <h4>heard</h4>
+            <p>Whenever a player hears another player or creature speak,
+                this event is triggered, with two parameters, the text
+                spoken and the player/creature speaking.</p>
+            <h4>killed</h4>
+            <p>When creature/player A kills creature/player B, then A
+                emits the event "killed" with parameter B.</p>
+            <h4>before/after got hit</h4>
+            <p>When one player or creature attempts to hit another, after
+                the requisite stat competition occurs, a "before got hit"
+                event is also emitted, which can be blocked.  If the hit
+                succeeds, and "after got hit" event is emitted.  These are
+                emitted by the target of the attack, and the parameters are
+                the attacker and the target.  You could selectively block
+                some hits with code like the following.</p>
+            <textarea class='code'>
+player.on( 'before got hit', function ( attacker, target ) {
+    // let's just drop 50% of attempted hits in this example
+    if ( Math.random() < 0.5 ) {
+        // block the hit by returning a reason that the "got hit" failed
+        // (might want some sound or animation here, too, though)
+        return 'Attack blocked by [put some reason here]!'
+    }
+    // otherwise, return false, meaning that the attack was not blocked
+    return false;
+} ); </textarea>
+            <h4>missed target, dodged attack</h4>
+            <p>When creature/player A swings at but misses creature/player
+                B, in combat, then A emits the event "missed target" with
+                parameter B, and B emits the event "dodged attack" with
+                parameter A.</p>
+            <h4>equipped by/item</h4>
+            <p>When creature/player A equips item B, then A emits the event
+                "equipped item" with parameter B, and B emits the event
+                "equipped by" with parameter A.</p>
+            <h4>unequipped by/item</h4>
+            <p>Same as previous, but when equipment is removed.</p>
+            <h4>passed/failed stat check</h4>
+            <p>When <code>random.statCheck()</code> is called, if it passes,
+                then the player or creature involved emits the event
+                "passed stat check," with the parameters the name of the
+                stat and the difficulty level.  If they failed, then a
+                "failed stat check" is emitted with the same parameters.</p>
+            <h4>won/lost stat competition</h4>
+            <p>When <code>random.statCompetition()</code> is called, if it
+                passes, then the first player or creature involved emits the
+                event "won stat competition," with the parameters the name
+                of their stat, the opponent, and the name of their stat.
+                If they lost, then a "lost stat competition" is emitted with
+                the same parameters.  These same events are emitted the
+                other way around for the second player or creature involved
+                as well.</p>
+
             <a name='creature-objects'></a>
             <h2>Using Creature objects</h2>
 
@@ -619,6 +789,10 @@ log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
             <p>All are exactly the same as for Players, as documented
                 above.</p>
 
+            <h3>Creature events</h3>
+            <p>Every single player event is also a creature event, and vice
+                versa.  See the Player events section above for details.</p>
+
             <a name='landscape-item-objects'></a>
             <h2>Using Landscape Item objects</h2>
 
@@ -687,10 +861,14 @@ log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
                     log( "The player " + player.name + " stepped on your front doorstep!" );
                 } );
             </textarea>
-
             <h4>exited</h4>
             <p>Same as the previous, except when a player steps from
                 the inside of the item's rectangle to its outside.</p>
+            <h4>destroyed</h4>
+            <p>Occurs when the block containing the item is unloaded
+                (because the game is shutting down, or no players are nearby
+                and thus memory is being conserved) and thus all items in it
+                are being removed from memory.  Receives no parameters.</p>
 
             <h4>no create/reset events</h4>
             <p>There are not events for when landscape items are loaded
@@ -744,11 +922,30 @@ log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
                 above.</p>
 
             <h3>Movable Item events</h3>
+            <h4>before/after get/drop</h4>
+            <p>When a player or creature attempts to get a movable item,
+                the item emits "before get" and "after get" events, which
+                receive one parameter, the creature attempting to get it.
+                You can thus prevent picking an item up by handling the
+                "before get" event and returning a blocking message, or
+                react to the player/creature having gotten the object by
+                handling "after get."  Corresponding events are fired when
+                a player or creature attempts to drop an item.  This
+                includes taking items from/putting items into
+                containers; those, too, count as getting/dropping items.</p>
+            <p>Also, if a maker adds an item to their own inventory (which
+                bypasses all checks for carryability), the "after get"
+                event is fired by itself.</p>
             <h4>no create/reset events</h4>
             <p>There are not events for when movable items are loaded
                 or reset, because if you want to react to those events,
                 you simply put the event handler code in the behavior
                 directly.</p>
+            <h4>See also...</h4>
+            <p>There are events for when items are equipped/unequipped, but
+                these are documented in the Player Events section above,
+                so that they can be coupled with the corresponding events
+                for players and creatures.</p>
 
             <a name='behavior-examples'></a>
             <h2>Example Behavior Code</h2>
@@ -1364,108 +1561,6 @@ this.uses['Train ' + statToTrain] = function ( player ) {
     	}
     );
 };</textarea>
-
-            <a name='misc-ref'></a>
-            <h2>Miscellaneous references</h2>
-
-            <h3><a name="locations"></a>How are locations in the game world
-                stored?</h3>
-            <p>The game map is made up of many "planes," each of which is a
-                flat surface that extends arbitrarily far in all
-                directions.  The first plane in the game is numbered 0, and
-                each additional plane created by makers within the game is
-                numbered successively, 1, 2, 3, etc.</p>
-            <p>The location of a player or item within the plane is a pair
-                of real numbers (x,y), just like when plotting points on the
-                plane in an algebra class.  The only difference is that the
-                values follow the standard computer-screen convention that
-                larger y values are further <i>down</i> the screen, rather
-                than the convention in high school algebra, in which larger
-                y values are further <i>up</i>.</p>
-            <p>Each plane is a grid of cells, and each cell is 1 unit wide
-                and 1 unit high.  So as a player walks from one square block
-                on the map to the next one to the right, say, his or her x
-                coordinate increases by 1.  Players' x and y coordinates
-                can be fractional, because players may be, for example, 15%
-                of the way into a block at any point in time.</p>
-            <p>Thus a player's location is made up of three parts:  The
-                number of the plane he or she is in (0, 1, 2, ...) and then
-                his or her coordinates within that plane (e.g., (2.6,-1.0)).
-                In the game, a location is an array of these three itmes,
-                in <code>[ plane, x, y ]</code> form.  All new players log
-                into the game initially at position
-                <code>[ 0, 0, 0 ]</code>, which is called the "origin."</p>
-            <p>If a new player began walking up and to the right, their
-                coordinates might become, for example,
-                <code>[ 0, 1.5, -1.5 ]</code>, after they had walked one and
-                a half cells up and to the right.  Each maker can see his or
-                her own position beneath the avatar's name on the top right
-                of the game map.  Non-makers cannot see their position in
-                that way.</p>
-            <p>The initial value (the 0 indicating which plane they are on)
-                cannot change as players walk around normally.  They would
-                need to enter some kind of teleportation device to change
-                planes.</p>
-            <p>The game is first created with just one plane, plane 0.
-                Makers can create new planes using the Database command
-                button, and choosing the Blocks table within it.  It is
-                common for a maker to begin his or her time as a maker by
-                creating a new plane to have as their own private home, and
-                then experimenting with their maker capabilities on that
-                plane, where no one else can interfere, nor be harmed by any
-                mistakes the maker might make during experimentation.</p>
-
-            <h3><a name="editing-code"></a>How do I edit code?</h3>
-            <p>There are a few places as a maker where you will find
-                yourself viewing a code editor.  One is when you are
-                <a href='animationcoding.html'>editing the implementation of
-                an animation</a>; another is when
-                <a href='behaviorcoding.html'>editing the implementation of
-                a behavior</a>; there will be others.  In each situation,
-                the game shows you a small code editor that is initially
-                blank, and which you must fill with code.</p>
-            <p>There are two things you need to know in order to be able to
-                write the code that goes in that blank.  First, how does one
-                use the editor itself?  Second, how does one figure out what
-                code to write?</p>
-            <p>As far as using the editor itself, that is fairly
-                straightforward.  Here are a few highlights:</p>
-            <ul>
-                <li>You will be coding in JavaScript, and the editor does
-                    syntax hightlight for JavaScript automatically.</li>
-                <li>The editor is smart enough to allow you to use tabs
-                    (without it shifting focus out of the editor) and it
-                    will often indent automatically for you (for example,
-                    after you type a { and press enter).</li>
-                <li>You can use keyboard shortcuts for Cut (Ctrl/Cmd+X),
-                    Copy (Ctrl/Cmd+C), Paste (Ctrl/Cmd+V), Undo
-                    (Ctrl/Cmd+Z), and possibly others.</li>
-                <li>Pressing F11 when your cursor is in the code window will
-                    cause the code editor to fill your browser.  This helps
-                    you see your code better and removes the distractions of
-                    the game map on the left.  When you are done editing,
-                    you must press F11 again to return to the small size
-                    editor, then click the appropriate "save" button to save
-                    your work.</li>
-            </ul>
-            <p>As far as the question about how to figure out what code to
-                write, follow one of the links above to learn about coding
-                animations or behaviors.</p>
-
-            <h3><a name="error-logs"></a>What is my maker error log and
-                where can I find it?</h3>
-            <p>Each maker has a personal error log.  It will contain any
-                messages logged when code you write executes the
-                <code>log()</code> command.  It will also contain a record
-                of any errors thrown by code you write.</p>
-            <p>To see your maker log, click the Database command button,
-                then click the Maker Error Logs table.  You can browse the
-                messages in the log or clear the log out.</p>
-            <p>If something isn't working as you expect, you should check
-                your maker error log to see if there's helpful debugging
-                information there.  Even if everything seems to be working
-                fine, it's a good idea to look there now and again, to see
-                if any otherwise-undetected errors are taking place.</p>
 
         </div>
     </body>

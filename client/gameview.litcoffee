@@ -791,6 +791,4 @@ the avatar attempt to walk there over time.
 
 The server can also tell us to start walking towards a given point.
 
-    socket.on 'walk towards', ( data ) ->
-        console.log 'heard this whereIWantToGo data:', data
-        setWhereIWantToGo data
+    socket.on 'walk towards', ( data ) -> setWhereIWantToGo data
