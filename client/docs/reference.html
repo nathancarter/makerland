@@ -352,6 +352,9 @@ log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
                 P.saveData.avatar.headColor // string, e.g. '#ff0000'
                 // ...and many other saveData contents
                 // Note: Don't manipulate the fields in P.saveData unless you know what you're doing!
+                P.enemies // list of all enemies, primary one first
+                P.inventory // list of all objects being carried
+                P.equipment // mapping from body part names to equipped items
             </textarea>
             <p>You may also store data in the player object, in one of
                 two ways.  You can store permanent data by writing into
@@ -384,6 +387,16 @@ log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
                     playerObject.saveData.EileensFair = { minigameScore : 0 };
                 // then later...
                 playerObject.saveData.EileensFair.minigameScore += 100;
+            </textarea>
+            <p>You can distinguish creature objects from player objects by
+                checking whether they have a <code>saveData</code> member.
+                Players do, and creatures do not.</p>
+            <textarea class='code'>
+                if ( 'saveData' in livingThing ) {
+                    // livingThing is a player
+                } else {
+                    // livingThings is a creature
+                }
             </textarea>
 
             <h4>Functions in <code>P</code>:</h4>
@@ -469,7 +482,7 @@ log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
                 // Get a final stat value, including base plus bonus:
                 P.getStat( 'name' )
             </textarea>
-            <h5>User interace</h5>
+            <h5>User interface</h5>
             <textarea class='code'>
                 // Get list of commands to which the player has access:
                 // (returns a list of lower-case strings)
@@ -499,6 +512,88 @@ log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
 
             <a name='creature-objects'></a>
             <h2>Using Creature objects</h2>
+
+            <h3>Creature object member functions</h3>
+            <p>Assume <code>C</code> is a creature object.  Then it
+                has the following member functions and variables.</p>
+            <h4>Fields in <code>C</code>:</h4>
+            <textarea class='code'>
+                C.ID // unique ID for this creature object, an integer
+                C.enemies, C.inventory, C.equipment // same as for players
+            </textarea>
+            <p>You may also store data in the creature object, but know that
+                it is necessarily temporary.  Not only can creatures be
+                killed, but they are also unloaded when the game is shut
+                down, or when there are no players nearby for a long enough
+                time.  You can store such temporary data by writing into
+                other (new and unused) fields of the creature object.</p>
+            <p>Here is an example.</p>
+            <textarea class='code'>
+            // Use a highly unique/unusual identifier name to make it
+            // unlikely that it will clash with identifiers used anywhere
+            // else in the game.
+            creatureObject.whenLastHitByFireballSpell = ( new Date() ).getTime();
+            </textarea>
+            <p>You can distinguish creature objects from player objects by
+                checking whether they have a <code>saveData</code> member.
+                Players do, and creatures do not.</p>
+            <textarea class='code'>
+                if ( 'saveData' in livingThing ) {
+                    // livingThing is a player
+                } else {
+                    // livingThings is a creature
+                }
+            </textarea>
+
+            <h4>Functions in <code>C</code>:</h4>
+            <p>(There are many others not listed here that are for
+                internal use only.)</p>
+            <h5>Health and combat</h5>
+            <p>All are exactly the same as for Players, as documented
+                above.</p>
+            <h5>Position</h5>
+            <textarea class='code'>
+                // Where the creature is on the game map:
+                // (returns a [plane,x,y] triple)
+                C.getPosition(); // same as for players
+                // Move the creature to a new location:
+                // (parameter must be a [plane,x,y] triple)
+                C.moveTo( destination ); // NOT THE SAME AS FOR PLAYERS!
+                // Alternately, you can move relative to your current spot:
+                C.moveBy( dx, dy ); // Also not available for players
+                // moveBy() takes an optional third parameter, duration,
+                // which will spread the movement out linearly over time
+                // (in seconds); without that parameter, it is instantaneous
+            </textarea>
+            <h5>Inventory and Equipment</h5>
+            <p>All are exactly the same as for Players, as documented
+                above.</p>
+            <h5>Stats</h5>
+            <p>All are exactly the same as for Players, as documented
+                above.</p>
+            <h5>Creature actions</h5>
+            <textarea class='code'>
+                // Force the creature to speak:
+                C.say( text );
+                // Force the creature to attempt to pick up an item (which
+                // may fail, for example, if the creature is already
+                // carrying too much to take more):
+                C.get( item );
+                // Force the creature to drop an item it's carrying (which
+                // only fails if the item has some behavior that prevents
+                // this, which is unusual):
+                C.drop( item );
+            </textarea>
+            <h5>Cleanup</h5>
+            <textarea class='code'>
+                // Remove the creature from the game world (and thus the
+                // garbage collector will later delete it):
+                C.destroy();
+                // Check to see if the creature has been removed from the
+                // game world (but the object obviously not yet garbage
+                // collected, because your code still has a reference to it):
+                C.wasDestroyed() // returns a boolean
+            </textarea>
 
             <a name='landscape-item-objects'></a>
             <h2>Using Landscape Item objects</h2>
