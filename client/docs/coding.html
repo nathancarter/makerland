@@ -1006,6 +1006,7 @@ player.mapClickMode( 'Click on the map where you want to place the bomb.',
         // *some* UI)
     } );</textarea>
 
+            <a name='stat-competition'></a>
             <p>Finally, it is sometimes sensible to run a test of the user's
                 ability level against some stat of an opponent.  For example
                 the "whack" ability above should perhaps take into account
@@ -1017,7 +1018,6 @@ player.mapClickMode( 'Click on the map where you want to place the bomb.',
                 first player wins the competition or false if the second
                 player does.  We might integrate this into the "whack" code
                 as follows.</p>
-            if (random.statCompetition(A,'stat',B,'stat')) then_A_won();
             <textarea class='code'>
 // what is our current whacking skill level?
 var stat = this.getStat( 'whack' );

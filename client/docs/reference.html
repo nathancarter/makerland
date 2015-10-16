@@ -63,6 +63,198 @@
             <a name='behavior-globals'></a>
             <h2>Global functions available to Behaviors</h2>
 
+            <h3>Showing Animations</h3>
+            <textarea class='code'>
+                showAnimation( location, name, optionalParameterObj );
+            </textarea>
+            <p>The <code>location</code> parameter must be a location in
+                the game world, <a href='foundations.html'>as documented
+                on this page</a>.  All players that can see the location
+                given will have their browsers notified of the
+                animation, so that the game can draw it on their
+                screens.</p>
+            <p>The <code>name</code> parameter must be either a string
+                name of an animation in the animations database, or the
+                numerical index of one.  It specifies which animation to
+                run.</p>
+            <p>The final parameter is optional, and if given, must be an
+                object whose key-value pairs will be copied into the
+                scope of the animation's code before it gets run.  This
+                is how you can transmit any data specific to the
+                animation to the client for use during the animation.
+                For instance, if you are triggering a shower of sparks
+                animation, it might accept a color parameter, and you
+                would make this final parameter
+                <code>{ color : '#ff0000' }</code>.  Because this will
+                be transmitted to the client, it must be JSON data; no
+                player objects or landscape item object can be
+                included.  (Names, however, can be.)</p>
+            <p>If you pass 0 as the duration, the animation continues
+                indefinitely.  To stop it, store the return value of
+                <code>showAnimation()</code> and later pass that stored
+                value to <code>stopAnimation()</code>.</p>
+
+            <h3>Playing Sounds</h3>
+            <textarea class='code'>
+                playSound( nameOfSound, target );
+            </textarea>
+            <p>The name of the sound should be a string that matches one of
+                the sounds in the sounds table in the database.  If no sound
+                matches the given text, this routine does nothing.  (Thus
+                you can disable a sound by simply not including in your
+                database a sound file for the name in question.)  The target
+                can be either a player object (and they will be the only
+                one to hear the sound) or a location on the game map
+                (<a href='#locations'>as documented here</a>) and anyone
+                near that location will hear the sound.</p>
+
+            <h3>Constructing things</h3>
+            <textarea class='code'>
+                var C = Creature( 10 );
+                var I = Item( index );
+            </textarea>
+            <p>The <code>Creature</code> and <code>Item</code> functions
+                construct new instances of creatures and movable items,
+                respectively.  You must pass an index into the creatures or
+                movable items table as the one parameter.  The result will
+                be null if no such creature/item exists.</p>
+            <p>For more information on what you can do with such objects
+                once you construct them, see the respective sections below
+                (<a href='#creature-objects'>creatures</a>,
+                <a href='#movable-item-objects'>items</a>).</p>
+
+            <h3>Finding things on the map</h3>
+            <textarea class='code'>
+                var list1 = livingsNear( [0,0,0], 5 );
+                var list2 = landscapeItemsNear( somePlayer.getPosition(), radius );
+            </textarea>
+            <p>Both the <code>livingsNear</code> and
+                <code>landscapeItemsNear</code> functions take a
+                <a href='#locations'>location on the game map</a> as their
+                first parameter and a radius (measured in map cells) as
+                their second.  They return arrays.  In the first case, an
+                array of all living things near the given position (where
+                living things can be creatures or players, and "near" means
+                within the given radius).  In the second case, landscape
+                items are returned.</p>
+            <p>For more information on what you can do with such objects
+                once you get them, see the respective sections below
+                (<a href='#creature-objects'>creatures</a>,
+                <a href='#player-objects'>players</a>,
+                <a href='#landscape-item-objects'>landscape items</a>).</p>
+
+            <h3>Asking the player for confirmation</h3>
+            <textarea class='code'>
+                confirm( player, 'Are you sure you want to throw the ring in the fire?',
+                    function () {
+                        // they said yes
+                        Sauron.destroy();
+                    },
+                    function () {
+                        // they said no
+                        Elrond.embitter();
+                    } );
+            </textarea>
+            <p>The <code>confirm</code> function takes a player and a
+                message as its first two arguments, and prompts the player
+                with the message.  The player can choose to confirm/proceed,
+                or to deny/cancel.  Which one they choose determines which
+                function gets called, the one passed as the third argument
+                (for yes/confirm) or the one passed as the fourth argument
+                (for no/cancel).  See the example above.</p>
+
+            <h3>Interacting with map cells</h3>
+            <textarea class='code'>
+                var cellIndex = getCell( player.getPosition() );
+                setCell( [10, 5 -3], 15 );
+            </textarea>
+            <p>The <code>getCell()</code> function takes a position on the
+                game map (<a href='#locations'>as described here</a>) and
+                returns an index into the cell types table, the index of
+                the cell type under that position in the game.  It returns
+                -1 if that cell has not yet been specified by a maker (or
+                is the default for its plane).</p>
+            <p>The <code>setCell()</code>
+                function takes two parameters, the first just like
+                <code>getCell()</code> and the second an index into the
+                cell types table.  It changes that one cell on the game
+                map.</p>
+
+            <h3>Timing</h3>
+            <p>The functions <code>setInterval</code>,
+                <code>setTimeout</code>, <code>clearInterval</code>, and
+                <code>clearTimeout</code> function just as they do in
+                standard JavaScript, in the browser or in Node.</p>
+
+            <h3>Random numbers</h3>
+            <p>You can generate a random number between any two given real
+                numbers a and b, all values equally likely, using
+                <code>random.uniformOpen( a, b )</code>.  The interval is
+                open on the right.  To have it closed, use
+                <code>random.uniformClosed( a, b )</code>.</p>
+            <p>You can generate a random integer between any two given
+                integers a and b, inclusive, all values equally likely,
+                using <code>random.uniformInteger( a, b )</code>.</p>
+            <p>To randomly select a value from an array, all equally likely
+                to be chosen, use
+                <code>random.uniformFromArray( array )</code>.</p>
+            <p>When a living (creature or player) attempts a task with
+                difficulty n, we take the relevant stat and randomly decide
+                if they succeed, weighting the probability of success by the
+                stat value and the probability of failure by the difficulty
+                n.  The result (true for success, false for failure) can be
+                obtained through
+                <code>random.statCheck( living, 'stat name', n )</code>.</p>
+            <p>A related function is <code>statCompetition</code>, which is
+                <a href='coding.html#stat-competition'>already documented
+                here</a>.</p>
+
+            <h3>Logging debugging information</h3>
+            <p>As <a href='#error-logs'>documented below</a>, every maker
+                has a personal error log.  You can add entries to it from
+                your code (for debugging purposes) using the
+                <code>log()</code> function.  This works much like
+                <code>console.log()</code> in standard JavaScript, in that
+                it takes any number of arguments, converts them all to
+                strings, and joins them with spaces in between, logging
+                the resulting string.  Example:</p>
+            <textarea class='code'>
+log( 'Here we inspect the value of plekt:', plekt.value );</textarea>
+
+            <h3>Installing event handlers</h3>
+            <p>Most behaviors modify how a landscape item
+                <i>behaves,</i> and they do so by installing in it
+                event handlers.  They do so using the common convention
+                shown in the following code.</p>
+            <textarea class='code'>
+                this.on( "event name", function ( eventData ) {
+                    // write here code that handles the event
+                } );
+            </textarea>
+            <p>In the above code, the <code>this</code> object is
+                the object to which the behavior is attached.  That
+                object is guaranteed to have an events system installed,
+                and you can install handlers using the standard "on"
+                convention common in HTML applications.</p>
+            <p>The "on" function installs an event handler that is
+                triggered <i>on</i> each occurrence of the given event.
+                Events are specified by name, and the available event
+                names are given in the various sections below, on Landsacpe
+                Items, Creatures, and Movable Items.</p>
+            <p>The second parameter is the function that should be run
+                whenever an event of the given type takes place.  The
+                function will be passed some data about the event, as
+                documented in each event, below, and may do whatever
+                it likes in response.</p>
+            <p>For instance, when a player enters a landscape item, it
+                might teleport the player to a new location.  Or while
+                a player stays inside the landscape item, it might harm
+                or heal the player.</p>
+            <p>If you ever want to remove an event handler you've installed,
+                you must store the return value to the <code>on()</code>
+                call, and later pass it to a <code>remove()</code> call in
+                the same object.</p>
+
             <a name='animation-globals'></a>
             <h2>Global functions available to Animations</h2>
 
@@ -71,87 +263,6 @@
 
             <a name='player-objects'></a>
             <h2>Using Player objects</h2>
-
-            <a name='creature-objects'></a>
-            <h2>Using Creatuer objects</h2>
-
-            <a name='landscape-item-objects'></a>
-            <h2>Using Landscape Item objects</h2>
-
-            <a name='movable-item-objects'></a>
-            <h2>Using Movable Item objects</h2>
-
-            <h2>What events can my behaviors listen to?</h2>
-            <p>Other events are coming later, but for now, there are
-                these.</p>
-
-            <h3>"entered" for a Landscape Item</h3>
-            <p>Whenever a player steps from the outside of a landscape
-                item's boundary rectangle to the inside, the "entered"
-                event is triggered.  The <code>eventData</code>
-                parameter is the player object who entered.</p>
-            <p>Example:</p>
-            <textarea class='code'>
-                this.on( "entered", function ( player ) {
-                    log( "The player " + player.name + " stepped on your front doorstep!" );
-                } );
-            </textarea>
-
-            <h3>"exited" for a Landscape Item</h3>
-            <p>Same as the previous, except when a player steps from
-                the inside of the item's rectangle to its outside.</p>
-
-            <h3>No need for create/reset events</h3>
-            <p>There are not events for when landscape items are loaded
-                or reset, because if you want to react to those events,
-                you simply put the event handler code in the behavior
-                directly.</p>
-
-            <h2>What functions can my behavior code
-                (or event handler code) use?</h2>
-            <p>More to come later, but these are available now.</p>
-
-            <h3>Landscape Item member functions</h3>
-            <p>Assume <code>L</code> is a landscape item.  Then it
-                has the following member functions and variables.</p>
-            <h4>Fields in <code>L</code>:</h4>
-            <textarea class='code'>
-                L.position // length-3 array of map coordinates of item center
-                L.plane // first entry of L.position
-                L.x // second entry of L.position
-                L.y // third entry of L.position
-                L.localX // distance from top-left corner of its block to L.x
-                L.localY // same as previous, but for L.y
-                L.topLeft.x // x coordinate of left side of item
-                L.topLeft.y // y coordinate of top of item
-                L.bottomRight.x // x coordinate of right side of item
-                L.bottomRight.y // y coordinate of bottom of item
-
-                L.type // integer index of its type in the landscape items database table
-                L.behaviors // list of behaviors taken from its definition in the database
-                L.visible // boolean: visible to non-makers?
-                L.size // how many cells wide and high is this item? (all items are square)
-            </textarea>
-
-            <h4>Functions in <code>L</code>:</h4>
-            <textarea class='code'>
-                // Whether the item collides with a rectangle from topLeft to bottomRight:
-                // (topLeft must be of the form {x:number,y:number},
-                // and bottomRight must also)
-                L.collides( topLeft, bottomRight )
-                // Install an event handler, as documented earlier:
-                // (returns a unique id which can be used to uninstall
-                // the handler later if necessary)
-                L.on( eventName, handlerFunction );
-                // Uninstall a handler, given its unique ID:
-                L.remove( handlerID );
-                // Trigger an event:
-                // (zero or more eventData parameters are acceptable)
-                L.emit( eventName, eventData );
-                // Attempt an event, triggering before and after event handlers:
-                // (not fully documented here)
-                L.attempt( eventName, runHandler, failHandler, eventData );
-            </textarea>
 
             <h3>Player object member functions</h3>
             <p>Assume <code>P</code> is a player object.  Then it
@@ -213,74 +324,79 @@
                 P.teleport( destination );
             </textarea>
 
-            <h3>Global functions</h3>
+            <a name='creature-objects'></a>
+            <h2>Using Creature objects</h2>
+
+            <a name='landscape-item-objects'></a>
+            <h2>Using Landscape Item objects</h2>
+
+            <h3>Landscape Item member functions</h3>
+            <p>Assume <code>L</code> is a landscape item.  Then it
+                has the following member functions and variables.</p>
+            <h4>Fields in <code>L</code>:</h4>
             <textarea class='code'>
-                // Documented below:
-                showAnimation( location, name, optionalParameterObject );
-                // Documented above already:
-                // (arguments get concatenated into strings with a space between,
-                // as with console.log in the browser)
-                log( any, sequence, of, zero, or, more, things );
+                L.position // length-3 array of map coordinates of item center
+                L.plane // first entry of L.position
+                L.x // second entry of L.position
+                L.y // third entry of L.position
+                L.localX // distance from top-left corner of its block to L.x
+                L.localY // same as previous, but for L.y
+                L.topLeft.x // x coordinate of left side of item
+                L.topLeft.y // y coordinate of top of item
+                L.bottomRight.x // x coordinate of right side of item
+                L.bottomRight.y // y coordinate of bottom of item
+
+                L.type // integer index of its type in the landscape items database table
+                L.behaviors // list of behaviors taken from its definition in the database
+                L.visible // boolean: visible to non-makers?
+                L.size // how many cells wide and high is this item? (all items are square)
             </textarea>
 
+            <h4>Functions in <code>L</code>:</h4>
             <textarea class='code'>
-                showAnimation( location, name, optionalParameterObj );
+                // Whether the item collides with a rectangle from topLeft to bottomRight:
+                // (topLeft must be of the form {x:number,y:number},
+                // and bottomRight must also)
+                L.collides( topLeft, bottomRight )
+                // Install an event handler, as documented earlier:
+                // (returns a unique id which can be used to uninstall
+                // the handler later if necessary)
+                L.on( eventName, handlerFunction );
+                // Uninstall a handler, given its unique ID:
+                L.remove( handlerID );
+                // Trigger an event:
+                // (zero or more eventData parameters are acceptable)
+                L.emit( eventName, eventData );
+                // Attempt an event, triggering before and after event handlers:
+                // (not fully documented here)
+                L.attempt( eventName, runHandler, failHandler, eventData );
             </textarea>
-            <p>The <code>location</code> parameter must be a location in
-                the game world, <a href='foundations.html'>as documented
-                on this page</a>.  All players that can see the location
-                given will have their browsers notified of the
-                animation, so that the game can draw it on their
-                screens.</p>
-            <p>The <code>name</code> parameter must be either a string
-                name of an animation in the animations database, or the
-                numerical index of one.  It specifies which animation to
-                run.</p>
-            <p>The final parameter is optional, and if given, must be an
-                object whose key-value pairs will be copied into the
-                scope of the animation's code before it gets run.  This
-                is how you can transmit any data specific to the
-                animation to the client for use during the animation.
-                For instance, if you are triggering a shower of sparks
-                animation, it might accept a color parameter, and you
-                would make this final parameter
-                <code>{ color : '#ff0000' }</code>.  Because this will
-                be transmitted to the client, it must be JSON data; no
-                player objects or landscape item object can be
-                included.  (Names, however, can be.)</p>
 
-            <p>About event handler code...</p>
-            <p>Most behaviors modify how a landscape item
-                <i>behaves,</i> and they do so by installing in it
-                event handlers.  They do so using the common convention
-                shown in the following code.</p>
+            <h3>Landscape Item events</h3>
+            <h4>entered</h4>
+            <p>Whenever a player steps from the outside of a landscape
+                item's boundary rectangle to the inside, the "entered"
+                event is triggered.  The <code>eventData</code>
+                parameter is the player object who entered.</p>
+            <p>Example:</p>
             <textarea class='code'>
-                this.on( "event name", function ( eventData ) {
-                    // write here code that handles the event
+                this.on( "entered", function ( player ) {
+                    log( "The player " + player.name + " stepped on your front doorstep!" );
                 } );
             </textarea>
-            <p>In the above code, the <code>this</code> object is
-                the object to which the behavior is attached.  That
-                object is guaranteed to have an events system installed,
-                and you can install handlers using the standard "on"
-                convention common in HTML applications.</p>
-            <p>The "on" function installs an event handler that is
-                triggered <i>on</i> each occurrence of the given event.
-                Events are specified by name, and the available event
-                names are given in the next section.</p>
-            <p>The second parameter is the function that should be run
-                whenever an event of the given type takes place.  The
-                function will be passed some data about the event, as
-                documented in the following section, and may do whatever
-                it likes in response.</p>
-            <p>For instance, when a player enters a landscape item, it
-                might teleport the player to a new location.  Or while
-                a player stays inside the landscape item, it might harm
-                or heal the player.</p>
-            <p>If you ever want to remove an event handler you've installed,
-                you must store the return value to the <code>on()</code>
-                call, and later pass it to a <code>remove()</code> call in
-                the same object.</p>
+
+            <h4>exited</h4>
+            <p>Same as the previous, except when a player steps from
+                the inside of the item's rectangle to its outside.</p>
+
+            <h4>no create/reset events</h4>
+            <p>There are not events for when landscape items are loaded
+                or reset, because if you want to react to those events,
+                you simply put the event handler code in the behavior
+                directly.</p>
+
+            <a name='movable-item-objects'></a>
+            <h2>Using Movable Item objects</h2>
 
             <a name='behavior-examples'></a>
             <h2>Example Behavior Code</h2>
