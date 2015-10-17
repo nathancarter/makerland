@@ -224,7 +224,7 @@ for doing so looks like the following.
                     ,
                         type : 'text'
                         value : '<p>Not sure how to write this code?
-                            <a href="docs/behaviorcoding.html"
+                            <a href="docs/coding.html#behaviors"
                             target="_blank">Click here</a> to open some
                             instructions (in a new tab).</p>'
                     ,

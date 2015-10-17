@@ -279,14 +279,10 @@ for doing so looks like the following.
                         value : data.code
                     ,
                         type : 'text'
-                        value : '<p>Documentation on how to write this code
-                            is still forthcoming.  For now, just know that
-                            the player who executed the command is the
-                            "this" object when the code is run.</p>'
-                        # value : '<p>Not sure how to write this code?
-                        #     <a href="docs/behaviorcoding.html"
-                        #     target="_blank">Click here</a> to open some
-                        #     instructions (in a new tab).</p>'
+                        value : '<p>Not sure how to write this code?
+                            <a href="docs/coding.html#abilities"
+                            target="_blank">Click here</a> to open some
+                            instructions (in a new tab).</p>'
                     ,
                         type : 'action'
                         value : 'Save changes'

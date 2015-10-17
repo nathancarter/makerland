@@ -37,6 +37,12 @@
             <div class="starter-template">
                 <h1>Coding</h1>
                 <p class="lead">Putting JavaScript into MakerLand</p>
+                <p>Table of contents:</p>
+                <ul>
+                  <li><a href='#behaviors'>Behaviors</a></li>
+                  <li><a href='#animations'>Animations</a></li>
+                  <li><a href='#abilities'>Abilities</a></li>
+                </ul>
             </div>
 
             <hr>
@@ -287,8 +293,11 @@ this.on( 'entered', function ( player ) {
             <p>Behaviors you write can also trigger animations, but that is
                 discussed in the following section.</p>
 
+            <hr>
+
             <h2><a name='animations'></a>Animations</h2>
 
+            <h3>What are animations?</h3>
             <div class='row'>
               <div class='col-md-6'>
                 <p>An animation is a routine that is run in the player's
@@ -309,7 +318,7 @@ this.on( 'entered', function ( player ) {
               </div>
             </div>
 
-            <h2>When does animation code get run?</h2>
+            <h3>When does animation code get run?</h3>
             <p>The game map is redrawn many times per second, in order to
                 allow for fluid motion and animation; thus animation
                 routines are also run many times per second until their
@@ -338,7 +347,7 @@ this.on( 'entered', function ( player ) {
                 later pass it to <code>stopAnimation()</code>, when you want
                 to cancel the animation.</p>
 
-            <h2>Who creates animations?</h2>
+            <h3>Who creates animations?</h3>
             <p>Any maker can create them.  Here's how to create a very
                 simple animation.  In fact, it's so simple that it doesn't
                 show anything on screen!  (More useful animations are
@@ -368,11 +377,11 @@ this.on( 'entered', function ( player ) {
             <p>Now let's see how to make animations that
                 actually draw something on the screen.</p>
 
-            <h2>What functions can my animation code use?</h2>
+            <h3>What functions can my animation code use?</h3>
             <p>This is a pretty comprehensive list, but it could always
                 grow in the future.</p>
 
-            <h3>All 2D context members are in scope</h3>
+            <h4>All 2D context members are in scope</h4>
             <p>MakerLand draws the game map using
                 <a href='http://www.w3schools.com/html/html5_canvas.asp'
                 >the HTML5 Canvas</a>.  The functions that draw on a
@@ -407,7 +416,7 @@ this.on( 'entered', function ( player ) {
                 the game client until the player is forced to reload
                 the page.</p>
 
-            <h3>Some handy global objects</h3>
+            <h4>Some handy global objects</h4>
             <p>Your code may also access a few handy global objects,
                 most notably <code>gameview</code>, which is the canvas
                 itself.  This allows you to, for example, extend the
@@ -434,7 +443,7 @@ this.on( 'entered', function ( player ) {
                     player is a maker</li>
             </ul>
 
-            <h3>All global JavaScript functions</h3>
+            <h4>All global JavaScript functions</h4>
             <p>Of course, all functions defined globally in the browser
                 are also available to your animation code.  This can be
                 dangerous, in that you could write code that navigated
@@ -451,7 +460,7 @@ this.on( 'entered', function ( player ) {
                 fillRect( 0, 0, gameview.width, gameview.height );
             </textarea>
 
-            <h3>Data in the parameters object</h3>
+            <h4>Data in the parameters object</h4>
             <p>As described earlier on this page, animations are
                 triggered when the <code>showAnimation()</code> function
                 is called on the server side.  Its third parameter is an
@@ -493,7 +502,7 @@ this.on( 'entered', function ( player ) {
                 the animation could only show itself if
                 <code>currentStatus.name == whoGotHit</code>.</p>
 
-            <h3>Game-specific global functions</h3>
+            <h4>Game-specific global functions</h4>
             <p>The game also provides animations with some useful
                 functions for dealing with positions on the map and on
                 the screen.</p>
@@ -562,7 +571,7 @@ this.on( 'entered', function ( player ) {
                      0, 2*Math.PI ); // arc goes all the way around the circle, 0 to 2pi
             </textarea>
 
-            <h3>The time variable, <code>t</code></h3>
+            <h4>The time variable, <code>t</code></h4>
             <p>Each animation also has access to a variable
                 <code>t</code>, which ranges from 0.0 at the start of
                 the animation to 1.0 at the end, regardless of the
@@ -580,7 +589,7 @@ this.on( 'entered', function ( player ) {
                      0, 2*Math.PI );
             </textarea>
 
-            <h3>The <code>memory</code> object</h3>
+            <h4>The <code>memory</code> object</h4>
             <p>Finally, if you have some complex initialization to do at
                 the start of your animation, you have access to a
                 <code>memory</code> object, which is initially the
@@ -631,8 +640,8 @@ this.on( 'entered', function ( player ) {
                 animation function will begin at 0.5, for that player
                 only.</p>
 
-            <h2>When does the game itself call
-                <code>showAnimation()</code>?</h2>
+            <h3>When does the game itself call
+                <code>showAnimation()</code>?</h3>
             <p>The game server itself will call <code>showAnimation()</code>
                 at the following times, and with the following
                 parameters.  (On top of these, you may call that function
@@ -717,16 +726,16 @@ this.on( 'entered', function ( player ) {
                     </li>
             </ul>
 
-            <h2>Ready-to-use, nontrivial examples</h2>
+            <h3>Ready-to-use, nontrivial examples</h3>
             <p>The Sample Universe implements 7 of the above animations,
             and you can freely inspect/change/copy the code for each of them
             as an admin in the Sample Universe.  The 7 in question are
             show text, speak, map edit, highlight region, hit, miss, and
             death.</p>
 
-            <h2>Exercises</h2>
+            <h3>Exercises</h3>
             <p><a href='ideas.html#animations'>Check out the ideas here for
-            a first animation you can create, in a step-by-step way, to
+            a first animation you can create</a>, in a step-by-step way, to
             add a toy item to your game.</p>
             <p>Then add to the Sample Universe animations for each of the
             built-in animation types for which the Sample Universe does not
@@ -737,6 +746,8 @@ this.on( 'entered', function ( player ) {
             if they came with an animation?  If so, add an animation to the
             database for the behavior, and trigger it from the behavior code
             with <code>showAnimation()</code>.</p>
+
+            <hr>
 
             <h2><a name='abilities'></a>Abilities</h2>
 

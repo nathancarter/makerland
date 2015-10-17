@@ -1528,7 +1528,7 @@ versions.
                 require( './blocks' ).resetBlocksNearPlayer player
                 player.showOK '<p>The objects near you have been reset.</p>
                     <p>Not sure what that means?
-                    <a href="docs/resetcommand.html"
+                    <a href="docs/commands.html#reset"
                     target="_blank">Read this command\'s
                     full documentation.</a></p>',
                     => player.showCommandUI()
