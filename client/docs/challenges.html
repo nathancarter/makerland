@@ -62,30 +62,62 @@
             <div class='row'>
               <div class='col-md-4'>
                 <div class="panel panel-default">
-                  <div class="panel-heading">1. Fill this in</div>
+                  <div class="panel-heading">1. Sounds</div>
                   <div class="panel-body">
-                    <p>Fill this in</p>
+                    <p>There is a list of built-in sound effects the game is
+                    ready to play, if you include sound files with those
+                    names in the Sounds table in the game database.
+                    (<a href='commands.html#sounds-table'>See here for
+                    details.</a>)  Find or create sound files for each such
+                    sound and upload them, so that your game has sound
+                    effects.</p>
                   </div>
                 </div>
               </div>
               <div class='col-md-4'>
                 <div class="panel panel-default">
-                  <div class="panel-heading">1. Fill this in</div>
+                  <div class="panel-heading">2. Quests</div>
                   <div class="panel-body">
-                    <p>Fill this in</p>
+                    <p>Come up with some quests players can do in your game
+                    universe, and implement them.  Here are a few examples
+                    to help you start thinking creatively.</p>
+                    <ul>
+                        <li>A friendly creature has lost an item and asks
+                            players to find it for him/her.  Finding it and
+                            bringing it back will cause the friendly
+                            creature to trade the lost item for a reward
+                            that has some value to the players.</li>
+                        <li>Residents of a peaceful town are being
+                            threatened by nearby aggressive monsters, and
+                            ask you to defeat them and bring back the body
+                            of the leader as evidence that they can rest
+                            safely at night once again.</li>
+                        <li>A child or pet has wandered off into dangerous
+                            territory.  You must find the lost creature,
+                            defend it from any aggressive monsters nearby,
+                            and get it to follow you home.</li>
+                    </ul>
                   </div>
                 </div>
               </div>
               <div class='col-md-4'>
                 <div class="panel panel-default">
-                  <div class="panel-heading">1. Fill this in</div>
+                  <div class="panel-heading">3. Several areas</div>
                   <div class="panel-body">
-                    <p>Fill this in</p>
+                    <p>Your game world needs to be large for it to be
+                    enjoyable for players to enter.  They need to feel that
+                    there is enough for them to explore, so that they can
+                    play your game for a long time without getting bored.
+                    (No one wants to kill the same 4 bandits over and over.)
+                    Create many different areas of your world, each with its
+                    own unique style, so that players can walk a long way
+                    in your world before they hit the impassable ocean or
+                    mountain or wall or whatever it is that keeps them in
+                    the areas you've built/populated.</p>
                   </div>
                 </div>
               </div>
             </div>
-
 
             <hr>
 
@@ -95,25 +127,136 @@
             <div class='row'>
               <div class='col-md-4'>
                 <div class="panel panel-default">
-                  <div class="panel-heading">1. Fill this in</div>
+                  <div class="panel-heading">4. Many enemies</div>
                   <div class="panel-body">
-                    <p>Fill this in</p>
+                    <p>As players gain power, they will need stronger and
+                    stronger enemies to fight, or your game ceases to be a
+                    challenge for them.  Naturally, you do not want to
+                    simply create copies of the same goblin and increasing
+                    its stats.</p>
+                    <p>Create many different monsters, and populate the
+                    many areas of your game with them.  Big, strong things
+                    (like dragons) should have correspondingly great stats,
+                    and small things (like beetles and caterpillars) should
+                    be trivial to defeat.  Everything else should sit
+                    sensibly on the spectrum in between.  The more creatures
+                    you create, the more interesting your game world will be
+                    to explore, and the longer players can play before they
+                    feel that they've "seen it all."</p>
                   </div>
                 </div>
               </div>
               <div class='col-md-4'>
                 <div class="panel panel-default">
-                  <div class="panel-heading">1. Fill this in</div>
+                  <div class="panel-heading">5. Categories of
+                      abilities</div>
                   <div class="panel-body">
-                    <p>Fill this in</p>
+                    <p>Come up with several different <i>types</i> of
+                    abilities (that is, categories into which abilities
+                    will fall).  For example, soldier abilities, wizard
+                    abilities, and engineering abilities.  (Or whatever
+                    categories you want.)</p>
+                    <p>Then create abilities in each of these categories.
+                    This will be a significant investment of time in coding
+                    and testing, so roll up your sleeves!  This also
+                    connects directly to Idea 6, so look ahead.</p>
                   </div>
                 </div>
               </div>
               <div class='col-md-4'>
                 <div class="panel panel-default">
-                  <div class="panel-heading">1. Fill this in</div>
+                  <div class="panel-heading">6. Ability training areas</div>
                   <div class="panel-body">
-                    <p>Fill this in</p>
+                    <p>For each category of abilities you created, build an
+                    area where there are trainers for those abilities.  For
+                    example, if you created some abilities that soldiers
+                    would have, you can create an army base where there are
+                    soldiers that will train you in the abilities.  Or if
+                    you created engineering abilities, there may be a school
+                    that will train players in those abilities.</p>
+                    <p>It's up to you whether you want the players to have
+                    to somehow earn the abilities, through quests, puzzles,
+                    combat, exploration, experience points, or trade.  Your
+                    areas should include a way for players to get new
+                    commands for each ability, and ways to train the
+                    corresponding stats for their new abilities.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr>
+
+            <div class='alert alert-info'>
+              <h3>Ninja Challenges</h3>
+            </div>
+            <div class='row'>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <div class="panel-heading">7. Settings file</div>
+                  <div class="panel-body">
+                    <p>Find on disk the folder in which MakerLand stores
+                    your universe.  (Consider using your computer's search
+                    feature, and look for a folder with your universe's
+                    name.)</p>
+                    <p>In there is a file called <code>settings.json</code>.
+                    Open it in your favorite text editor.  Try changing
+                    some of the following settings.</p>
+                    <ul>
+                        <li><code>gameTitle</code>, which is HTML content
+                            shown above the username and password blanks on
+                            the login screen</li>
+                        <li><code>gameTitleImage</code>, which lets you put
+                            in that same folder any image that is used as
+                            the title screen image</li>
+                        <li><code>privateGame</code>, which forbids the
+                            creation of new accounts by visitors, if set to
+                            true</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <div class="panel-heading">8. Death area</div>
+                  <div class="panel-body">
+                    <p>Create a new plane in your universe called the
+                    Underworld.  This is where players will go when they
+                    die.</p>
+                    <p>Edit the <code>setting.json</code> file mentioned
+                    in Idea 7, and change
+                    <code>locationPlayersAwakeAfterDeath</code> to a point
+                    in that new plane.</p>
+                    <p>Create around that point a whole underworld that
+                    players must find their way out of before they can
+                    return to the main game world.  Perhaps it should be a
+                    maze with one portal out?  Perhaps there are enemies too
+                    strong to fight, that must be avoided?  Perhaps there
+                    are doors that open and close randomly?  It's up to you!
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class='col-md-4'>
+                <div class="panel panel-default">
+                  <div class="panel-heading">9. Player homes</div>
+                  <div class="panel-body">
+                    <p>Create an item called a "deed" that gives players
+                    permission to build their own home in the game world.
+                    It should have an action called "claim land" that only
+                    functions at locations you've pre-specified (such as on
+                    a certain plane or on a certain cell type).  When the
+                    player uses that action, the following happens.</p>
+                    <p>A new landscape item that looks like a house is added
+                    to the game map, with a sign out front saying whose
+                    house it is.  On a separate plane set a side for the
+                    interiors of houses, some empty space is filled in with
+                    the interior of the house, just for use by that player.
+                    The house functions as a portal to the interior, and the
+                    interior has an exit that portals the player back to the
+                    exterior.  The house only functions as a portal for the
+                    player who created it.  The house should contain a chest
+                    where the player can permanently store their loot.</p>
                   </div>
                 </div>
               </div>
