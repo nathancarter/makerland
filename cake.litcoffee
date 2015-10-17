@@ -10,6 +10,49 @@ We keep a set of build utilities in a separate module, which we now load.
 
     build = require './buildutils'
 
+## Help!
+
+The build process is complicated.  This explains it.
+
+    build.task 'help', 'Print an explanation of the build process(es).', ->
+        console.log '
+          \nCommon build workflows:
+          \n-----------------------
+          \n
+          \n1. Building the command-line app
+          \n   The first line gets package binaries correct for the CLI.
+          \n   Omit it if you did it more recently than electron-rebuild.
+          \n     $ npm run electron-unbuild
+          \n     $ cake compile
+          \n
+          \n2. Running the command-line app
+          \n   This assumes you have recently built the CLI (1., above).
+          \n   I usually write scripts to do this, but it goes like so:
+          \n     $ npm start [-- --root <universe folder>]
+          \n
+          \n3. Building the electron app
+          \n   The first line gets package binaries correct for the app.
+          \n   Omit it if you did it more recently than electron-unbuild.
+          \n     $ npm run electron-rebuild
+          \n     $ cake electron
+          \n
+          \n4. Running the electron app
+          \n   This assumes you have recently built the app (3., above).
+          \n     $ npm run electron
+          \n
+          \nOther build workflows:
+          \n----------------------
+          \n
+          \n1. Packaging the electron app for distribution
+          \n   This assumes you have recently built the app (3., above).
+          \n   Packages created get placed in Makerland-*-*/ folders.
+          \n     $ npm run electron-package
+          \n
+          \n2. Rebuild electron.icns from electron.iconset
+          \n   Only needed if you change a file in electron.iconset.
+          \n     $ npm run electron-icon
+          \n'
+
 ## Easy way to build all
 
 If you want to build and test evertything, just run `cake all`. It simply
@@ -69,18 +112,4 @@ If there are folders to copy, do those next.
                     recur()
                 reader.pipe tar.extract "./electron/#{next}"
                 return
-
-Finally, it prints a message to let the user know what they probably want to
-do next to actually build the electron app.
-
-            console.log '\n ** Electron app is prepared for building. **
-    \nnpm run electron           = run electron app without building
-    \nnpm run electron-rebuild   = after installing a new module, use this
-    \n                             to ensure that its binary version gets
-    \n                             built portably into the electron app
-    \nnpm run electron-unbuild   = if you recently ran electron-rebuild, you
-    \n                             cannot use "npm start" until running this
-    \n                             to revert npm modules to correct versions
-    \nnpm run electron-icon      = build electron.iconset -> electron.icns
-    \nnpm run electron-package   = build electron app -> Makerland-*-*/'
             done()
