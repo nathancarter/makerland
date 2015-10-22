@@ -22,11 +22,13 @@
     "start": "coffee server/server.litcoffee",
     "electron": "electron electron",
     "electron-rebuild": "electron-rebuild",
-    "electron-unbuild": "rm -rf node_modules/mdns && npm i",
+    "electron-unbuild": "rm -rf node_modules/mdns && rm -rf node_modules/appdmg && npm i",
     "electron-icon": "iconutil -c icns electron.iconset",
-    "electron-package": "electron-packager electron MakerLand --platform=darwin --arch=x64 --version=0.30.1 --app-bundle-id=com.github.nathancarter.makerland --app-version=0.1 --helper-bundle-id=com.github.nathancarter.makerlandhelper --icon=electron.icns --asar --overwrite"
+    "electron-package": "electron-packager electron MakerLand --platform=darwin --arch=x64 --version=0.30.1 --app-bundle-id=com.github.nathancarter.makerland --app-version=0.1 --helper-bundle-id=com.github.nathancarter.makerlandhelper --icon=electron.icns --asar --overwrite",
+    "electron-dmg": "appdmg appdmg.json MakerLand-darwin-x64/MakerLand.dmg"
   },
   "devDependencies": {
+    "appdmg": "^0.3.4",
     "electron-packager": "^5.0.1",
     "electron-prebuilt": "^0.30.1",
     "electron-rebuild": "^0.2.5"

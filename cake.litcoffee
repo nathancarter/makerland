@@ -19,38 +19,28 @@ The build process is complicated.  This explains it.
           \nCommon build workflows:
           \n-----------------------
           \n
-          \n1. Building the command-line app
+          \n1. Building and running the command-line app
           \n   The first line gets package binaries correct for the CLI.
           \n   Omit it if you did it more recently than electron-rebuild.
           \n     $ npm run electron-unbuild
           \n     $ cake compile
-          \n
-          \n2. Running the command-line app
-          \n   This assumes you have recently built the CLI (1., above).
-          \n   I usually write scripts to do this, but it goes like so:
           \n     $ npm start [-- --root <universe folder>]
+          \n   I usually write scripts to handle the final line (run).
           \n
-          \n3. Building the electron app
+          \n2. Building and running the electron app
           \n   The first line gets package binaries correct for the app.
           \n   Omit it if you did it more recently than electron-unbuild.
           \n     $ npm run electron-rebuild
           \n     $ cake electron
-          \n
-          \n4. Running the electron app
-          \n   This assumes you have recently built the app (3., above).
           \n     $ npm run electron
           \n
-          \nOther build workflows:
-          \n----------------------
-          \n
-          \n1. Packaging the electron app for distribution
-          \n   This assumes you have recently built the app (3., above).
-          \n   Packages created get placed in Makerland-*-*/ folders.
+          \n3. Packaging the electron app for distribution
+          \n   (Once you\'ve done the build step, 2., above.)
+          \n   The DMG will be placed in an Makerland-*-*/ folder.
           \n     $ npm run electron-package
-          \n
-          \n2. Rebuild electron.icns from electron.iconset
-          \n   Only needed if you change a file in electron.iconset.
-          \n     $ npm run electron-icon
+          \n     $ npm run electron-icon       # Only if you changed icons
+          \n     $ npm run electron-unbuild    # So that appdmg will run
+          \n     $ npm run electron-dmg
           \n'
 
 ## Easy way to build all
@@ -92,10 +82,40 @@ compiles, minifies, and generates source maps.
 
     build.asyncTask 'electron', 'Compile all electron .litcoffee sources',
     ( done ) ->
+        backedUpNodeModules = no
+        prunedNodeModules = no
         toBuild = build.dir './electron', /\.litcoffee$/
         toCopy = [ 'client', 'server', 'sampleuniverse', 'node_modules' ]
         tar = require 'tar-fs'
         do recur = ->
+
+If we have not yet backed up `node_modules`, do that first.
+
+            rimraf = require 'rimraf'
+            if not backedUpNodeModules
+                console.log "Removing ./electron/node_modules"
+                rimraf 'electron/node_modules', ( err ) ->
+                    throw err if err
+                    console.log "Backing up ./node_modules to ./nmbackup"
+                    reader = tar.pack "./node_modules"
+                    reader.on 'end', ->
+                        console.log "Backed up node_modules."
+                        backedUpNodeModules = yes
+                        recur()
+                    reader.pipe tar.extract "./nmbackup"
+                return
+
+If we have not yet pruned `node_modules`, do that now.
+
+            if not prunedNodeModules
+                console.log 'Pruning node_modules for production'
+                exec 'npm prune --production', { cwd : '.' },
+                ( err, stdout, stderr ) ->
+                    if stdout + stderr then console.log stdout + stderr.red
+                    throw err if err
+                    prunedNodeModules = yes
+                    recur()
+                return
 
 If there are things to build, do those first.
 
@@ -112,4 +132,15 @@ If there are folders to copy, do those next.
                     recur()
                 reader.pipe tar.extract "./electron/#{next}"
                 return
-            done()
+
+Now restore `node_modules` from the backup.
+
+            console.log 'Removing the node_modules used in the packaging'
+            rimraf './node_modules', ( err ) ->
+                throw err if err
+                console.log 'Moving node_modules backup back into place'
+                exec 'mv nmbackup node_modules', { cwd : '.' },
+                ( err, stdout, stderr ) ->
+                    if stdout + stderr then console.log stdout + stderr.red
+                    throw err if err
+                    done()
