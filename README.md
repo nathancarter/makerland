@@ -5,8 +5,9 @@ I built this app as a venue for creating games to play with my kids, and to
 begin to teach them JavaScript.  It's a work in progress, but it's time to
 share it with more than just my family.
 
-[Download v0.1 for 64-bit Mac OS X here.](https://github.com/nathancarter/makerland/releases/tag/v0.1)
+ * [Download v0.1 for 64-bit Mac OS X here.](https://github.com/nathancarter/makerland/releases/tag/v0.1)
 Other platforms coming later.
+ * Post on [the wiki](https://github.com/nathancarter/makerland/wiki) to show off any games you make.
 
 ## What is MakerLand?
 
