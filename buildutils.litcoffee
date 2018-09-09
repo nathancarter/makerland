@@ -209,8 +209,8 @@ error if there was one.
 
         ,
             description : "\tMinifying #{base}.js..."
-            command : "#{uglify} -c -m -v false
-                       --in-source-map #{base}.js.map -o #{base}.min.js
-                       --source-map #{base}.min.js.map"
+            command : "#{uglify} #{base}.js -c -m
+                       -o #{base}.min.js --source-map
+                       \"content=#{base}.js.map,filename=#{base}.min.js.map\""
             cwd : path
         ], callback
