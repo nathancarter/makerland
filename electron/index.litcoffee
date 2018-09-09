@@ -7,7 +7,7 @@ and is poorly documented.  Try back later.
 Load the inter-process communication module, for listening to the main
 process.
 
-    ipc = require 'ipc'
+    ipc = require( 'electron' ).ipcRenderer
 
 Converts any text to/from a name that can be used as an element ID.
 
@@ -21,7 +21,7 @@ universe in either the left or right column.
         'closed' : 'Closed'
         'open-to-me' : 'Open to me'
         'open-to-all' : 'Open to all'
-    ipc.on 'addMyUniverse', ( data ) ->
+    ipc.on 'addMyUniverse', ( event, data ) ->
         data.name = data.name.replace /"/g, '\\"'
 
 The `element` will be the entire box representing the universe in question.
@@ -152,7 +152,7 @@ Add event handlers to all of its buttons.
 
 The function for the right column is simpler.
 
-    ipc.on 'addOtherUniverse', ( data ) ->
+    ipc.on 'addOtherUniverse', ( event, data ) ->
         data.name = data.name.replace /"/g, '\\"'
 
 The `element` will be the entire box representing the universe in question.
@@ -189,14 +189,14 @@ Add event handlers to its one button.
 
 And a function for clearing either column.
 
-    ipc.on 'clearColumn', ( mine ) ->
+    ipc.on 'clearColumn', ( event, mine ) ->
         column = "#{if mine then 'my' else 'other'}-universes-column"
         document.getElementById( column ).innerHTML = ''
 
 Similar to the universe adding functions, but can add any HTML to either
 column, rather than a specific universe element.
 
-    ipc.on 'addMessage', ( mine, text ) ->
+    ipc.on 'addMessage', ( event, mine, text ) ->
         column = "#{if mine then 'my' else 'other'}-universes-column"
         element = document.createElement 'div'
         element.innerHTML = text.replace /"/g, '\\"'

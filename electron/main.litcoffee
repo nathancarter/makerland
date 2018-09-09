@@ -4,9 +4,9 @@
 This is thrown together now and mostly experimental.  It doesn't do much,
 and is poorly documented.  Try back later.
 
-    app = require 'app'
-    BrowserWindow = require 'browser-window'
-    ipc = require 'ipc'
+    app = require( 'electron' ).app
+    BrowserWindow = require( 'electron' ).BrowserWindow
+    ipc = require( 'electron' ).ipcMain
     fs = require 'fs'
     path = require 'path'
     tar = require 'tar-fs'
@@ -81,7 +81,7 @@ Create the browser window.
 
 Refresh its content
 
-        mainWindow.loadUrl "file://#{__dirname}/index.html"
+        mainWindow.loadURL "file://#{__dirname}/index.html"
         mainWindow.webContents.on 'did-finish-load', updateUniverseLists
         # mainWindow.openDevTools()
 
@@ -185,11 +185,11 @@ Listen for buttons clicked in windows we spawn.
             updateUniverseLists()
     ipc.on 'visit my universe', ( event, data ) ->
         if not universe = myUniverses[data] then return
-        require( 'shell' ).openExternal \
+        require( 'electron' ).shell.openExternal \
             "http://localhost:#{universe.server.port}"
     ipc.on 'visit other universe', ( event, data ) ->
         if not universe = nearbyUniverses[data] then return
-        require( 'shell' ).openExternal \
+        require( 'electron' ).shell.openExternal \
             "http://#{universe.address}:#{universe.port}"
     ipc.on 'universe action', ( event, data ) ->
         switch data.action
@@ -206,7 +206,8 @@ Listen for buttons clicked in windows we spawn.
                 reader = tar.pack folder data.name
                 reader.on 'end', updateUniverseLists
                 reader.on 'error', ( err ) ->
-                    require( 'dialog' ).showMessageBox mainWindow,
+                    require( 'electron' ).dialog.showMessageBox \
+                    mainWindow,
                         type : 'error'
                         buttons : [ 'OK' ]
                         title : 'Renaming error'
@@ -217,7 +218,8 @@ Listen for buttons clicked in windows we spawn.
                 fs.rename path.join( myUniversesFolder, data.name ),
                     path.join( myUniversesFolder, data.value ), ( err ) ->
                         if err
-                            require( 'dialog' ).showMessageBox mainWindow,
+                            require( 'electron' ).dialog.showMessageBox \
+                            mainWindow,
                                 type : 'error'
                                 buttons : [ 'OK' ]
                                 title : 'Renaming error'
@@ -231,7 +233,8 @@ Listen for buttons clicked in windows we spawn.
                 folder = path.join myUniversesFolder, data.name
                 require( 'rimraf' ) folder, ( err ) ->
                     if err
-                        require( 'dialog' ).showMessageBox mainWindow,
+                        require( 'electron' ).dialog.showMessageBox \
+                        mainWindow,
                             type : 'error'
                             buttons : [ 'OK' ]
                             title : 'Renaming error'
@@ -251,7 +254,8 @@ Listen for buttons clicked in windows we spawn.
         try
             fs.mkdirSync newUniverseFolder
         catch e
-            require( 'dialog' ).showErrorBox 'Could not create universe',
+            require( 'electron' ).dialog.showErrorBox \
+                'Could not create universe',
                 "There was an error when attempting to create a folder on
                 your filesystem for the new universe.\n\n#{e}"
             return
@@ -260,7 +264,7 @@ Listen for buttons clicked in windows we spawn.
         mainWindow.loadUrl "file://#{__dirname}/index.html"
         mainWindow.webContents.on 'did-finish-load', updateUniverseLists
     ipc.on 'choose universe title image', ( event ) ->
-        require( 'dialog' ).showOpenDialog mainWindow, {
+        require( 'electron' ).dialog.showOpenDialog mainWindow, {
             title : 'Choose universe title image'
             filters : [
                 name : 'Images'
